@@ -99,6 +99,46 @@ body {
   color: var(--text);
 }
 
+/* ========== COUNTRY FILTER ========== */
+.country-filter {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 32px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.country-pill {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 4px 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.country-pill:hover {
+  border-color: var(--text-dim);
+  color: var(--text);
+}
+
+.country-pill--active {
+  background: var(--text);
+  color: var(--bg);
+  border-color: var(--text);
+}
+
+.geo-dim {
+  opacity: 0.15;
+  transition: opacity 0.2s;
+}
+
 /* ========== COMPONENT NAV ========== */
 .component-nav {
   display: flex;
@@ -761,6 +801,474 @@ body {
 
 .footer a:hover {
   text-decoration: underline;
+}
+
+/* ========== GEOPOLITICS VIEW ========== */
+.geo-view {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0;
+}
+
+.geo-content {
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.geo-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Stack Sovereignty */
+.sovereignty-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sovereignty-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.sovereignty-label {
+  width: 160px;
+  flex-shrink: 0;
+  font-size: 11px;
+  font-family: 'Share Tech Mono', monospace;
+  letter-spacing: 0.5px;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sovereignty-bottleneck {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1px solid var(--red);
+  color: var(--red);
+  font-size: 9px;
+  font-weight: 600;
+}
+
+.sovereignty-bar {
+  flex: 1;
+  display: flex;
+  height: 28px;
+  border-radius: 3px;
+  overflow: hidden;
+  background: var(--border);
+}
+
+.sovereignty-seg {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  transition: width 0.3s;
+}
+
+.sovereignty-seg__label {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.5px;
+  color: white;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+}
+
+.sovereignty-seg--us {
+  background: #2d5a8e;
+}
+
+.sovereignty-seg--cn {
+  background: #c53030;
+}
+
+.sovereignty-seg--other {
+  background: #6b6b6b;
+}
+
+.sovereignty-count {
+  width: 24px;
+  text-align: right;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  color: var(--text-dim);
+}
+
+.sovereignty-legend {
+  display: flex;
+  gap: 20px;
+  margin-top: 8px;
+}
+
+.sovereignty-legend__item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  color: var(--text-dim);
+  letter-spacing: 0.5px;
+}
+
+.sovereignty-legend__count {
+  margin-left: auto;
+  font-style: italic;
+}
+
+.sovereignty-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+}
+
+.sovereignty-dot--us {
+  background: #2d5a8e;
+}
+
+.sovereignty-dot--cn {
+  background: #c53030;
+}
+
+.sovereignty-dot--other {
+  background: #6b6b6b;
+}
+
+/* Scoreboard */
+.scoreboard-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.scoreboard-col {
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+  background: var(--bg-card);
+}
+
+.scoreboard-header {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 10px 16px;
+  color: white;
+  text-align: center;
+}
+
+.scoreboard-col--us .scoreboard-header { background: #2d5a8e; }
+.scoreboard-col--cn .scoreboard-header { background: #c53030; }
+.scoreboard-col--other .scoreboard-header { background: #6b6b6b; }
+
+.scoreboard-stats {
+  padding: 8px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.scoreboard-stat {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.scoreboard-stat:last-child {
+  border-bottom: none;
+}
+
+.scoreboard-stat__value {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 18px;
+  color: var(--text);
+  font-weight: 500;
+}
+
+.scoreboard-stat__label {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+/* OEM Nationality Cards */
+.oem-nationality-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+}
+
+.oem-nat-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.oem-nat-card:hover {
+  border-color: var(--border-hover);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+}
+
+.oem-nat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.oem-nat-name {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.oem-nat-flag {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.5px;
+  padding: 2px 6px;
+  border-radius: 2px;
+  color: white;
+}
+
+.oem-nat-flag--us { background: #2d5a8e; }
+.oem-nat-flag--cn { background: #c53030; }
+.oem-nat-flag--other { background: #6b6b6b; }
+
+.oem-nat-bar {
+  display: flex;
+  height: 8px;
+  border-radius: 2px;
+  overflow: hidden;
+  background: var(--border);
+}
+
+.oem-nat-bar .sovereignty-seg {
+  min-width: 4px;
+  height: 100%;
+}
+
+.oem-nat-stats {
+  display: flex;
+  gap: 12px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  color: var(--text-dim);
+  letter-spacing: 0.3px;
+}
+
+.oem-nat-total {
+  margin-left: auto;
+  color: var(--text-secondary);
+}
+
+/* Cut the Wire */
+.cut-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cut-label {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  color: var(--text-dim);
+  margin-right: 4px;
+}
+
+.cut-toggle {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 4px 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.cut-toggle:hover {
+  border-color: var(--red);
+  color: var(--red);
+}
+
+.cut-toggle--active {
+  background: var(--red);
+  color: white;
+  border-color: var(--red);
+}
+
+.cut-reset {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  color: var(--text-dim);
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 4px 10px;
+  cursor: pointer;
+  margin-left: 8px;
+  transition: all 0.15s;
+}
+
+.cut-reset:hover {
+  color: var(--text);
+  border-color: var(--text-dim);
+}
+
+.cut-impact {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.cut-subsection {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cut-subtitle {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  font-weight: 400;
+}
+
+.cut-comp-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cut-comp-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cut-comp-name {
+  width: 160px;
+  flex-shrink: 0;
+  font-size: 11px;
+  font-family: 'Share Tech Mono', monospace;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.cut-comp-bar {
+  flex: 1;
+  height: 20px;
+  background: rgba(197, 48, 48, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.cut-comp-fill {
+  height: 100%;
+  background: var(--green);
+  border-radius: 2px;
+  transition: width 0.3s;
+}
+
+.cut-comp-fill--zero {
+  background: var(--red);
+  width: 100% !important;
+}
+
+.cut-comp-stat {
+  width: 40px;
+  text-align: right;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  color: var(--text-dim);
+}
+
+.cut-comp-stat--zero {
+  color: var(--red);
+  font-weight: 600;
+}
+
+.cut-oem-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cut-oem-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.cut-oem-row:hover {
+  border-color: var(--border-hover);
+}
+
+.cut-oem-name {
+  flex: 1;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.cut-oem-country {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  color: var(--text-dim);
+}
+
+.cut-oem-loss {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  color: var(--red);
+}
+
+.cut-oem-loss--severe {
+  font-weight: 600;
+}
+
+.cut-no-impact {
+  font-size: 12px;
+  color: var(--text-dim);
+  margin-top: 8px;
 }
 
 /* ========== SCROLLBAR ========== */

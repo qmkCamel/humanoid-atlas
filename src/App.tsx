@@ -9,6 +9,7 @@ preloadPLY('/models/skeleton.ply');
 const TABS = [
   { id: 'skeleton', label: 'Skeleton' },
   { id: 'all_oems', label: 'All OEMs' },
+  { id: 'geopolitics', label: 'Geopolitics' },
   { id: 'sensors_general', label: 'Sensors' },
   { id: 'compute', label: 'Compute' },
   { id: 'batteries', label: 'Battery' },
@@ -98,6 +99,172 @@ const COMPONENT_KEYWORDS: Record<string, string[]> = {
   skeleton: [],
 };
 
+// Component IDs that map to the TABS for sovereignty analysis
+const SOVEREIGNTY_COMPONENTS = [
+  'motors', 'reducers', 'screws', 'bearings', 'batteries', 'compute',
+  'sensors_general', 'end_effectors', 'pcbs',
+];
+
+function getSovereigntyData() {
+  return SOVEREIGNTY_COMPONENTS.map((compId) => {
+    const keywords = COMPONENT_KEYWORDS[compId] || [];
+    const category = componentCategories.find((c) => c.id === compId);
+    const rels = relationships.filter((r) =>
+      keywords.some((kw) => r.component.toLowerCase().includes(kw))
+    );
+    const supplierIds = [...new Set(rels.map((r) => r.from))];
+    const suppliers = supplierIds
+      .map((id) => companies.find((c) => c.id === id))
+      .filter(Boolean) as typeof companies;
+
+    const groups: Record<string, typeof companies> = { US: [], CN: [], OTHER: [] };
+    suppliers.forEach((s) => {
+      groups[getCountryGroup(s.country)].push(s);
+    });
+    const total = suppliers.length;
+    return {
+      id: compId,
+      name: category?.name || compId,
+      bottleneck: category?.bottleneck || false,
+      groups,
+      total,
+      pctUS: total ? Math.round((groups.US.length / total) * 100) : 0,
+      pctCN: total ? Math.round((groups.CN.length / total) * 100) : 0,
+      pctOther: total ? Math.round((groups.OTHER.length / total) * 100) : 0,
+    };
+  });
+}
+
+function getScoreboardData() {
+  const groups: ('US' | 'CN' | 'OTHER')[] = ['US', 'CN', 'OTHER'];
+  const oemList = companies.filter((c) => c.type === 'oem');
+
+  return groups.map((group) => {
+    const groupOems = oemList.filter((c) => getCountryGroup(c.country) === group);
+    const groupSuppliers = companies.filter((c) => c.type !== 'oem' && getCountryGroup(c.country) === group);
+
+    const totalShipments = groupOems.reduce((s, c) => s + (c.robotSpecs?.shipments2025 || 0), 0);
+
+    // Self-sufficiency: for each OEM in this group, what % of their suppliers are also in this group?
+    let selfSufficiencySum = 0;
+    let selfSufficiencyCount = 0;
+    groupOems.forEach((oem) => {
+      const supplierRels = relationships.filter((r) => r.to === oem.id);
+      if (supplierRels.length === 0) return;
+      const domesticCount = supplierRels.filter((r) => {
+        const supplier = companies.find((c) => c.id === r.from);
+        return supplier && getCountryGroup(supplier.country) === group;
+      }).length;
+      selfSufficiencySum += (domesticCount / supplierRels.length) * 100;
+      selfSufficiencyCount++;
+    });
+    const selfSufficiency = selfSufficiencyCount ? Math.round(selfSufficiencySum / selfSufficiencyCount) : 0;
+
+    // Bottleneck exposure: how many bottleneck component categories have NO supplier from this group?
+    const bottleneckCategories = componentCategories.filter((c) => c.bottleneck);
+    let bottleneckExposed = 0;
+    bottleneckCategories.forEach((cat) => {
+      const keywords = COMPONENT_KEYWORDS[cat.id] || [];
+      const rels = relationships.filter((r) =>
+        keywords.some((kw) => r.component.toLowerCase().includes(kw))
+      );
+      const supplierIds = [...new Set(rels.map((r) => r.from))];
+      const hasGroupSupplier = supplierIds.some((id) => {
+        const s = companies.find((c) => c.id === id);
+        return s && getCountryGroup(s.country) === group;
+      });
+      if (!hasGroupSupplier) bottleneckExposed++;
+    });
+
+    return {
+      group,
+      label: group === 'US' ? 'United States' : group === 'CN' ? 'China' : 'Rest of World',
+      oemCount: groupOems.length,
+      supplierCount: groupSuppliers.length,
+      totalShipments,
+      selfSufficiency,
+      bottleneckExposed,
+      bottleneckTotal: bottleneckCategories.length,
+    };
+  });
+}
+
+function getOemNationalityData() {
+  const oemList = companies.filter((c) => c.type === 'oem');
+  return oemList.map((oem) => {
+    const supplierRels = relationships.filter((r) => r.to === oem.id);
+    const supplierCompanies = supplierRels
+      .map((r) => companies.find((c) => c.id === r.from))
+      .filter(Boolean) as typeof companies;
+
+    const groups: Record<string, number> = { US: 0, CN: 0, OTHER: 0 };
+    supplierCompanies.forEach((s) => {
+      groups[getCountryGroup(s.country)]++;
+    });
+    const total = supplierCompanies.length;
+    return {
+      id: oem.id,
+      name: oem.name,
+      country: oem.country,
+      countryGroup: getCountryGroup(oem.country),
+      total,
+      pctUS: total ? Math.round((groups.US / total) * 100) : 0,
+      pctCN: total ? Math.round((groups.CN / total) * 100) : 0,
+      pctOther: total ? Math.round((groups.OTHER / total) * 100) : 0,
+    };
+  });
+}
+
+function getCutWireImpact(cutSet: Set<string>) {
+  if (cutSet.size === 0) return null;
+
+  const oemList = companies.filter((c) => c.type === 'oem');
+  const oemImpacts = oemList.map((oem) => {
+    const allRels = relationships.filter((r) => r.to === oem.id);
+    const cutRels = allRels.filter((r) => {
+      const supplier = companies.find((c) => c.id === r.from);
+      return supplier && cutSet.has(getCountryGroup(supplier.country));
+    });
+    return {
+      id: oem.id,
+      name: oem.name,
+      country: oem.country,
+      totalSuppliers: allRels.length,
+      lostSuppliers: cutRels.length,
+      lostComponents: [...new Set(cutRels.map((r) => r.component))],
+      pctLost: allRels.length ? Math.round((cutRels.length / allRels.length) * 100) : 0,
+    };
+  }).filter((o) => o.lostSuppliers > 0)
+    .sort((a, b) => b.pctLost - a.pctLost);
+
+  // Component categories affected
+  const componentImpacts = SOVEREIGNTY_COMPONENTS.map((compId) => {
+    const keywords = COMPONENT_KEYWORDS[compId] || [];
+    const category = componentCategories.find((c) => c.id === compId);
+    const rels = relationships.filter((r) =>
+      keywords.some((kw) => r.component.toLowerCase().includes(kw))
+    );
+    const supplierIds = [...new Set(rels.map((r) => r.from))];
+    const totalSuppliers = supplierIds.length;
+    const remainingSuppliers = supplierIds.filter((id) => {
+      const s = companies.find((c) => c.id === id);
+      return s && !cutSet.has(getCountryGroup(s.country));
+    }).length;
+
+    return {
+      id: compId,
+      name: category?.name || compId,
+      bottleneck: category?.bottleneck || false,
+      totalSuppliers,
+      remainingSuppliers,
+      lostCount: totalSuppliers - remainingSuppliers,
+      pctRemaining: totalSuppliers ? Math.round((remainingSuppliers / totalSuppliers) * 100) : 100,
+    };
+  }).filter((c) => c.lostCount > 0);
+
+  return { oemImpacts, componentImpacts };
+}
+
 function getComponentChain(componentId: string) {
   const keywords = COMPONENT_KEYWORDS[componentId] || [];
   const rels = relationships.filter((r) =>
@@ -119,11 +286,21 @@ function getComponentChain(componentId: string) {
   };
 }
 
+type CountryGroup = 'US' | 'CN' | 'OTHER' | null;
+
+function getCountryGroup(country: string): 'US' | 'CN' | 'OTHER' {
+  if (country === 'US') return 'US';
+  if (country === 'CN') return 'CN';
+  return 'OTHER';
+}
+
 export default function App() {
   const [activeTab, setActiveTab] = useState('skeleton');
   const [companyId, setCompanyId] = useState<string | null>(null);
   const [actuatorType, setActuatorType] = useState<'linear' | 'rotary'>('linear');
   const [chainFocus, setChainFocus] = useState<string | null>(null);
+  const [countryFilter, setCountryFilter] = useState<CountryGroup>(null);
+  const [cutCountries, setCutCountries] = useState<Set<string>>(new Set());
 
   const selectedComponent = useMemo(
     () => (activeTab !== 'skeleton' ? componentCategories.find((c) => c.id === activeTab) : null),
@@ -136,7 +313,7 @@ export default function App() {
   );
 
   const chain = useMemo(() => {
-    if (activeTab === 'skeleton' || activeTab === 'all_oems') return null;
+    if (activeTab === 'skeleton' || activeTab === 'all_oems' || activeTab === 'geopolitics') return null;
     if (activeTab === 'actuators_rotary') {
       return getComponentChain(actuatorType === 'linear' ? 'actuators_linear_only' : 'actuators_rotary_only');
     }
@@ -300,6 +477,25 @@ export default function App() {
         <span className="header-sub">Humanoid Supply Chain & Landscape Explorer</span>
       </header>
 
+      <div className="country-filter">
+          <button
+            className={`country-pill ${countryFilter === null ? 'country-pill--active' : ''}`}
+            onClick={() => setCountryFilter(null)}
+          >All</button>
+          <button
+            className={`country-pill ${countryFilter === 'US' ? 'country-pill--active' : ''}`}
+            onClick={() => setCountryFilter(countryFilter === 'US' ? null : 'US')}
+          >US</button>
+          <button
+            className={`country-pill ${countryFilter === 'CN' ? 'country-pill--active' : ''}`}
+            onClick={() => setCountryFilter(countryFilter === 'CN' ? null : 'CN')}
+          >China</button>
+          <button
+            className={`country-pill ${countryFilter === 'OTHER' ? 'country-pill--active' : ''}`}
+            onClick={() => setCountryFilter(countryFilter === 'OTHER' ? null : 'OTHER')}
+          >Other</button>
+        </div>
+
       <nav className="component-nav">
         {TABS.map((t) => {
           return (
@@ -314,7 +510,7 @@ export default function App() {
         })}
       </nav>
 
-      <main className={activeTab === 'skeleton' ? 'skeleton-view' : 'component-view'}>
+      <main className={activeTab === 'skeleton' ? 'skeleton-view' : activeTab === 'geopolitics' ? 'geo-view' : 'component-view'}>
         {/* Skeleton tab */}
         {activeTab === 'skeleton' && (
           <div className="skeleton-center">
@@ -327,7 +523,7 @@ export default function App() {
           <div className="oems-view">
             <div className="oem-image-grid">
               {oems.map((c) => (
-                <button key={c.id} className="oem-image-card" onClick={() => handleSelectCompany(c.id)}>
+                <button key={c.id} className={`oem-image-card ${countryFilter && getCountryGroup(c.country) !== countryFilter ? 'geo-dim' : ''}`} onClick={() => handleSelectCompany(c.id)}>
                   {c.robotImage && (
                     <div className="oem-image-card__img">
                       <img src={c.robotImage} alt={c.name} />
@@ -346,8 +542,194 @@ export default function App() {
           </div>
         )}
 
+        {/* Geopolitics tab */}
+        {activeTab === 'geopolitics' && (() => {
+          const sovereignty = getSovereigntyData();
+          const oemNationality = getOemNationalityData();
+          const scoreboard = getScoreboardData();
+          const cutImpact = getCutWireImpact(cutCountries);
+          return (
+            <div className="geo-content">
+              <section className="geo-section">
+                <h3 className="section-title">US vs China vs Rest — Scoreboard</h3>
+                <div className="scoreboard-grid">
+                  {scoreboard.map((col) => (
+                    <div key={col.group} className={`scoreboard-col scoreboard-col--${col.group.toLowerCase()}`}>
+                      <div className="scoreboard-header">{col.label}</div>
+                      <div className="scoreboard-stats">
+                        <div className="scoreboard-stat">
+                          <span className="scoreboard-stat__value">{col.oemCount}</span>
+                          <span className="scoreboard-stat__label">OEMs</span>
+                        </div>
+                        <div className="scoreboard-stat">
+                          <span className="scoreboard-stat__value">{col.supplierCount}</span>
+                          <span className="scoreboard-stat__label">Suppliers</span>
+                        </div>
+                        <div className="scoreboard-stat">
+                          <span className="scoreboard-stat__value">{col.totalShipments.toLocaleString()}</span>
+                          <span className="scoreboard-stat__label">2025 Shipments</span>
+                        </div>
+                        <div className="scoreboard-stat">
+                          <span className="scoreboard-stat__value">{col.selfSufficiency}%</span>
+                          <span className="scoreboard-stat__label">Self-Sufficiency</span>
+                        </div>
+                        <div className="scoreboard-stat">
+                          <span className="scoreboard-stat__value">{col.bottleneckExposed}/{col.bottleneckTotal}</span>
+                          <span className="scoreboard-stat__label">Bottleneck Exposed</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+
+              <section className="geo-section">
+                <h3 className="section-title">Stack Sovereignty — Supplier Origin by Component</h3>
+                <div className="sovereignty-stack">
+                  {sovereignty.map((row) => (
+                    <div key={row.id} className="sovereignty-row">
+                      <div className="sovereignty-label">
+                        <span>{row.name}</span>
+                        {row.bottleneck && <span className="sovereignty-bottleneck">!</span>}
+                      </div>
+                      <div className="sovereignty-bar">
+                        {row.pctUS > 0 && (
+                          <div className="sovereignty-seg sovereignty-seg--us" style={{ width: `${row.pctUS}%` }}>
+                            <span className="sovereignty-seg__label">{row.pctUS}%</span>
+                          </div>
+                        )}
+                        {row.pctCN > 0 && (
+                          <div className="sovereignty-seg sovereignty-seg--cn" style={{ width: `${row.pctCN}%` }}>
+                            <span className="sovereignty-seg__label">{row.pctCN}%</span>
+                          </div>
+                        )}
+                        {row.pctOther > 0 && (
+                          <div className="sovereignty-seg sovereignty-seg--other" style={{ width: `${row.pctOther}%` }}>
+                            <span className="sovereignty-seg__label">{row.pctOther}%</span>
+                          </div>
+                        )}
+                      </div>
+                      <div className="sovereignty-count">{row.total}</div>
+                    </div>
+                  ))}
+                </div>
+                <div className="sovereignty-legend">
+                  <span className="sovereignty-legend__item"><span className="sovereignty-dot sovereignty-dot--us" /> US</span>
+                  <span className="sovereignty-legend__item"><span className="sovereignty-dot sovereignty-dot--cn" /> China</span>
+                  <span className="sovereignty-legend__item"><span className="sovereignty-dot sovereignty-dot--other" /> Other</span>
+                  <span className="sovereignty-legend__item sovereignty-legend__count">Count = total suppliers</span>
+                </div>
+              </section>
+
+              <section className="geo-section">
+                <h3 className="section-title">OEM Supply Chain Dependency — Supplier Origin per OEM</h3>
+                <div className="oem-nationality-grid">
+                  {oemNationality.map((oem) => (
+                    <div key={oem.id} className="oem-nat-card" onClick={() => handleSelectCompany(oem.id)}>
+                      <div className="oem-nat-header">
+                        <span className="oem-nat-name">{oem.name}</span>
+                        <span className={`oem-nat-flag oem-nat-flag--${oem.countryGroup.toLowerCase()}`}>{oem.country}</span>
+                      </div>
+                      <div className="oem-nat-bar">
+                        {oem.pctUS > 0 && (
+                          <div className="sovereignty-seg sovereignty-seg--us" style={{ width: `${oem.pctUS}%` }} />
+                        )}
+                        {oem.pctCN > 0 && (
+                          <div className="sovereignty-seg sovereignty-seg--cn" style={{ width: `${oem.pctCN}%` }} />
+                        )}
+                        {oem.pctOther > 0 && (
+                          <div className="sovereignty-seg sovereignty-seg--other" style={{ width: `${oem.pctOther}%` }} />
+                        )}
+                      </div>
+                      <div className="oem-nat-stats">
+                        <span>US {oem.pctUS}%</span>
+                        <span>CN {oem.pctCN}%</span>
+                        <span>Other {oem.pctOther}%</span>
+                        <span className="oem-nat-total">{oem.total} suppliers</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+
+              <section className="geo-section">
+                <h3 className="section-title">Cut the Wire — Sanction Simulator</h3>
+                <div className="cut-controls">
+                  <span className="cut-label">Remove suppliers from:</span>
+                  {(['US', 'CN', 'OTHER'] as const).map((g) => (
+                    <button
+                      key={g}
+                      className={`cut-toggle ${cutCountries.has(g) ? 'cut-toggle--active' : ''}`}
+                      onClick={() => {
+                        const next = new Set(cutCountries);
+                        if (next.has(g)) next.delete(g); else next.add(g);
+                        setCutCountries(next);
+                      }}
+                    >
+                      {g === 'US' ? 'US' : g === 'CN' ? 'China' : 'Other'}
+                    </button>
+                  ))}
+                  {cutCountries.size > 0 && (
+                    <button className="cut-reset" onClick={() => setCutCountries(new Set())}>Reset</button>
+                  )}
+                </div>
+
+                {cutImpact && (
+                  <div className="cut-impact">
+                    {cutImpact.componentImpacts.length > 0 && (
+                      <div className="cut-subsection">
+                        <h4 className="cut-subtitle">Component Impact</h4>
+                        <div className="cut-comp-list">
+                          {cutImpact.componentImpacts.map((c) => (
+                            <div key={c.id} className="cut-comp-row">
+                              <span className="cut-comp-name">
+                                {c.name}
+                                {c.bottleneck && <span className="sovereignty-bottleneck">!</span>}
+                              </span>
+                              <div className="cut-comp-bar">
+                                <div
+                                  className={`cut-comp-fill ${c.pctRemaining === 0 ? 'cut-comp-fill--zero' : ''}`}
+                                  style={{ width: `${c.pctRemaining}%` }}
+                                />
+                              </div>
+                              <span className={`cut-comp-stat ${c.remainingSuppliers === 0 ? 'cut-comp-stat--zero' : ''}`}>
+                                {c.remainingSuppliers}/{c.totalSuppliers}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {cutImpact.oemImpacts.length > 0 && (
+                      <div className="cut-subsection">
+                        <h4 className="cut-subtitle">OEM Impact</h4>
+                        <div className="cut-oem-list">
+                          {cutImpact.oemImpacts.map((o) => (
+                            <div key={o.id} className="cut-oem-row" onClick={() => handleSelectCompany(o.id)}>
+                              <span className="cut-oem-name">{o.name}</span>
+                              <span className="cut-oem-country">{o.country}</span>
+                              <span className={`cut-oem-loss ${o.pctLost > 50 ? 'cut-oem-loss--severe' : ''}`}>
+                                -{o.lostSuppliers} suppliers ({o.pctLost}%)
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {cutCountries.size > 0 && !cutImpact && (
+                  <p className="cut-no-impact">No impact — no suppliers from the selected region(s) in the dataset.</p>
+                )}
+              </section>
+            </div>
+          );
+        })()}
+
         {/* Component tab */}
-        {activeTab !== 'skeleton' && activeTab !== 'all_oems' && selectedComponent && (
+        {activeTab !== 'skeleton' && activeTab !== 'all_oems' && activeTab !== 'geopolitics' && selectedComponent && (
           <>
             <div className="component-top">
               <div className="component-model">
@@ -435,7 +817,7 @@ export default function App() {
                       {chain.upstream.map((c) => c && (
                         <button
                           key={c.id}
-                          className={`chain-entity ${connectedIds && !connectedIds.has(c.id) ? 'chain-entity--dim' : ''} ${chainFocus === c.id ? 'chain-entity--focused' : ''}`}
+                          className={`chain-entity ${connectedIds && !connectedIds.has(c.id) ? 'chain-entity--dim' : ''} ${chainFocus === c.id ? 'chain-entity--focused' : ''} ${countryFilter && getCountryGroup(c.country) !== countryFilter ? 'geo-dim' : ''}`}
                           onClick={(e) => {
                             if (chainFocus === c.id) { setChainFocus(null); }
                             else if (chainFocus) { setChainFocus(c.id); }
@@ -458,7 +840,7 @@ export default function App() {
                       {chain.suppliers.map((c) => c && (
                         <button
                           key={c.id}
-                          className={`chain-entity ${connectedIds && !connectedIds.has(c.id) ? 'chain-entity--dim' : ''} ${chainFocus === c.id ? 'chain-entity--focused' : ''}`}
+                          className={`chain-entity ${connectedIds && !connectedIds.has(c.id) ? 'chain-entity--dim' : ''} ${chainFocus === c.id ? 'chain-entity--focused' : ''} ${countryFilter && getCountryGroup(c.country) !== countryFilter ? 'geo-dim' : ''}`}
                           onClick={() => {
                             if (chainFocus === c.id) { setChainFocus(null); }
                             else { setChainFocus(c.id); }
@@ -481,7 +863,7 @@ export default function App() {
                       {chain.oems.map((c) => c && (
                         <button
                           key={c.id}
-                          className={`chain-entity ${connectedIds && !connectedIds.has(c.id) ? 'chain-entity--dim' : ''} ${chainFocus === c.id ? 'chain-entity--focused' : ''}`}
+                          className={`chain-entity ${connectedIds && !connectedIds.has(c.id) ? 'chain-entity--dim' : ''} ${chainFocus === c.id ? 'chain-entity--focused' : ''} ${countryFilter && getCountryGroup(c.country) !== countryFilter ? 'geo-dim' : ''}`}
                           onClick={() => {
                             if (chainFocus === c.id) { setChainFocus(null); }
                             else { setChainFocus(c.id); }
