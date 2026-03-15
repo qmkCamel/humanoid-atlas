@@ -137,17 +137,10 @@ body {
 }
 
 .component-btn__warn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  border: 1px solid var(--red);
+  width: 16px;
+  height: 16px;
   color: var(--red);
-  font-size: 8px;
-  font-weight: 600;
-  line-height: 1;
+  flex-shrink: 0;
 }
 
 /* ========== SKELETON VIEW ========== */
@@ -166,6 +159,11 @@ body {
   height: 100%;
 }
 
+/* ========== ALL OEMs VIEW ========== */
+.oems-view {
+  padding: 32px;
+}
+
 /* ========== COMPONENT VIEW ========== */
 .component-view {
   flex: 1;
@@ -175,13 +173,12 @@ body {
 
 .component-top {
   display: grid;
-  grid-template-columns: 2fr 3fr;
+  grid-template-columns: 1fr 1fr;
   border-bottom: 1px solid var(--border);
 }
 
 .component-model {
-  aspect-ratio: 1;
-  max-height: 420px;
+  min-height: 350px;
   border-right: 1px solid var(--border);
 }
 
@@ -208,7 +205,7 @@ body {
 }
 
 .component-desc {
-  font-size: 14px;
+  font-size: 16px;
   line-height: 1.7;
   color: var(--text-secondary);
   font-weight: 300;
@@ -426,13 +423,12 @@ body {
 
 .company-top {
   display: grid;
-  grid-template-columns: 2fr 3fr;
+  grid-template-columns: 1fr 1fr;
   border-bottom: 1px solid var(--border);
 }
 
 .company-model {
-  aspect-ratio: 1;
-  max-height: 380px;
+  min-height: 350px;
   border-right: 1px solid var(--border);
 }
 
@@ -449,7 +445,7 @@ body {
 }
 
 .company-desc {
-  font-size: 14px;
+  font-size: 16px;
   line-height: 1.7;
   color: var(--text-secondary);
   font-weight: 300;
@@ -516,7 +512,7 @@ body {
 /* Specs */
 .specs-grid {
   display: grid;
-  grid-template-columns: 2fr 3fr;
+  grid-template-columns: 1fr 1fr;
   gap: 0 32px;
 }
 

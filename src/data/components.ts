@@ -109,7 +109,7 @@ export const componentCategories: ComponentCategory[] = [
     id: 'compute',
     name: 'Compute',
     description: 'Largely standardized on NVIDIA Jetson platform (Orin, AGX Thor). Tesla is the exception with proprietary FSD SoC. Key metrics: TOPS, TOPS/watt.',
-    plyModel: '/models/pcb.ply',
+    plyModel: '/models/compute.ply',
     bottleneck: false,
     keyMetrics: {
       'Dominant Platform': 'NVIDIA Jetson (Orin, AGX Thor)',
@@ -144,6 +144,7 @@ export const componentCategories: ComponentCategory[] = [
     id: 'sensors_tactile',
     name: 'Tactile Sensors',
     description: 'End-effector sensing for dexterous manipulation. Critical for grasping and object recognition. Tesla uses custom fingertip sensors.',
+    plyModel: '/models/tactile-sensor.ply',
     bottleneck: false,
     keyMetrics: {
       'Adoption': '10 of 13 OEMs have tactile sensing',
@@ -154,6 +155,7 @@ export const componentCategories: ComponentCategory[] = [
     id: 'end_effectors',
     name: 'End Effectors (Hands)',
     description: 'Dexterous hands range from 3-finger grippers to 22-DOF anthropomorphic hands. Tendon-driven (1X, Tesla) vs motor+gear (Figure, Dexmate).',
+    plyModel: '/models/end-effector.ply',
     bottleneck: false,
     keyMetrics: {
       'DOF Range': '3-finger gripper to 22-DOF hand',

@@ -5,6 +5,7 @@ import './App.css';
 
 const TABS = [
   { id: 'skeleton', label: 'Skeleton' },
+  { id: 'all_oems', label: 'All OEMs' },
   { id: 'sensors_general', label: 'Sensors' },
   { id: 'compute', label: 'Compute' },
   { id: 'batteries', label: 'Battery' },
@@ -17,6 +18,13 @@ const TABS = [
   { id: 'pcbs', label: 'PCBs' },
 ];
 
+// Per-model orientation fixes (most models are fine, these need correction)
+const MODEL_ROTATIONS: Record<string, [number, number, number]> = {
+  '/models/skeleton.ply': [-Math.PI / 2, 0, 0],
+  '/models/end-effector.ply': [-Math.PI / 2, 0, 0],
+  '/models/planetary-screw.ply': [0, 0, Math.PI / 2],
+};
+
 const COMPONENT_KEYWORDS: Record<string, string[]> = {
   motors: ['bldc motors', 'motors', 'servo motors'],
   reducers: ['harmonic reducer', 'strain wave reducer'],
@@ -24,11 +32,11 @@ const COMPONENT_KEYWORDS: Record<string, string[]> = {
   sensors_general: ['lidar', 'image sensors'],
   end_effectors: ['dexterous hands'],
   pcbs: ['motor drivers', 'analog ics', 'power semiconductors', 'mlcc', 'passive components', 'chip fabrication'],
-  batteries: [],
-  bearings: [],
-  actuators_rotary: [],
-  actuators_linear: [],
-  screws: [],
+  batteries: ['battery cells', 'battery pack'],
+  bearings: ['cross-roller bearings', 'ball bearings', 'bearings'],
+  actuators_rotary: ['actuator modules', 'servo actuators'],
+  actuators_linear: ['actuator modules'],
+  screws: ['planetary roller screws', 'roller screws'],
   sensors_tactile: [],
   skeleton: [],
 };
@@ -103,7 +111,7 @@ export default function App() {
                 <PLYViewer
                   modelUrl={selectedCompany.plyModel}
                   color="#1a1a1a"
-                  initialRotation={selectedCompany.plyModel === '/models/skeleton.ply' ? [-Math.PI / 2, 0, 0] : undefined}
+                  initialRotation={MODEL_ROTATIONS[selectedCompany.plyModel]}
                 />
               ) : (
                 <div className="model-placeholder" />
@@ -216,7 +224,13 @@ export default function App() {
               onClick={() => setActiveTab(t.id)}
             >
               {t.label}
-              {comp?.bottleneck && <span className="component-btn__warn">!</span>}
+              {comp?.bottleneck && (
+                <svg className="component-btn__warn" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="10" cy="10" r="9" stroke="currentColor" strokeWidth="1.5"/>
+                  <path d="M10 5.5V11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                  <circle cx="10" cy="14" r="0.75" fill="currentColor"/>
+                </svg>
+              )}
             </button>
           );
         })}
@@ -226,17 +240,34 @@ export default function App() {
         {/* Skeleton tab */}
         {activeTab === 'skeleton' && (
           <div className="skeleton-center">
-            <PLYViewer modelUrl="/models/skeleton.ply" color="#1a1a1a" initialRotation={[-Math.PI / 2, 0, 0]} />
+            <PLYViewer modelUrl="/models/skeleton.ply" color="#1a1a1a" initialRotation={MODEL_ROTATIONS['/models/skeleton.ply']} />
+          </div>
+        )}
+
+        {/* All OEMs tab */}
+        {activeTab === 'all_oems' && (
+          <div className="oems-view">
+            <div className="oem-grid">
+              {oems.map((c) => (
+                <button key={c.id} className="oem-card" onClick={() => handleSelectCompany(c.id)}>
+                  <span className="oem-name">{c.name}</span>
+                  <span className="oem-country">{c.country}</span>
+                  {c.robotSpecs?.status === 'In Production' && (
+                    <span className="oem-status">In Production</span>
+                  )}
+                </button>
+              ))}
+            </div>
           </div>
         )}
 
         {/* Component tab */}
-        {activeTab !== 'skeleton' && selectedComponent && (
+        {activeTab !== 'skeleton' && activeTab !== 'all_oems' && selectedComponent && (
           <>
             <div className="component-top">
               <div className="component-model">
                 {selectedComponent.plyModel ? (
-                  <PLYViewer modelUrl={selectedComponent.plyModel} color="#1a1a1a" />
+                  <PLYViewer modelUrl={selectedComponent.plyModel} color="#1a1a1a" initialRotation={MODEL_ROTATIONS[selectedComponent.plyModel]} />
                 ) : (
                   <div className="model-placeholder">No 3D model</div>
                 )}
@@ -316,20 +347,6 @@ export default function App() {
               </div>
             )}
 
-            <div className="used-by">
-              <h3 className="section-title">All OEMs</h3>
-              <div className="oem-grid">
-                {oems.map((c) => (
-                  <button key={c.id} className="oem-card" onClick={() => handleSelectCompany(c.id)}>
-                    <span className="oem-name">{c.name}</span>
-                    <span className="oem-country">{c.country}</span>
-                    {c.robotSpecs?.status === 'In Production' && (
-                      <span className="oem-status">In Production</span>
-                    )}
-                  </button>
-                ))}
-              </div>
-            </div>
           </>
         )}
       </main>

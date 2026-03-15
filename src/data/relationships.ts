@@ -63,6 +63,41 @@ export const relationships: SupplyRelationship[] = [
   { id: 'r75', from: 'jl_mag', to: 'cubemars', component: 'NdFeB Magnets', description: 'Permanent magnets for Chinese motor supply chain' },
   { id: 'r76', from: 'jl_mag', to: 'estun', component: 'NdFeB Magnets' },
 
+  // === ACTUATOR MODULE SUPPLIERS → OEMs ===
+  { id: 'r106', from: 'cubemars', to: 'unitree', component: 'Actuator Modules', description: 'Complete rotary actuator modules' },
+  { id: 'r107', from: 'cubemars', to: 'agibot', component: 'Actuator Modules' },
+  { id: 'r108', from: 'cubemars', to: 'engineai', component: 'Actuator Modules' },
+  { id: 'r109', from: 'estun', to: 'agibot', component: 'Servo Actuators', description: 'Integrated servo actuator packages' },
+  { id: 'r110', from: 'estun', to: 'xpeng', component: 'Servo Actuators' },
+  { id: 'r111', from: 'estun', to: 'ubtech', component: 'Servo Actuators' },
+
+  // === BEARING SUPPLIERS → OEMs ===
+  { id: 'r93', from: 'thk', to: 'tesla', component: 'Cross-Roller Bearings', description: 'Hip and waist joint bearings' },
+  { id: 'r94', from: 'thk', to: 'apptronik', component: 'Cross-Roller Bearings' },
+  { id: 'r95', from: 'thk', to: 'figure', component: 'Cross-Roller Bearings' },
+  { id: 'r96', from: 'thk', to: 'ubtech', component: 'Cross-Roller Bearings' },
+  { id: 'r97', from: 'thk', to: 'engineai', component: 'Cross-Roller Bearings' },
+  { id: 'r98', from: 'skf', to: 'boston_dynamics', component: 'Bearings' },
+  { id: 'r99', from: 'skf', to: 'agility', component: 'Bearings' },
+  { id: 'r100', from: 'skf', to: 'unitree', component: 'Ball Bearings' },
+
+  // === SCREW SUPPLIERS → OEMs ===
+  { id: 'r101', from: 'rollvis', to: 'tesla', component: 'Planetary Roller Screws', description: '1:14 ratio screws for linear actuators' },
+  { id: 'r102', from: 'rollvis', to: 'apptronik', component: 'Planetary Roller Screws' },
+  { id: 'r103', from: 'rollvis', to: 'figure', component: 'Planetary Roller Screws' },
+  { id: 'r104', from: 'ewellix', to: 'boston_dynamics', component: 'Roller Screws' },
+  { id: 'r105', from: 'ewellix', to: 'agility', component: 'Roller Screws' },
+
+  // === BATTERY SUPPLIERS → OEMs ===
+  { id: 'r85', from: 'panasonic_energy', to: 'tesla', component: 'Battery Cells', description: '2170/4680 lithium-ion cells' },
+  { id: 'r86', from: 'catl', to: 'unitree', component: 'Battery Pack', description: 'Lithium-ion battery packs' },
+  { id: 'r87', from: 'catl', to: 'agibot', component: 'Battery Pack' },
+  { id: 'r88', from: 'catl', to: 'xpeng', component: 'Battery Cells', description: 'Solid-state battery development' },
+  { id: 'r89', from: 'catl', to: 'ubtech', component: 'Battery Pack', description: 'Dual hot-swap battery packs' },
+  { id: 'r90', from: 'catl', to: 'engineai', component: 'Battery Cells' },
+  { id: 'r91', from: 'byd_battery', to: 'agibot', component: 'Battery Pack' },
+  { id: 'r92', from: 'byd_battery', to: 'ubtech', component: 'Battery Pack' },
+
   // === END EFFECTOR SUPPLIERS ===
   { id: 'r80', from: 'psyonic', to: 'apptronik', component: 'Dexterous Hands', description: 'Off-the-shelf robotic/prosthetic hands' },
 ];
