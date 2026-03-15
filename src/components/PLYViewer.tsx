@@ -3,24 +3,53 @@ import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { PLYLoader } from 'three/examples/jsm/loaders/PLYLoader.js';
 
+// Global geometry cache — parsed geometries persist across mounts/tab switches
+const geometryCache = new Map<string, THREE.BufferGeometry>();
+const loadingPromises = new Map<string, Promise<THREE.BufferGeometry>>();
+
+function loadPLY(url: string): Promise<THREE.BufferGeometry> {
+  if (geometryCache.has(url)) {
+    return Promise.resolve(geometryCache.get(url)!);
+  }
+  if (loadingPromises.has(url)) {
+    return loadingPromises.get(url)!;
+  }
+  const promise = new Promise<THREE.BufferGeometry>((resolve) => {
+    const loader = new PLYLoader();
+    loader.load(url, (geo) => {
+      geometryCache.set(url, geo);
+      loadingPromises.delete(url);
+      resolve(geo);
+    });
+  });
+  loadingPromises.set(url, promise);
+  return promise;
+}
+
+// Preload a model without rendering — call early to start fetching
+export function preloadPLY(url: string) {
+  loadPLY(url);
+}
+
 function PointCloud({ url, color = '#1a1a1a', initialRotation, spinSpeed = 1, scale = 1.05 }: { url: string; color?: string; initialRotation?: [number, number, number]; spinSpeed?: number; scale?: number }) {
   const ref = useRef<THREE.Points>(null);
   const [geometry, setGeometry] = useState<THREE.BufferGeometry | null>(null);
 
   useEffect(() => {
     setGeometry(null);
-    const loader = new PLYLoader();
-    loader.load(url, (geo) => {
+    loadPLY(url).then((geo) => {
+      // Clone so transforms don't mutate the cached copy
+      const clone = geo.clone();
       if (initialRotation) {
-        geo.rotateX(initialRotation[0]);
-        geo.rotateY(initialRotation[1]);
-        geo.rotateZ(initialRotation[2]);
+        clone.rotateX(initialRotation[0]);
+        clone.rotateY(initialRotation[1]);
+        clone.rotateZ(initialRotation[2]);
       }
-      geo.center();
-      geo.computeBoundingSphere();
-      const s = scale / (geo.boundingSphere?.radius || 1);
-      geo.scale(s, s, s);
-      setGeometry(geo);
+      clone.center();
+      clone.computeBoundingSphere();
+      const s = scale / (clone.boundingSphere?.radius || 1);
+      clone.scale(s, s, s);
+      setGeometry(clone);
     });
   }, [url, initialRotation, scale]);
 

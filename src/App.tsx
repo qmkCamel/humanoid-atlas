@@ -1,7 +1,10 @@
 import { useState, useMemo } from 'react';
-import PLYViewer from './components/PLYViewer';
+import PLYViewer, { preloadPLY } from './components/PLYViewer';
 import { companies, relationships, componentCategories } from './data';
 import './App.css';
+
+// Start fetching the skeleton model immediately on module load
+preloadPLY('/models/skeleton.ply');
 
 const TABS = [
   { id: 'skeleton', label: 'Skeleton' },
@@ -283,7 +286,7 @@ export default function App() {
         </main>
 
         <footer className="footer">
-          <span>Data: Humanity's Last Machine + RoboStrategy</span>
+          <span>Data: Humanity's Last Machine + RoboStrategy · Maintained by <a href="https://x.com/JulianSaks" target="_blank" rel="noopener noreferrer">Julian Saks</a></span>
         </footer>
       </div>
     );
@@ -294,7 +297,7 @@ export default function App() {
     <div className="app">
       <header className="header">
         <span className="header-title">Humanoid Atlas</span>
-        <span className="header-sub">Supply Chain & Landscape Explorer</span>
+        <span className="header-sub">Humanoid Supply Chain & Landscape Explorer</span>
       </header>
 
       <nav className="component-nav">
@@ -307,13 +310,6 @@ export default function App() {
               onClick={() => { setActiveTab(t.id); setChainFocus(null); }}
             >
               {t.label}
-              {comp?.bottleneck && (
-                <svg className="component-btn__warn" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <circle cx="10" cy="10" r="9" stroke="currentColor" strokeWidth="1.5"/>
-                  <path d="M10 5.5V11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                  <circle cx="10" cy="14" r="0.75" fill="currentColor"/>
-                </svg>
-              )}
             </button>
           );
         })}
@@ -513,9 +509,9 @@ export default function App() {
         <span>{companies.filter((c) => c.type !== 'oem').length} Suppliers</span>
         <span className="footer-sep" />
         <span>
-          {oems.reduce((s, c) => s + (c.robotSpecs?.shipments2025 || 0), 0).toLocaleString()} est. 2025 shipments
+          {oems.reduce((s, c) => s + (c.robotSpecs?.shipments2025 || 0), 0).toLocaleString()} units shipped (2025)
         </span>
-        <span className="footer-right">Data: Humanity's Last Machine + RoboStrategy</span>
+        <span className="footer-right">Data: Humanity's Last Machine + RoboStrategy · Maintained by <a href="https://x.com/JulianSaks" target="_blank" rel="noopener noreferrer">Julian Saks</a></span>
       </footer>
     </div>
   );
