@@ -293,7 +293,7 @@ export default function App() {
   return (
     <div className="app">
       <header className="header">
-        <span className="header-title">Humanoid Terminal</span>
+        <span className="header-title">Humanoids Atlas</span>
       </header>
 
       <nav className="component-nav">
