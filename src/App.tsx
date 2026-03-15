@@ -429,8 +429,6 @@ export default function App() {
                         <button
                           key={c.id}
                           className={`chain-entity ${connectedIds && !connectedIds.has(c.id) ? 'chain-entity--dim' : ''} ${chainFocus === c.id ? 'chain-entity--focused' : ''}`}
-                          onMouseEnter={() => !chainFocus && setChainFocus(c.id)}
-                          onMouseLeave={() => !chainFocus && setChainFocus(null)}
                           onClick={(e) => {
                             if (chainFocus === c.id) { setChainFocus(null); }
                             else if (chainFocus) { setChainFocus(c.id); }
@@ -454,8 +452,6 @@ export default function App() {
                         <button
                           key={c.id}
                           className={`chain-entity ${connectedIds && !connectedIds.has(c.id) ? 'chain-entity--dim' : ''} ${chainFocus === c.id ? 'chain-entity--focused' : ''}`}
-                          onMouseEnter={() => !chainFocus && setChainFocus(c.id)}
-                          onMouseLeave={() => !chainFocus && setChainFocus(null)}
                           onClick={() => {
                             if (chainFocus === c.id) { setChainFocus(null); }
                             else { setChainFocus(c.id); }
@@ -479,8 +475,6 @@ export default function App() {
                         <button
                           key={c.id}
                           className={`chain-entity ${connectedIds && !connectedIds.has(c.id) ? 'chain-entity--dim' : ''} ${chainFocus === c.id ? 'chain-entity--focused' : ''}`}
-                          onMouseEnter={() => !chainFocus && setChainFocus(c.id)}
-                          onMouseLeave={() => !chainFocus && setChainFocus(null)}
                           onClick={() => {
                             if (chainFocus === c.id) { setChainFocus(null); }
                             else { setChainFocus(c.id); }
