@@ -185,7 +185,11 @@ export default function App() {
         <main className="company-view">
           <div className="company-top">
             <div className="company-model">
-              {selectedCompany.plyModel ? (
+              {selectedCompany.robotImage ? (
+                <div className="company-image">
+                  <img src={selectedCompany.robotImage} alt={selectedCompany.name} />
+                </div>
+              ) : selectedCompany.plyModel ? (
                 <PLYViewer
                   modelUrl={selectedCompany.plyModel}
                   color="#1a1a1a"
@@ -325,14 +329,21 @@ export default function App() {
         {/* All OEMs tab */}
         {activeTab === 'all_oems' && (
           <div className="oems-view">
-            <div className="oem-grid">
+            <div className="oem-image-grid">
               {oems.map((c) => (
-                <button key={c.id} className="oem-card" onClick={() => handleSelectCompany(c.id)}>
-                  <span className="oem-name">{c.name}</span>
-                  <span className="oem-country">{c.country}</span>
-                  {c.robotSpecs?.status === 'In Production' && (
-                    <span className="oem-status">In Production</span>
+                <button key={c.id} className="oem-image-card" onClick={() => handleSelectCompany(c.id)}>
+                  {c.robotImage && (
+                    <div className="oem-image-card__img">
+                      <img src={c.robotImage} alt={c.name} />
+                    </div>
                   )}
+                  <div className="oem-image-card__info">
+                    <span className="oem-image-card__name">{c.name}</span>
+                    <span className="oem-image-card__country">{c.country}</span>
+                    {c.robotSpecs?.status === 'In Production' && (
+                      <span className="oem-image-card__status">In Production</span>
+                    )}
+                  </div>
                 </button>
               ))}
             </div>

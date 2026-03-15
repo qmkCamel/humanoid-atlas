@@ -42,6 +42,7 @@ export interface Company {
   description: string;
   marketShare?: string;
   plyModel?: string;
+  robotImage?: string;
   robotSpecs?: RobotSpecs;
   website?: string;
   ticker?: string;
