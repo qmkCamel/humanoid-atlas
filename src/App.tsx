@@ -699,11 +699,13 @@ export default function App() {
     return () => document.removeEventListener('mousedown', onClick);
   }, []);
 
-  // Detect if query is a natural language question
+  // Detect if query is a compare or natural language question
+  const isCompareQuery = useMemo(() => /^compare\s+.+\s+(?:vs\.?|versus)\s+.+$/i.test(searchQuery.trim()), [searchQuery]);
   const isNlQuery = useMemo(() => {
+    if (isCompareQuery) return true;
     const q = searchQuery.trim().toLowerCase();
     return q.includes('?') || q.startsWith('which') || q.startsWith('who') || q.startsWith('what') || q.startsWith('how') || q.startsWith('list') || q.startsWith('show') || q.startsWith('find') || q.includes('suppliers with') || q.includes('oems that') || q.includes('companies that');
-  }, [searchQuery]);
+  }, [searchQuery, isCompareQuery]);
 
   // Simple search results (client-side, instant)
   const searchResults = useMemo(() => {
@@ -932,10 +934,7 @@ export default function App() {
               <div className="compare-card" onClick={() => { setCompareIds(null); setCompareAnalysis(null); handleSelectCompany(idA); }}>
                 {compA.robotImage && <img className="compare-card__image" src={compA.robotImage} alt={compA.name} />}
                 <div className="compare-card__name">{compA.name}</div>
-                <div className="compare-card__meta">
-                  {compA.country}
-                  {compA.robotSpecs?.status === 'In Production' && <span className="compare-card__status">In Production</span>}
-                </div>
+                <div className="compare-card__meta">{compA.country}</div>
                 <div className="compare-card__specs">
                   {specs.map((s) => (
                     <div key={s.label} className="compare-card__spec">
@@ -948,10 +947,7 @@ export default function App() {
               <div className="compare-card" onClick={() => { setCompareIds(null); setCompareAnalysis(null); handleSelectCompany(idB); }}>
                 {compB.robotImage && <img className="compare-card__image" src={compB.robotImage} alt={compB.name} />}
                 <div className="compare-card__name">{compB.name}</div>
-                <div className="compare-card__meta">
-                  {compB.country}
-                  {compB.robotSpecs?.status === 'In Production' && <span className="compare-card__status">In Production</span>}
-                </div>
+                <div className="compare-card__meta">{compB.country}</div>
                 <div className="compare-card__specs">
                   {specs.map((s) => (
                     <div key={s.label} className="compare-card__spec">
@@ -1377,6 +1373,8 @@ export default function App() {
                     </div>
                   ))}
                 </>
+              ) : isCompareQuery ? (
+                <div className="search-empty">Press Enter to compare</div>
               ) : isNlQuery ? (
                 <div className="search-empty">Press Enter to search</div>
               ) : searchResults.length > 0 ? (

@@ -2935,8 +2935,8 @@ body {
 .compare-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  margin-bottom: 24px;
+  gap: 12px;
+  margin-bottom: 20px;
 }
 
 /* 3. Company card */
@@ -2956,8 +2956,8 @@ body {
 /* 4. Robot image */
 .compare-card__image {
   width: 100%;
-  height: 160px;
-  object-fit: cover;
+  height: 120px;
+  object-fit: contain;
   border-radius: 6px;
   margin-bottom: 12px;
   background: #f0ede8;
@@ -2995,14 +2995,18 @@ body {
 .compare-card__specs {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
+  border-top: 1px solid var(--border);
+  padding-top: 8px;
+  margin-top: 8px;
 }
 
 /* 9. Spec row */
 .compare-card__spec {
   display: flex;
   justify-content: space-between;
-  font-size: 12px;
+  font-size: 11px;
+  padding: 2px 0;
 }
 
 /* 10. Spec label */
@@ -3038,19 +3042,22 @@ body {
 .compare-overlap {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
-/* 15. Overlap group */
+/* 15-16. Overlap group + label */
 .compare-overlap__group {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
 }
 
-/* 16. Group label */
 .compare-overlap__label {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 500;
   color: var(--text);
-  margin-bottom: 4px;
+  min-width: 160px;
+  flex-shrink: 0;
 }
 
 /* 17. Supplier names */
