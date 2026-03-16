@@ -2956,7 +2956,7 @@ body {
 /* 4. Robot image */
 .compare-card__image {
   width: 100%;
-  height: 280px;
+  height: 420px;
   object-fit: cover;
   border-radius: 6px;
   margin-bottom: 12px;
