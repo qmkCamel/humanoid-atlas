@@ -989,7 +989,7 @@ export default function App() {
           <input
             className="search-input"
             type="text"
-            placeholder="Search companies..."
+            placeholder="Search the atlas..."
             value={searchQuery}
             onChange={(e) => { setSearchQuery(e.target.value); setSearchOpen(true); }}
             onFocus={() => setSearchOpen(true)}
@@ -1012,6 +1012,7 @@ export default function App() {
                     <span className="search-result__name">{c.name}</span>
                     <span className="search-result__meta">
                       <span>{c.country}</span>
+                      <span>&middot;</span>
                       <span className="search-result__type">{TYPE_DISPLAY[c.type] || c.type}</span>
                     </span>
                   </div>
