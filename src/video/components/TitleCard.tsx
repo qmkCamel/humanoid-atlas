@@ -5,7 +5,6 @@
 
 import { AbsoluteFill, spring, useCurrentFrame, useVideoConfig, interpolate } from 'remotion';
 import { AnimatedText } from './AnimatedText';
-import type { CSSProperties } from 'react';
 
 export interface TitleCardProps {
   /** Main heading */
