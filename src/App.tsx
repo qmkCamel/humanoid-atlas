@@ -644,6 +644,63 @@ export default function App() {
     const specs = selectedCompany.robotSpecs;
     const supplierRels = relationships.filter((r) => r.to === selectedCompany.id);
     const customerRels = relationships.filter((r) => r.from === selectedCompany.id);
+    const isSupplier = selectedCompany.type !== 'oem';
+
+    // Supplier-specific computed data
+    const supplierAnalysis = isSupplier ? (() => {
+      const oemList = companies.filter((c) => c.type === 'oem');
+      const oemIds = new Set(oemList.map((c) => c.id));
+      const totalOems = oemList.length;
+
+      // Customer reach: which OEMs does this supplier serve?
+      const oemCustomerRels = customerRels.filter((r) => oemIds.has(r.to));
+      const oemCustomers = oemCustomerRels
+        .map((r) => companies.find((c) => c.id === r.to))
+        .filter(Boolean) as typeof companies;
+      const uniqueOemCustomers = [...new Map(oemCustomers.map((c) => [c.id, c])).values()];
+      const reachGroups: Record<string, typeof companies> = { US: [], CN: [], OTHER: [] };
+      uniqueOemCustomers.forEach((c) => {
+        reachGroups[getCountryGroup(c.country)].push(c);
+      });
+
+      // Alternative suppliers: same component category
+      const componentLabel = SUPPLIER_COMPONENT_LABEL[selectedCompany.id] || null;
+      const alternatives = componentLabel
+        ? companies.filter((s) => {
+            if (s.id === selectedCompany.id || s.type === 'oem') return false;
+            if (SUPPLIER_COMPONENT_LABEL[s.id] !== componentLabel) return false;
+            return relationships.some((r) => r.from === s.id && oemIds.has(r.to));
+          }).map((s) => {
+            const oemCount = [...new Set(
+              relationships.filter((r) => r.from === s.id && oemIds.has(r.to)).map((r) => r.to)
+            )].length;
+            const components = [...new Set(
+              relationships.filter((r) => r.from === s.id).map((r) => r.component)
+            )];
+            return { id: s.id, name: s.name, country: s.country, oemCount, component: components[0] || componentLabel };
+          })
+        : [];
+
+      // Supply chain position: upstream → this → downstream
+      const upstream = supplierRels
+        .map((r) => companies.find((c) => c.id === r.from))
+        .filter(Boolean) as typeof companies;
+      const downstream = customerRels
+        .map((r) => companies.find((c) => c.id === r.to))
+        .filter(Boolean) as typeof companies;
+      const uniqueDownstream = [...new Map(downstream.map((c) => [c.id, c])).values()];
+      const uniqueUpstream = [...new Map(upstream.map((c) => [c.id, c])).values()];
+
+      return {
+        totalOems,
+        oemCount: uniqueOemCustomers.length,
+        reachGroups,
+        componentLabel,
+        alternatives,
+        upstream: uniqueUpstream,
+        downstream: uniqueDownstream,
+      };
+    })() : null;
 
     return (
       <div className="app">
@@ -714,6 +771,59 @@ export default function App() {
                 })}
               </div>
             </div>
+          )}
+
+          {supplierAnalysis && (
+            <>
+              {supplierAnalysis.oemCount > 0 && (
+                <div className="company-section">
+                  <h3 className="section-title">Customer Reach</h3>
+                  <div className="supplier-reach">
+                    <div className="supplier-reach__bar">
+                      <div className="supplier-reach__track">
+                        <div
+                          className="supplier-reach__fill"
+                          style={{ width: `${(supplierAnalysis.oemCount / supplierAnalysis.totalOems) * 100}%` }}
+                        />
+                      </div>
+                      <span className="supplier-reach__label">{supplierAnalysis.oemCount}/{supplierAnalysis.totalOems} OEMs</span>
+                    </div>
+                    <div className="supplier-reach__groups">
+                      {(['US', 'CN', 'OTHER'] as const).map((g) => {
+                        const group = supplierAnalysis.reachGroups[g];
+                        if (group.length === 0) return null;
+                        const label = g === 'US' ? 'US' : g === 'CN' ? 'CN' : 'Other';
+                        return (
+                          <div key={g} className="supplier-reach__group">
+                            <span className="supplier-reach__group-label">{label} ({group.length}):</span>
+                            <span className="supplier-reach__group-names">{group.map((c) => c.name).join(', ')}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div className="company-section">
+                <h3 className="section-title">Alternative Suppliers{supplierAnalysis.componentLabel ? ` — ${supplierAnalysis.componentLabel}` : ''}</h3>
+                {supplierAnalysis.alternatives.length > 0 ? (
+                  <div className="supplier-alts">
+                    {supplierAnalysis.alternatives.map((alt) => (
+                      <button key={alt.id} className="supplier-alts__row" onClick={() => handleSelectCompany(alt.id)}>
+                        <span className="supplier-alts__name">{alt.name}</span>
+                        <span className="supplier-alts__country">{alt.country}</span>
+                        <span className="supplier-alts__component">{alt.component}</span>
+                        <span className="supplier-alts__oems">{alt.oemCount} OEMs</span>
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="supplier-alts--none">Sole supplier in dataset — no alternatives tracked</p>
+                )}
+              </div>
+
+            </>
           )}
 
           {specs && (

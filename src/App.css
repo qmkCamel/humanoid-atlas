@@ -2266,3 +2266,202 @@ body {
     font-size: 10px;
   }
 }
+
+/* ========== SUPPLIER DETAIL PAGES ========== */
+
+/* --- Customer Reach --- */
+.supplier-reach {
+  margin-bottom: 8px;
+}
+
+.supplier-reach__bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.supplier-reach__track {
+  flex: 1;
+  height: 8px;
+  background: #e8e5e0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.supplier-reach__fill {
+  height: 100%;
+  border-radius: 4px;
+  background: var(--accent);
+  transition: width 0.3s;
+}
+
+.supplier-reach__label {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 12px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  min-width: 80px;
+  text-align: right;
+}
+
+.supplier-reach__groups {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.supplier-reach__group {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.supplier-reach__group-label {
+  font-weight: 500;
+  color: var(--text);
+  min-width: 64px;
+  flex-shrink: 0;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px;
+}
+
+.supplier-reach__group-names {
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+/* --- Alternatives List --- */
+.supplier-alts {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.supplier-alts__row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: border-color 0.15s;
+  font-size: 12px;
+}
+
+.supplier-alts__row:hover {
+  border-color: var(--border-hover);
+}
+
+.supplier-alts__name {
+  font-weight: 500;
+  color: var(--text);
+}
+
+.supplier-alts__country {
+  color: var(--text-dim);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px;
+}
+
+.supplier-alts__component {
+  color: var(--text-secondary);
+  margin-left: auto;
+}
+
+.supplier-alts__oems {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px;
+  color: var(--text-dim);
+  flex-shrink: 0;
+}
+
+.supplier-alts--none {
+  font-size: 12px;
+  color: var(--red);
+}
+
+/* --- Mini Supply Chain Position --- */
+.supplier-chain {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.supplier-chain__col {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 120px;
+}
+
+.supplier-chain__col-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-dim);
+  margin-bottom: 4px;
+  font-family: 'Share Tech Mono', monospace;
+}
+
+.supplier-chain__arrow {
+  font-size: 16px;
+  color: var(--text-dim);
+  margin-top: 26px;
+}
+
+.supplier-chain__node {
+  padding: 4px 10px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 11px;
+  color: var(--text);
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.supplier-chain__node:hover {
+  border-color: var(--border-hover);
+}
+
+.supplier-chain__node--self {
+  border-color: var(--accent);
+  font-weight: 500;
+  background: #f5f2ed;
+}
+
+.supplier-chain__node--country {
+  font-size: 9px;
+  color: var(--text-dim);
+  margin-left: 4px;
+}
+
+/* ========== SUPPLIER DETAIL TABLET (max-width: 768px) ========== */
+@media (max-width: 768px) {
+  .supplier-reach__group {
+    flex-wrap: wrap;
+  }
+
+  .supplier-chain {
+    flex-direction: column;
+  }
+
+  .supplier-chain__arrow {
+    transform: rotate(90deg);
+  }
+}
+
+/* ========== SUPPLIER DETAIL PHONE (max-width: 480px) ========== */
+@media (max-width: 480px) {
+  .supplier-alts__row {
+    flex-wrap: wrap;
+  }
+
+  .supplier-alts__component {
+    margin-left: 0;
+  }
+}
