@@ -162,4 +162,33 @@ export const relationships: SupplyRelationship[] = [
   { id: 'r163', from: 'panasonic_energy', to: 'sunday', component: 'Battery Pack' },
   { id: 'r164', from: 'thk', to: 'sunday', component: 'Cross-Roller Bearings' },
   { id: 'r165', from: 'bosch_sensortec', to: 'sunday', component: 'IMU' },
+
+  // === FOURIER INTELLIGENCE (GR-2) ===
+  { id: 'r170', from: 'nvidia', to: 'fourier', component: 'Jetson Orin', description: 'AI compute for GR-2' },
+  { id: 'r171', from: 'leaderdrive', to: 'fourier', component: 'Harmonic Reducer', description: 'Reducers for FSA actuators' },
+  { id: 'r172', from: 'catl', to: 'fourier', component: 'Battery Pack' },
+  { id: 'r173', from: 'bosch_sensortec', to: 'fourier', component: 'IMU' },
+  { id: 'r174', from: 'sony_sensors', to: 'fourier', component: 'Image Sensors' },
+
+  // === KEPLER ROBOTICS (K2) ===
+  { id: 'r180', from: 'leaderdrive', to: 'kepler', component: 'Harmonic Reducer', description: 'Chinese domestic reducer supply' },
+  { id: 'r181', from: 'catl', to: 'kepler', component: 'Battery Pack' },
+  { id: 'r182', from: 'bosch_sensortec', to: 'kepler', component: 'IMU' },
+  { id: 'r183', from: 'sony_sensors', to: 'kepler', component: 'Image Sensors' },
+
+  // === SANCTUARY AI (Phoenix) ===
+  { id: 'r190', from: 'nvidia', to: 'sanctuary_ai', component: 'Jetson Platform', description: 'Compute for Carbon AI system' },
+  { id: 'r191', from: 'sony_sensors', to: 'sanctuary_ai', component: 'Image Sensors' },
+  { id: 'r192', from: 'bosch_sensortec', to: 'sanctuary_ai', component: 'IMU' },
+
+  // === EXPANDING EXISTING SUPPLIERS (high-confidence) ===
+  { id: 'r200', from: 'horizon_robotics', to: 'ubtech', component: 'AI Chips', description: 'Chinese domestic compute alternative' },
+  { id: 'r201', from: 'horizon_robotics', to: 'agibot', component: 'AI Chips', description: 'Domestic compute qualification' },
+  { id: 'r202', from: 'nsk', to: 'unitree', component: 'Ball Bearings' },
+  { id: 'r203', from: 'nsk', to: 'tesla', component: 'Precision Bearings' },
+  { id: 'r204', from: 'nsk', to: 'boston_dynamics', component: 'Angular Contact Bearings' },
+  { id: 'r205', from: 'nabtesco', to: 'boston_dynamics', component: 'RV Reducer', description: 'Cycloidal reducer for high-torque joints' },
+  { id: 'r206', from: 'kollmorgen', to: 'boston_dynamics', component: 'BLDC Motors', description: 'Frameless motors from Spot heritage' },
+  { id: 'r207', from: 'sony_sensors', to: 'unitree', component: 'Image Sensors' },
+  { id: 'r208', from: 'sony_sensors', to: 'xpeng', component: 'Image Sensors', description: 'Eagle Eye stereo camera sensors' },
 ];

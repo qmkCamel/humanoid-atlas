@@ -223,14 +223,14 @@ const SCENARIOS = [
   {
     id: 'taiwan_strait',
     label: 'Taiwan Strait Crisis',
-    description: 'TSMC goes offline — NVIDIA and Intel lose chip fabrication, cascading to nearly every humanoid OEM.',
+    description: 'TSMC goes offline — NVIDIA and Intel lose chip fabrication, cascading to the majority of humanoid OEMs.',
     cutCompanies: ['tsmc'],
     cutCountries: [] as string[],
   },
   {
     id: 'harmonic_shortage',
     label: 'Harmonic Drive Shortage',
-    description: 'Japan\'s Harmonic Drive Systems cannot ship — the single most expensive actuator component disappears from 9 OEMs.',
+    description: 'Japan\'s Harmonic Drive Systems cannot ship — the single most expensive actuator component disappears from 9 of 16 OEMs.',
     cutCompanies: ['harmonic_drive'],
     cutCountries: [],
   },
@@ -251,7 +251,7 @@ const SCENARIOS = [
   {
     id: 'nvidia_blacklist',
     label: 'NVIDIA Blacklist',
-    description: 'NVIDIA cut from supply chain — 9 OEMs lose their primary compute platform. Only Tesla (proprietary) and XPeng (Horizon) are unaffected.',
+    description: 'NVIDIA cut from supply chain — 11 OEMs lose their primary compute platform. Only Tesla (proprietary), XPeng (Horizon), and Kepler are unaffected.',
     cutCompanies: ['nvidia'],
     cutCountries: [],
   },
