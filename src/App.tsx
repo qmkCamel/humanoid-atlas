@@ -650,7 +650,6 @@ export default function App() {
   const thesisCache = useRef<Map<string, string>>(new Map());
   const [graphQuery, setGraphQuery] = useState('');
   const [graphHighlightIds, setGraphHighlightIds] = useState<Set<string> | null>(null);
-  const [graphAnswer, setGraphAnswer] = useState<string | null>(null);
   const [graphQuerying, setGraphQuerying] = useState(false);
   const [companyChat, setCompanyChat] = useState('');
   const [companyChatAnswer, setCompanyChatAnswer] = useState<string | null>(null);
@@ -1713,11 +1712,11 @@ export default function App() {
                   if (e.key === 'Escape') {
                     setGraphQuery('');
                     setGraphHighlightIds(null);
-                    setGraphAnswer(null);
+
                   }
                   if (e.key === 'Enter' && graphQuery.trim() && !graphQuerying) {
                     setGraphQuerying(true);
-                    setGraphAnswer(null);
+
                     fetch('/api/graph-query', {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json' },
@@ -1730,7 +1729,6 @@ export default function App() {
                       .then((r) => r.json())
                       .then((d) => {
                         if (d.highlightIds) setGraphHighlightIds(new Set(d.highlightIds));
-                        if (d.answer) setGraphAnswer(d.answer);
                       })
                       .catch(() => {})
                       .finally(() => setGraphQuerying(false));
@@ -1742,7 +1740,6 @@ export default function App() {
                 <button className="cut-reset" onClick={() => {
                   setGraphQuery('');
                   setGraphHighlightIds(null);
-                  setGraphAnswer(null);
                 }}>Clear</button>
               )}
             </div>
