@@ -2142,7 +2142,7 @@ export default function App() {
                 ) : activeTab === 'vlas' ? (
                   <div className="vla-placeholder">
                     <span className="vla-placeholder__eyebrow">
-                      {focusedVlaModel ? focusedVlaModel.developer : 'Vision-Language-Action'}
+                      {focusedVlaModel ? focusedVlaModel.developer : 'Vision-Language-Action Models'}
                     </span>
                     <span className="vla-placeholder__title">
                       {focusedVlaModel ? focusedVlaModel.name : 'VLA'}
