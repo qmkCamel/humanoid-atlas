@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState, useMemo, useCallback } from 'react';
-import type { RewardComparison, RewardModelScores } from '../data/rewardComparisons';
+import type { RewardComparison } from '../data/rewardComparisons';
 
 interface RewardChartProps {
   comparisons: RewardComparison[];

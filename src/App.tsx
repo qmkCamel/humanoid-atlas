@@ -1016,6 +1016,7 @@ export default function App() {
 
   const handleLike = useCallback((oemId: string) => {
     const removing = likedByMe.has(oemId);
+    // Optimistic UI update
     setLikes((prev) => ({ ...prev, [oemId]: Math.max(0, (prev[oemId] || 0) + (removing ? -1 : 1)) }));
     setLikedByMe((prev) => {
       const next = new Set(prev);
@@ -1027,7 +1028,24 @@ export default function App() {
       method: removing ? 'DELETE' : 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ oemId }),
-    }).catch(() => {});
+    })
+      .then((r) => r.json())
+      .then((data) => {
+        // Server returned actual count — sync it (handles alreadyVoted case)
+        if (typeof data.likes === 'number') {
+          setLikes((prev) => ({ ...prev, [oemId]: data.likes }));
+        }
+        // If server says already voted, re-toggle the heart to "liked" state
+        if (data.alreadyVoted) {
+          setLikedByMe((prev) => {
+            const next = new Set(prev);
+            next.add(oemId);
+            try { localStorage.setItem('oem_likes', JSON.stringify([...next])); } catch { /* */ }
+            return next;
+          });
+        }
+      })
+      .catch(() => {});
   }, [likedByMe]);
 
   const handleBackFromCompany = () => {
