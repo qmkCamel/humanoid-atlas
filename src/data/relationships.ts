@@ -133,7 +133,7 @@ export const relationships: SupplyRelationship[] = [
   // === ADDITIONAL MOTOR RELATIONSHIPS (from audit) ===
   { id: 'r145', from: 'moons', to: 'xpeng', component: 'Servo Motors' },
   { id: 'r146', from: 'moons', to: 'ubtech', component: 'Servo Motors' },
-  { id: 'r147', from: 'maxon', to: '1x', component: 'BLDC Motors', description: 'Frameless BLDC motors' },
+  { id: 'r147', from: '1x', to: '1x', component: 'Revo2 Motors (in-house)', description: 'Proprietary motors with in-house wound copper coils, 5x torque density vs off-the-shelf' },
 
   // === ADDITIONAL BEARING RELATIONSHIPS (from audit) ===
   { id: 'r148', from: 'thk', to: 'agibot', component: 'Cross-Roller Bearings' },
@@ -144,7 +144,7 @@ export const relationships: SupplyRelationship[] = [
   // === ADDITIONAL BATTERY RELATIONSHIPS (from audit) ===
   { id: 'r152', from: 'lg_energy', to: 'boston_dynamics', component: 'Battery Cells', description: 'Hyundai group battery supply chain' },
   { id: 'r153', from: 'panasonic_energy', to: 'agility', component: 'Battery Cells' },
-  { id: 'r154', from: 'panasonic_energy', to: '1x', component: 'Battery Cells' },
+  { id: 'r154', from: '1x', to: '1x', component: 'Battery Cells (in-house)', description: '1X manufactures their own batteries' },
 
   // === ADDITIONAL SCREW RELATIONSHIPS (from audit) ===
   { id: 'r155', from: 'nanjing_kgm', to: 'unitree', component: 'Planetary Roller Screws', description: 'Chinese domestic screw supplier' },
@@ -215,7 +215,7 @@ export const relationships: SupplyRelationship[] = [
   { id: 'r342', from: 'intel', to: 'dobot', component: 'Depth Cameras', description: 'RealSense D455 depth camera' },
   { id: 'r341', from: 'nvidia', to: 'dobot', component: 'GPU', description: '16GB GPU (1500 TOPS total system), Physics AI partner' },
 
-  // LimX Dynamics (CL-3 Oli)
+  // LimX Dynamics (Oli)
   { id: 'r350', from: 'nvidia', to: 'limx', component: 'Jetson Orin NX', description: 'AI/perception compute (157 TOPS)' },
   { id: 'r351', from: 'intel', to: 'limx', component: 'Depth Cameras', description: 'RealSense D435i (head, chest, wrist, hip)' },
 

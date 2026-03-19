@@ -1,8 +1,9 @@
 import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import PLYViewer, { preloadPLY } from './components/PLYViewer';
 import SupplyChainGraph from './components/SupplyChainGraph';
-import { companies, relationships, componentCategories, vlaModels, rewardModels } from './data';
+import { companies, relationships, componentCategories, vlaModels, rewardModels, rewardComparisons } from './data';
 import type { RewardModelType } from './data';
+import RewardChart from './components/RewardChart';
 import './App.css';
 
 // Start fetching the skeleton model immediately on module load
@@ -2489,6 +2490,15 @@ export default function App() {
                     ))}
                   </div>
                 </div>
+              </div>
+            )}
+
+            {activeTab === 'reward_models' && (
+              <div className="supply-chain">
+                <div className="supply-chain__header">
+                  <h3 className="section-title">Reward Comparison</h3>
+                </div>
+                <RewardChart comparisons={rewardComparisons} />
               </div>
             )}
 
