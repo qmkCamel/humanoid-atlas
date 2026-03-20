@@ -3,8 +3,8 @@ import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import PLYViewer, { preloadPLY } from './components/PLYViewer';
 import SupplyChainGraph from './components/SupplyChainGraph';
-import { companies, relationships, componentCategories, vlaModels, rewardModels, rewardComparisons, worldModels, vizTools, headDesigns, companyFunding, topInvestors, companyProduction, factoryDirectory, manufacturingPartners, simPlatforms } from './data';
-import type { RewardModelType, WorldModelType, VizToolType, FaceDisplayType, FundingStatus, FactoryStatus, SimPlatformType } from './data';
+import { companies, relationships, componentCategories, vlaModels, rewardModels, rewardComparisons, worldModels, vizTools, headDesigns, companyFunding, topInvestors, companyProduction, factoryDirectory, manufacturingPartners, simPlatforms, safetyStandards, oemSafetyProfiles } from './data';
+import type { RewardModelType, WorldModelType, VizToolType, FaceDisplayType, FundingStatus, FactoryStatus, SimPlatformType, SafetyComplianceLevel, OemSafetyProfile } from './data';
 import RewardChart from './components/RewardChart';
 import './App.css';
 
@@ -50,6 +50,7 @@ const TABS: { id: string; label: string; group: TabGroup }[] = [
   { id: 'viz_tools', label: 'Viz Tools', group: 'software' },
   // HRI
   { id: 'displays', label: 'Displays', group: 'hri' },
+  { id: 'safety_standards', label: 'Safety & Standards', group: 'hri' },
 ];
 
 // Path ↔ Tab ID mapping for SEO-friendly URLs
@@ -77,6 +78,7 @@ const TAB_TO_PATH: Record<string, string> = {
   sim_platforms: '/software/sim-platforms',
   viz_tools: '/software/viz-tools',
   displays: '/hri/displays',
+  safety_standards: '/hri/safety-standards',
 };
 
 const PATH_TO_TAB: Record<string, string> = {
@@ -112,6 +114,7 @@ const TAB_META: Record<string, { title: string; description: string }> = {
   world_models: { title: 'World Models for Robotics — Video, Latent, RL | Humanoid Atlas', description: 'Compare 19 world models for robotics. DreamDojo, Dreamer V4, NVIDIA Cosmos, V-JEPA 2, Field AI, Rhoda AI, and more.' },
   sim_platforms: { title: 'Robotics Simulation Platforms — Isaac Sim, MuJoCo, Genesis | Humanoid Atlas', description: 'Compare 14 robotics simulation platforms with capability matrix. NVIDIA Isaac Sim, MuJoCo, Genesis, Drake, Gazebo, and more with OEM adoption maps.' },
   viz_tools: { title: 'Robotics Visualization Tools — Foxglove, Rerun & More | Humanoid Atlas', description: 'Compare 10 robotics visualization tools with capability matrix. Foxglove, Rerun, RViz2, PlotJuggler, and more.' },
+  safety_standards: { title: 'Humanoid Robot Safety Standards & Compliance | Humanoid Atlas', description: 'Track safety standards (ISO 25785-1, ANSI R15.06, EU AI Act), OEM compliance profiles, and safety design features across 12 humanoid robotics companies.' },
   displays: { title: 'Humanoid Robot Displays & Head Designs | Humanoid Atlas', description: 'Compare 17 humanoid robot head/face designs. OLED screens, status displays, LED indicators, cameras, sensors, and interaction design.' },
 };
 
@@ -632,6 +635,42 @@ function getSimPlatformOverview() {
   };
 }
 
+const SAFETY_CAPABILITIES = [
+  'Force Limit', 'E-Stop', 'Speed Limit', 'Collision Det.', 'Compliant Act.', 'Fall Protect', 'Cyber',
+] as const;
+
+function getSafetyCapabilities(p: OemSafetyProfile): Set<string> {
+  const s = new Set<string>();
+  if (p.forceLimiting) s.add('Force Limit');
+  if (p.eStop) s.add('E-Stop');
+  if (p.speedLimiting) s.add('Speed Limit');
+  if (p.collisionDetection) s.add('Collision Det.');
+  if (p.compliantActuators) s.add('Compliant Act.');
+  if (p.fallProtection) s.add('Fall Protect');
+  if (p.cyberSecurity) s.add('Cyber');
+  return s;
+}
+
+function getComplianceLevelLabel(level: SafetyComplianceLevel) {
+  switch (level) {
+    case 'certified': return 'Certified';
+    case 'in-progress': return 'In Progress';
+    case 'claimed': return 'Claimed';
+    case 'not-disclosed': return 'Not Disclosed';
+  }
+}
+
+function getSafetyOverview() {
+  return {
+    trackedStandards: safetyStandards.length,
+    publishedStandards: safetyStandards.filter((s) => s.status === 'published' || s.status === 'in-force').length,
+    inProgressStandards: safetyStandards.filter((s) => s.status === 'working-draft' || s.status === 'fdis' || s.status === 'framework').length,
+    trackedOems: oemSafetyProfiles.length,
+    certifiedOems: oemSafetyProfiles.filter((p) => p.complianceLevel === 'certified').length,
+    inProgressOems: oemSafetyProfiles.filter((p) => p.complianceLevel === 'in-progress').length,
+  };
+}
+
 function getVLAOverview() {
   const linkedOemIds = new Set(
     vlaModels.flatMap((model) => model.companyLinks.map((link) => link.companyId))
@@ -927,6 +966,7 @@ export default function App() {
   const [fundingStatusFilter, setFundingStatusFilter] = useState<'all' | FundingStatus>('all');
   const [factoryStatusFilter, setFactoryStatusFilter] = useState<'all' | FactoryStatus>('all');
   const [simPlatformFilter, setSimPlatformFilter] = useState<'all' | SimPlatformType>('all');
+  const [safetyComplianceFilter, setSafetyComplianceFilter] = useState<'all' | SafetyComplianceLevel>('all');
   const [countryFilter, setCountryFilter] = useState<CountryGroup>(null);
   const [cutCountries, setCutCountries] = useState<Set<string>>(new Set());
   const [cutCompanies, setCutCompanies] = useState<Set<string>>(new Set());
@@ -1210,6 +1250,24 @@ export default function App() {
     () => simPlatforms.find((p) => p.id === chainFocus) || null,
     [chainFocus]
   );
+
+  // Safety & standards state
+  const safetyOverviewData = useMemo(() => getSafetyOverview(), []);
+
+  const focusedSafetyProfile = useMemo(
+    () => oemSafetyProfiles.find((p) => p.id === chainFocus) || null,
+    [chainFocus]
+  );
+
+  const focusedSafetyStandard = useMemo(
+    () => safetyStandards.find((s) => s.id === chainFocus) || null,
+    [chainFocus]
+  );
+
+  const filteredSafetyProfiles = useMemo(() => {
+    if (safetyComplianceFilter === 'all') return oemSafetyProfiles;
+    return oemSafetyProfiles.filter((p) => p.complianceLevel === safetyComplianceFilter);
+  }, [safetyComplianceFilter]);
 
   // Viz tool state
   const vizToolOverview = useMemo(() => getVizToolOverview(), []);
@@ -2917,6 +2975,22 @@ export default function App() {
                         : `${vizToolOverview.trackedTools} tracked · ${vizToolOverview.platformTools} platforms · ${vizToolOverview.viewerTools} 3D viewers · ${vizToolOverview.timeSeriesTools} time series · ${vizToolOverview.analyticsTools} analytics`}
                     </span>
                   </div>
+                ) : activeTab === 'safety_standards' ? (
+                  <div className="vla-placeholder">
+                    <span className="vla-placeholder__eyebrow">
+                      {focusedSafetyProfile ? focusedSafetyProfile.name : focusedSafetyStandard ? focusedSafetyStandard.issuingBody : 'Humanoid Robot Safety'}
+                    </span>
+                    <span className="vla-placeholder__title">
+                      {focusedSafetyProfile ? getComplianceLevelLabel(focusedSafetyProfile.complianceLevel) : focusedSafetyStandard ? focusedSafetyStandard.name : 'Safety & Standards'}
+                    </span>
+                    <span className="vla-placeholder__meta">
+                      {focusedSafetyProfile
+                        ? `${focusedSafetyProfile.country} · ${focusedSafetyProfile.complianceSummary}`
+                        : focusedSafetyStandard
+                          ? `${focusedSafetyStandard.region} · ${focusedSafetyStandard.statusLabel}`
+                          : `${safetyOverviewData.trackedStandards} standards · ${safetyOverviewData.trackedOems} OEM profiles · ${safetyOverviewData.certifiedOems} certified`}
+                    </span>
+                  </div>
                 ) : activeTab === 'displays' ? (
                   <div className="vla-placeholder">
                     <span className="vla-placeholder__eyebrow">
@@ -2953,9 +3027,13 @@ export default function App() {
                             ? focusedSimPlatform.description
                             : activeTab === 'viz_tools' && focusedVizTool
                               ? focusedVizTool.description
-                              : activeTab === 'displays' && focusedHeadDesign
-                              ? focusedHeadDesign.description
-                              : selectedComponent.description;
+                              : activeTab === 'safety_standards' && focusedSafetyProfile
+                                ? focusedSafetyProfile.description
+                                : activeTab === 'safety_standards' && focusedSafetyStandard
+                                  ? focusedSafetyStandard.description
+                                  : activeTab === 'displays' && focusedHeadDesign
+                                    ? focusedHeadDesign.description
+                                    : selectedComponent.description;
                   const metrics = isActuator
                     ? ACTUATOR_INFO[actuatorType].keyMetrics
                     : activeTab === 'reward_models'
@@ -3041,6 +3119,30 @@ export default function App() {
                                   'With OEM Links': `${simPlatformOverview.withOemLinks} platforms adopted by OEMs`,
                                   Developers: `${simPlatformOverview.developerCount} organizations`,
                                 }
+                          : activeTab === 'safety_standards'
+                            ? focusedSafetyProfile
+                              ? {
+                                  Company: focusedSafetyProfile.name,
+                                  Compliance: getComplianceLevelLabel(focusedSafetyProfile.complianceLevel),
+                                  Summary: focusedSafetyProfile.complianceSummary,
+                                  Sources: focusedSafetyProfile.sources.map((s) => s.label).join(' · '),
+                                }
+                              : focusedSafetyStandard
+                                ? {
+                                    'Issuing Body': focusedSafetyStandard.issuingBody,
+                                    Region: focusedSafetyStandard.region,
+                                    Status: focusedSafetyStandard.statusLabel,
+                                    ...(focusedSafetyStandard.expectedDate ? { Expected: focusedSafetyStandard.expectedDate } : {}),
+                                    Sources: focusedSafetyStandard.sources.map((s) => s.label).join(' · '),
+                                  }
+                                : {
+                                    'Tracked Standards': `${safetyOverviewData.trackedStandards} safety standards`,
+                                    Published: `${safetyOverviewData.publishedStandards} published/in-force`,
+                                    'In Development': `${safetyOverviewData.inProgressStandards} working draft/FDIS/framework`,
+                                    'OEM Profiles': `${safetyOverviewData.trackedOems} companies tracked`,
+                                    Certified: `${safetyOverviewData.certifiedOems} with NRTL/formal certification`,
+                                    'In Progress': `${safetyOverviewData.inProgressOems} pursuing certification`,
+                                  }
                           : activeTab === 'displays'
                             ? focusedHeadDesign
                               ? {
@@ -3436,6 +3538,132 @@ export default function App() {
                         <span className="chain-country">{tool.country}</span>
                         <span className="chain-share">
                           {tool.developer} · {getVizToolTypeLabel(tool.toolType)}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'safety_standards' && (
+              <div className="supply-chain">
+                <div className="supply-chain__header">
+                  <h3 className="section-title">Standards Status</h3>
+                </div>
+                <div className="cap-matrix cap-matrix--standards">
+                  <table className="cap-matrix__table">
+                    <colgroup>
+                      <col style={{ width: '22%' }} />
+                      <col style={{ width: '28%' }} />
+                      <col style={{ width: '14%' }} />
+                      <col style={{ width: '20%' }} />
+                      <col style={{ width: '16%' }} />
+                    </colgroup>
+                    <thead>
+                      <tr>
+                        <th className="cap-matrix__tool-header">Standard</th>
+                        <th className="cap-matrix__cap-header"><span>Scope</span></th>
+                        <th className="cap-matrix__cap-header"><span>Region</span></th>
+                        <th className="cap-matrix__cap-header"><span>Status</span></th>
+                        <th className="cap-matrix__cap-header"><span>Expected</span></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {safetyStandards.map((std) => {
+                        const isFocused = focusedSafetyStandard?.id === std.id;
+                        const isDim = focusedSafetyStandard && !isFocused;
+                        return (
+                          <tr
+                            key={std.id}
+                            className={`cap-matrix__row ${isFocused ? 'cap-matrix__row--focused' : ''} ${isDim ? 'cap-matrix__row--dim' : ''}`}
+                            onClick={() => setChainFocus((prev) => prev === std.id ? null : std.id)}
+                          >
+                            <td className="cap-matrix__tool-name">{std.name}</td>
+                            <td className="cap-matrix__cell"><span className="cap-matrix__text">{std.scope}</span></td>
+                            <td className="cap-matrix__cell"><span className="cap-matrix__text">{std.region}</span></td>
+                            <td className="cap-matrix__cell"><span className="cap-matrix__text">{std.statusLabel}</span></td>
+                            <td className="cap-matrix__cell"><span className="cap-matrix__text">{std.expectedDate || '--'}</span></td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'safety_standards' && (
+              <div className="supply-chain">
+                <div className="supply-chain__header">
+                  <h3 className="section-title">Safety Design Matrix</h3>
+                </div>
+                <div className="cap-matrix">
+                  <table className="cap-matrix__table">
+                    <thead>
+                      <tr>
+                        <th className="cap-matrix__tool-header">Company</th>
+                        {SAFETY_CAPABILITIES.map((cap) => (
+                          <th key={cap} className="cap-matrix__cap-header"><span>{cap}</span></th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredSafetyProfiles.map((profile) => {
+                        const caps = getSafetyCapabilities(profile);
+                        const isFocused = focusedSafetyProfile?.id === profile.id;
+                        const isDim = focusedSafetyProfile && !isFocused;
+                        return (
+                          <tr
+                            key={profile.id}
+                            className={`cap-matrix__row ${isFocused ? 'cap-matrix__row--focused' : ''} ${isDim ? 'cap-matrix__row--dim' : ''}`}
+                            onClick={() => setChainFocus((prev) => prev === profile.id ? null : profile.id)}
+                          >
+                            <td className="cap-matrix__tool-name">{profile.name}</td>
+                            {SAFETY_CAPABILITIES.map((cap) => (
+                              <td key={cap} className="cap-matrix__cell">
+                                <span className={`cap-matrix__dot ${caps.has(cap) ? 'cap-matrix__dot--on' : ''}`} />
+                              </td>
+                            ))}
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'safety_standards' && (
+              <div className="supply-chain">
+                <div className="supply-chain__header">
+                  <h3 className="section-title">OEM Safety Profiles</h3>
+                  <div className="vla-filters">
+                    <button className={`country-pill ${safetyComplianceFilter === 'all' ? 'country-pill--active' : ''}`} onClick={() => setSafetyComplianceFilter('all')}>All</button>
+                    <button className={`country-pill ${safetyComplianceFilter === 'certified' ? 'country-pill--active' : ''}`} onClick={() => setSafetyComplianceFilter(safetyComplianceFilter === 'certified' ? 'all' : 'certified')}>Certified</button>
+                    <button className={`country-pill ${safetyComplianceFilter === 'in-progress' ? 'country-pill--active' : ''}`} onClick={() => setSafetyComplianceFilter(safetyComplianceFilter === 'in-progress' ? 'all' : 'in-progress')}>In Progress</button>
+                    <button className={`country-pill ${safetyComplianceFilter === 'claimed' ? 'country-pill--active' : ''}`} onClick={() => setSafetyComplianceFilter(safetyComplianceFilter === 'claimed' ? 'all' : 'claimed')}>Claimed</button>
+                    <button className={`country-pill ${safetyComplianceFilter === 'not-disclosed' ? 'country-pill--active' : ''}`} onClick={() => setSafetyComplianceFilter(safetyComplianceFilter === 'not-disclosed' ? 'all' : 'not-disclosed')}>Not Disclosed</button>
+                    {focusedSafetyProfile && (
+                      <button className="chain-clear" onClick={() => setChainFocus(null)}>
+                        CLEAR FILTER
+                      </button>
+                    )}
+                  </div>
+                </div>
+                <div className="chain-flow">
+                  <div className="chain-tier">
+                    <div className="chain-tier-label">Companies</div>
+                    {filteredSafetyProfiles.map((profile) => (
+                      <button
+                        key={profile.id}
+                        className={`chain-entity ${focusedSafetyProfile && focusedSafetyProfile.id !== profile.id ? 'chain-entity--dim' : ''} ${focusedSafetyProfile?.id === profile.id ? 'chain-entity--focused' : ''} ${countryFilter && getCountryFilterGroup(profile.country) !== countryFilter ? 'geo-dim' : ''}`}
+                        onClick={() => setChainFocus((prev) => prev === profile.id ? null : profile.id)}
+                      >
+                        <span className="chain-name">{profile.name}</span>
+                        <span className="chain-country">{profile.country}</span>
+                        <span className="chain-share">
+                          {getComplianceLevelLabel(profile.complianceLevel)} · {profile.complianceSummary}
                         </span>
                       </button>
                     ))}

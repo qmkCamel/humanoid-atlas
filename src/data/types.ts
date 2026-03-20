@@ -307,6 +307,49 @@ export interface SimPlatform {
   companyLinks: SimCompanyLink[];
 }
 
+// ── Safety & Standards ────────────────────────────────────────
+
+export type StandardStatus = 'published' | 'in-force' | 'fdis' | 'working-draft' | 'framework' | 'released';
+
+export interface SafetySourceRef {
+  label: string;
+  url: string;
+}
+
+export interface SafetyStandard {
+  id: string;
+  name: string;
+  scope: string;
+  issuingBody: string;
+  region: string;          // e.g. "International", "US", "EU", "CN"
+  status: StandardStatus;
+  statusLabel: string;     // e.g. "Published Oct 2025", "Working Draft"
+  expectedDate?: string;   // e.g. "2026-2027", "Jan 2027"
+  description: string;
+  sources: SafetySourceRef[];
+}
+
+export type SafetyComplianceLevel = 'certified' | 'in-progress' | 'claimed' | 'not-disclosed';
+
+export interface OemSafetyProfile {
+  id: string;
+  companyId: string;
+  name: string;
+  country: Country;
+  complianceLevel: SafetyComplianceLevel;
+  complianceSummary: string;  // e.g. "NRTL certified · CAT1 stop · Safety PLC"
+  description: string;
+  // Safety design capability flags
+  forceLimiting: boolean;
+  eStop: boolean;
+  speedLimiting: boolean;
+  collisionDetection: boolean;
+  compliantActuators: boolean;
+  fallProtection: boolean;
+  cyberSecurity: boolean;
+  sources: SafetySourceRef[];
+}
+
 export interface VLAModel {
   id: string;
   name: string;

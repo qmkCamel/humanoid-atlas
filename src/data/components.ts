@@ -239,4 +239,16 @@ export const componentCategories: ComponentCategory[] = [
       'Trend': 'Vision-only perception (dropping LiDAR) + AI depth estimation',
     },
   },
+  {
+    id: 'safety_standards',
+    name: 'Safety & Standards',
+    description: 'The regulatory and safety landscape for humanoid robots is rapidly evolving. ISO 25785-1, the first standard specifically for bipedal robots, is in working draft. Meanwhile, companies must navigate ISO 10218 (industrial), ISO 13482 (service), UL 3300 (OSHA-listed), EU Machinery Regulation, and the EU AI Act. Only one humanoid — Agility Digit — has achieved NRTL certification.',
+    bottleneck: false,
+    keyMetrics: {
+      'Key Standard': 'ISO 25785-1 (bipedal robots) — Working Draft, expected 2026-2027',
+      'First Certified': 'Agility Robotics Digit — NRTL field tested',
+      'EU Deadline': 'Machinery Regulation applies Jan 2027, AI Act Aug 2026',
+      'Critical Gap': 'No published standard addresses humanoid fall behavior',
+    },
+  },
 ];

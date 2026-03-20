@@ -3481,6 +3481,36 @@ body {
   }
 }
 
+/* ========== SAFETY STANDARDS TABLE ========== */
+
+.cap-matrix--standards .cap-matrix__table {
+  table-layout: fixed;
+}
+
+.cap-matrix--standards .cap-matrix__tool-header,
+.cap-matrix--standards .cap-matrix__tool-name {
+  width: 22%;
+}
+
+.cap-matrix--standards col.cap-matrix__col--scope {
+  width: 28%;
+}
+
+.cap-matrix--standards .cap-matrix__cap-header,
+.cap-matrix--standards .cap-matrix__cell {
+  text-align: left;
+  padding-left: 12px;
+}
+
+.cap-matrix__text {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  color: var(--text-secondary);
+  display: block;
+  white-space: normal;
+  line-height: 1.4;
+}
+
 /* ========== FUNDING TAB ========== */
 
 .funding-list {

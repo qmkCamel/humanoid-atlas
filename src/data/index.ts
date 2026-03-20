@@ -10,4 +10,5 @@ export { headDesigns } from './headDesigns';
 export { companyFunding, topInvestors } from './funding';
 export { companyProduction, factoryDirectory, manufacturingPartners } from './factories';
 export { simPlatforms } from './simPlatforms';
-export type { Company, SupplyRelationship, ComponentCategory, RobotSpecs, EntityType, Country, VLAModel, RewardModel, RewardModelType, WorldModel, WorldModelType, VizTool, VizToolType, HeadDesign, FaceDisplayType, FundingStatus, CompanyFunding, InvestorProfile, FactoryStatus, Factory, CompanyProduction, ManufacturingPartner, SimPlatformType, SimPlatform } from './types';
+export { safetyStandards, oemSafetyProfiles } from './safety';
+export type { Company, SupplyRelationship, ComponentCategory, RobotSpecs, EntityType, Country, VLAModel, RewardModel, RewardModelType, WorldModel, WorldModelType, VizTool, VizToolType, HeadDesign, FaceDisplayType, FundingStatus, CompanyFunding, InvestorProfile, FactoryStatus, Factory, CompanyProduction, ManufacturingPartner, SimPlatformType, SimPlatform, SafetyComplianceLevel, SafetyStandard, OemSafetyProfile } from './types';
