@@ -147,6 +147,18 @@ export const componentCategories: ComponentCategory[] = [
     },
   },
   {
+    id: 'viz_tools',
+    name: 'Visualization Tools',
+    description: 'Visualization tools let robotics engineers see, debug, and understand what their robots are doing. From 3D scene viewers and time series plotters to full observability platforms, these tools turn raw sensor data, logs, and telemetry into actionable insight — accelerating the development loop from data collection through fleet deployment.',
+    bottleneck: false,
+    keyMetrics: {
+      'Core Function': 'Visualize, debug, and inspect robot data',
+      'Input Types': '3D scenes, point clouds, images, video, time series, logs',
+      'Deployment Modes': 'Desktop, web, cloud, on-robot, VR/AR',
+      'Key Trend': 'Platform convergence — observability + ML pipeline integration',
+    },
+  },
+  {
     id: 'world_models',
     name: 'World Models',
     description: 'World models learn to simulate how the physical world evolves in response to robot actions. By predicting future states — as video frames, latent representations, or learned dynamics — they let robots practice tasks "in imagination" before acting in reality. This dramatically reduces the need for expensive real-world data collection and enables safer, faster policy training.',

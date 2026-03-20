@@ -585,6 +585,90 @@ body {
   border-bottom: 1px solid var(--border);
 }
 
+/* ========== CAPABILITY MATRIX ========== */
+.cap-matrix {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.cap-matrix__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px;
+}
+
+.cap-matrix__tool-header {
+  text-align: left;
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  padding: 0 12px 10px 0;
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+.cap-matrix__cap-header {
+  text-align: center;
+  font-size: 9px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  padding: 0 0 10px;
+  font-weight: 400;
+  width: 64px;
+  min-width: 52px;
+}
+
+.cap-matrix__cap-header span {
+  display: inline-block;
+}
+
+.cap-matrix__row {
+  cursor: pointer;
+  transition: opacity 0.15s, background 0.15s;
+  border-top: 1px solid var(--border);
+}
+
+.cap-matrix__row:hover {
+  background: var(--bg-muted);
+}
+
+.cap-matrix__row--focused {
+  background: var(--bg-muted);
+}
+
+.cap-matrix__row--dim {
+  opacity: 0.3;
+}
+
+.cap-matrix__tool-name {
+  padding: 8px 12px 8px 0;
+  font-size: 11px;
+  color: var(--text);
+  white-space: nowrap;
+  letter-spacing: 0.3px;
+}
+
+.cap-matrix__cell {
+  text-align: center;
+  padding: 8px 0;
+}
+
+.cap-matrix__dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--border);
+  transition: background 0.15s;
+}
+
+.cap-matrix__dot--on {
+  background: var(--text);
+}
+
 /* ========== REWARD CHART (video-synced) ========== */
 .reward-chart {
   padding: 12px 0;
@@ -1547,6 +1631,9 @@ body {
   .component-info { padding: 16px; gap: 16px; }
   .component-desc { font-size: 14px; }
   .supply-chain { padding: 16px; }
+  .cap-matrix__cap-header { font-size: 8px; width: 48px; min-width: 40px; letter-spacing: 0.5px; }
+  .cap-matrix__tool-name { font-size: 10px; }
+  .cap-matrix__dot { width: 7px; height: 7px; }
   .company-info { padding: 16px; gap: 10px; }
   .company-desc { font-size: 14px; }
   .company-section { padding: 16px; }

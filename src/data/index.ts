@@ -5,4 +5,5 @@ export { vlaModels } from './vlaModels';
 export { rewardModels } from './rewardModels';
 export { rewardComparisons } from './rewardComparisons';
 export { worldModels } from './worldModels';
-export type { Company, SupplyRelationship, ComponentCategory, RobotSpecs, EntityType, Country, VLAModel, RewardModel, RewardModelType, WorldModel, WorldModelType } from './types';
+export { vizTools } from './vizTools';
+export type { Company, SupplyRelationship, ComponentCategory, RobotSpecs, EntityType, Country, VLAModel, RewardModel, RewardModelType, WorldModel, WorldModelType, VizTool, VizToolType } from './types';

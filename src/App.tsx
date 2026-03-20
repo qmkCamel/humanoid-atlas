@@ -1,8 +1,8 @@
 import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import PLYViewer, { preloadPLY } from './components/PLYViewer';
 import SupplyChainGraph from './components/SupplyChainGraph';
-import { companies, relationships, componentCategories, vlaModels, rewardModels, rewardComparisons, worldModels } from './data';
-import type { RewardModelType, WorldModelType } from './data';
+import { companies, relationships, componentCategories, vlaModels, rewardModels, rewardComparisons, worldModels, vizTools } from './data';
+import type { RewardModelType, WorldModelType, VizToolType } from './data';
 import RewardChart from './components/RewardChart';
 import './App.css';
 
@@ -39,6 +39,7 @@ const TABS: { id: string; label: string; group: TabGroup }[] = [
   { id: 'vlas', label: 'VLA', group: 'software' },
   { id: 'reward_models', label: 'Reward Models', group: 'software' },
   { id: 'world_models', label: 'World Models', group: 'software' },
+  { id: 'viz_tools', label: 'Viz Tools', group: 'software' },
 ];
 
 // Per-model spin speed multipliers (normalize perceived rotation speed)
@@ -435,6 +436,23 @@ function getVlaCompanyRelationshipLabel(type: 'proprietary' | 'partner') {
   return 'Partner Integration';
 }
 
+const VIZ_CAPABILITIES = [
+  'ROS 1', 'ROS 2', 'MCAP', 'Web', 'Desktop', 'Python', '3D', 'Time Series', 'Video', 'Fleet', 'Collab',
+] as const;
+
+const VIZ_CAPABILITY_MAP: Record<string, Set<string>> = {
+  foxglove:    new Set(['ROS 1', 'ROS 2', 'MCAP', 'Web', 'Desktop', 'Python', '3D', 'Time Series', 'Video', 'Fleet', 'Collab']),
+  rerun:       new Set(['ROS 2', 'MCAP', 'Web', 'Desktop', 'Python', '3D', 'Time Series', 'Video']),
+  formant:     new Set(['ROS 1', 'ROS 2', 'Web', 'Python', '3D', 'Time Series', 'Video', 'Fleet', 'Collab']),
+  rviz2:       new Set(['ROS 2', 'Desktop', '3D']),
+  meshcat:     new Set(['Web', 'Python', '3D']),
+  viser:       new Set(['Web', 'Python', '3D']),
+  vuer:        new Set(['Web', 'Python', '3D', 'Video']),
+  plotjuggler: new Set(['ROS 1', 'ROS 2', 'MCAP', 'Desktop', 'Time Series']),
+  datatamer:   new Set(['ROS 2', 'Time Series']),
+  roboto_ai:   new Set(['ROS 2', 'MCAP', 'Web', 'Python', 'Time Series', 'Video', 'Fleet']),
+};
+
 function getRewardModelTypeLabel(type: RewardModelType) {
   if (type === 'trained') return 'Trained Model';
   if (type === 'zero-shot') return 'Zero-Shot';
@@ -466,6 +484,24 @@ function getWorldModelOverview() {
     rlImaginModels: worldModels.filter((m) => m.modelType === 'rl-imagination').length,
     foundationModels: worldModels.filter((m) => m.modelType === 'foundation-platform').length,
     developerCount: new Set(worldModels.map((m) => m.developer)).size,
+  };
+}
+
+function getVizToolTypeLabel(type: VizToolType) {
+  if (type === 'platform') return 'Platform';
+  if (type === '3d-viewer') return '3D Viewer';
+  if (type === 'time-series') return 'Time Series';
+  return 'Data & Analytics';
+}
+
+function getVizToolOverview() {
+  return {
+    trackedTools: vizTools.length,
+    platformTools: vizTools.filter((t) => t.toolType === 'platform').length,
+    viewerTools: vizTools.filter((t) => t.toolType === '3d-viewer').length,
+    timeSeriesTools: vizTools.filter((t) => t.toolType === 'time-series').length,
+    analyticsTools: vizTools.filter((t) => t.toolType === 'data-analytics').length,
+    developerCount: new Set(vizTools.map((t) => t.developer)).size,
   };
 }
 
@@ -741,6 +777,7 @@ export default function App() {
   const [vlaFilter, setVlaFilter] = useState<'all' | 'open' | 'closed'>('all');
   const [rewardFilter, setRewardFilter] = useState<'all' | RewardModelType>('all');
   const [worldModelFilter, setWorldModelFilter] = useState<'all' | WorldModelType>('all');
+  const [vizToolFilter, setVizToolFilter] = useState<'all' | VizToolType>('all');
   const [countryFilter, setCountryFilter] = useState<CountryGroup>(null);
   const [cutCountries, setCutCountries] = useState<Set<string>>(new Set());
   const [cutCompanies, setCutCompanies] = useState<Set<string>>(new Set());
@@ -965,6 +1002,7 @@ export default function App() {
     if (activeTab === 'vlas') return null;
     if (activeTab === 'reward_models') return null;
     if (activeTab === 'world_models') return null;
+    if (activeTab === 'viz_tools') return null;
     if (activeTab === 'actuators_rotary') {
       return getComponentChain(actuatorType === 'linear' ? 'actuators_linear_only' : 'actuators_rotary_only');
     }
@@ -1022,6 +1060,19 @@ export default function App() {
     if (worldModelFilter === 'all') return worldModels;
     return worldModels.filter((m) => m.modelType === worldModelFilter);
   }, [worldModelFilter]);
+
+  // Viz tool state
+  const vizToolOverview = useMemo(() => getVizToolOverview(), []);
+
+  const focusedVizTool = useMemo(
+    () => vizTools.find((tool) => tool.id === chainFocus) || null,
+    [chainFocus]
+  );
+
+  const filteredVizTools = useMemo(() => {
+    if (vizToolFilter === 'all') return vizTools;
+    return vizTools.filter((t) => t.toolType === vizToolFilter);
+  }, [vizToolFilter]);
 
   // Compute which entities are connected to the focused entity in the chain
   const connectedIds = useMemo(() => {
@@ -2362,6 +2413,20 @@ export default function App() {
                         : `${worldModelOverview.trackedModels} tracked · ${worldModelOverview.videoGenModels} video gen · ${worldModelOverview.latentDynModels} latent · ${worldModelOverview.rlImaginModels} RL/imagination · ${worldModelOverview.foundationModels} platform`}
                     </span>
                   </div>
+                ) : activeTab === 'viz_tools' ? (
+                  <div className="vla-placeholder">
+                    <span className="vla-placeholder__eyebrow">
+                      {focusedVizTool ? focusedVizTool.developer : 'Robotics Visualization Tools'}
+                    </span>
+                    <span className="vla-placeholder__title">
+                      {focusedVizTool ? focusedVizTool.name : 'Viz Tools'}
+                    </span>
+                    <span className="vla-placeholder__meta">
+                      {focusedVizTool
+                        ? `${focusedVizTool.country} · ${focusedVizTool.release} · ${getVizToolTypeLabel(focusedVizTool.toolType)}`
+                        : `${vizToolOverview.trackedTools} tracked · ${vizToolOverview.platformTools} platforms · ${vizToolOverview.viewerTools} 3D viewers · ${vizToolOverview.timeSeriesTools} time series · ${vizToolOverview.analyticsTools} analytics`}
+                    </span>
+                  </div>
                 ) : selectedComponent.plyModel ? (
                   <PLYViewer modelUrl={selectedComponent.plyModel} color="#1a1a1a" initialRotation={MODEL_ROTATIONS[selectedComponent.plyModel]} spinSpeed={MODEL_SPIN[selectedComponent.plyModel]} scale={MODEL_SCALE[selectedComponent.plyModel]} />
                 ) : (
@@ -2380,7 +2445,9 @@ export default function App() {
                         ? focusedRewardModel.description
                         : activeTab === 'world_models' && focusedWorldModel
                           ? focusedWorldModel.description
-                          : selectedComponent.description;
+                          : activeTab === 'viz_tools' && focusedVizTool
+                            ? focusedVizTool.description
+                            : selectedComponent.description;
                   const metrics = isActuator
                     ? ACTUATOR_INFO[actuatorType].keyMetrics
                     : activeTab === 'reward_models'
@@ -2425,11 +2492,32 @@ export default function App() {
                               'Foundation Platforms': `${worldModelOverview.foundationModels} full platforms`,
                               Developers: `${worldModelOverview.developerCount} organizations`,
                             }
-                        : activeTab === 'vlas'
-                          ? focusedVlaModel
+                        : activeTab === 'viz_tools'
+                          ? focusedVizTool
                             ? {
-                                Developer: focusedVlaModel.developer,
-                                'Relationship Type': getVlaRelationshipTypeLabel(focusedVlaModel.relationshipType),
+                                Developer: focusedVizTool.developer,
+                                Type: getVizToolTypeLabel(focusedVizTool.toolType),
+                                Language: focusedVizTool.language,
+                                Frameworks: focusedVizTool.frameworks,
+                                Deployment: focusedVizTool.deployment,
+                                License: focusedVizTool.license,
+                                Release: focusedVizTool.release,
+                                Focus: focusedVizTool.focus,
+                                Sources: focusedVizTool.sources.map((s) => s.label).join(' · '),
+                              }
+                            : {
+                                'Tracked Tools': `${vizToolOverview.trackedTools} visualization tools`,
+                                Platforms: `${vizToolOverview.platformTools} full observability platforms`,
+                                '3D Viewers': `${vizToolOverview.viewerTools} lightweight 3D viewers`,
+                                'Time Series': `${vizToolOverview.timeSeriesTools} time series / logging tools`,
+                                'Data & Analytics': `${vizToolOverview.analyticsTools} AI-powered analytics`,
+                                Developers: `${vizToolOverview.developerCount} organizations`,
+                              }
+                          : activeTab === 'vlas'
+                            ? focusedVlaModel
+                              ? {
+                                  Developer: focusedVlaModel.developer,
+                                  'Relationship Type': getVlaRelationshipTypeLabel(focusedVlaModel.relationshipType),
                                 Release: focusedVlaModel.release,
                                 Availability: focusedVlaModel.availability,
                                 Focus: focusedVlaModel.focus,
@@ -2622,6 +2710,85 @@ export default function App() {
                         <span className="chain-country">{model.country}</span>
                         <span className="chain-share">
                           {model.developer} · {getWorldModelTypeLabel(model.modelType)}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'viz_tools' && (
+              <div className="supply-chain">
+                <div className="supply-chain__header">
+                  <h3 className="section-title">Capability Matrix</h3>
+                </div>
+                <div className="cap-matrix">
+                  <table className="cap-matrix__table">
+                    <thead>
+                      <tr>
+                        <th className="cap-matrix__tool-header">Tool</th>
+                        {VIZ_CAPABILITIES.map((cap) => (
+                          <th key={cap} className="cap-matrix__cap-header"><span>{cap}</span></th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {vizTools.map((tool) => {
+                        const caps = VIZ_CAPABILITY_MAP[tool.id] || new Set();
+                        const isFocused = focusedVizTool?.id === tool.id;
+                        const isDim = focusedVizTool && !isFocused;
+                        return (
+                          <tr
+                            key={tool.id}
+                            className={`cap-matrix__row ${isFocused ? 'cap-matrix__row--focused' : ''} ${isDim ? 'cap-matrix__row--dim' : ''}`}
+                            onClick={() => setChainFocus((prev) => prev === tool.id ? null : tool.id)}
+                          >
+                            <td className="cap-matrix__tool-name">{tool.name}</td>
+                            {VIZ_CAPABILITIES.map((cap) => (
+                              <td key={cap} className="cap-matrix__cell">
+                                <span className={`cap-matrix__dot ${caps.has(cap) ? 'cap-matrix__dot--on' : ''}`} />
+                              </td>
+                            ))}
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'viz_tools' && (
+              <div className="supply-chain">
+                <div className="supply-chain__header">
+                  <h3 className="section-title">Tool Directory</h3>
+                  <div className="vla-filters">
+                    <button className={`country-pill ${vizToolFilter === 'all' ? 'country-pill--active' : ''}`} onClick={() => setVizToolFilter('all')}>All</button>
+                    <button className={`country-pill ${vizToolFilter === 'platform' ? 'country-pill--active' : ''}`} onClick={() => setVizToolFilter(vizToolFilter === 'platform' ? 'all' : 'platform')}>Platform</button>
+                    <button className={`country-pill ${vizToolFilter === '3d-viewer' ? 'country-pill--active' : ''}`} onClick={() => setVizToolFilter(vizToolFilter === '3d-viewer' ? 'all' : '3d-viewer')}>3D Viewer</button>
+                    <button className={`country-pill ${vizToolFilter === 'time-series' ? 'country-pill--active' : ''}`} onClick={() => setVizToolFilter(vizToolFilter === 'time-series' ? 'all' : 'time-series')}>Time Series</button>
+                    <button className={`country-pill ${vizToolFilter === 'data-analytics' ? 'country-pill--active' : ''}`} onClick={() => setVizToolFilter(vizToolFilter === 'data-analytics' ? 'all' : 'data-analytics')}>Analytics</button>
+                    {focusedVizTool && (
+                      <button className="chain-clear" onClick={() => setChainFocus(null)}>
+                        CLEAR FILTER
+                      </button>
+                    )}
+                  </div>
+                </div>
+                <div className="chain-flow">
+                  <div className="chain-tier">
+                    <div className="chain-tier-label">Tools</div>
+                    {filteredVizTools.map((tool) => (
+                      <button
+                        key={tool.id}
+                        className={`chain-entity ${focusedVizTool && focusedVizTool.id !== tool.id ? 'chain-entity--dim' : ''} ${focusedVizTool?.id === tool.id ? 'chain-entity--focused' : ''} ${countryFilter && getCountryFilterGroup(tool.country) !== countryFilter ? 'geo-dim' : ''}`}
+                        onClick={() => setChainFocus((prev) => prev === tool.id ? null : tool.id)}
+                      >
+                        <span className="chain-name">{tool.name}</span>
+                        <span className="chain-country">{tool.country}</span>
+                        <span className="chain-share">
+                          {tool.developer} · {getVizToolTypeLabel(tool.toolType)}
                         </span>
                       </button>
                     ))}
