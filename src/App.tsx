@@ -1,4 +1,6 @@
 import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
+import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import PLYViewer, { preloadPLY } from './components/PLYViewer';
 import SupplyChainGraph from './components/SupplyChainGraph';
 import { companies, relationships, componentCategories, vlaModels, rewardModels, rewardComparisons, worldModels, vizTools, headDesigns } from './data';
@@ -44,6 +46,58 @@ const TABS: { id: string; label: string; group: TabGroup }[] = [
   // HRI
   { id: 'displays', label: 'Displays', group: 'hri' },
 ];
+
+// Path ↔ Tab ID mapping for SEO-friendly URLs
+const TAB_TO_PATH: Record<string, string> = {
+  skeleton: '/',
+  all_oems: '/oems',
+  geopolitics: '/geopolitics',
+  network: '/network',
+  timeline: '/buildout',
+  sensors_general: '/hardware/sensors',
+  compute: '/hardware/compute',
+  batteries: '/hardware/battery',
+  motors: '/hardware/motors',
+  reducers: '/hardware/reducers',
+  bearings: '/hardware/bearings',
+  actuators_rotary: '/hardware/actuators',
+  screws: '/hardware/screws',
+  end_effectors: '/hardware/hands',
+  pcbs: '/hardware/pcbs',
+  vlas: '/software/vla',
+  reward_models: '/software/reward-models',
+  world_models: '/software/world-models',
+  viz_tools: '/software/viz-tools',
+  displays: '/hri/displays',
+};
+
+const PATH_TO_TAB: Record<string, string> = Object.fromEntries(
+  Object.entries(TAB_TO_PATH).map(([tab, path]) => [path, tab])
+);
+
+// Per-tab SEO meta content
+const TAB_META: Record<string, { title: string; description: string }> = {
+  skeleton: { title: 'Humanoid Atlas | Humanoid Robot Supply Chain Map & OEM Database', description: 'The comprehensive humanoid robot industry database. Compare 29+ OEMs, 41+ suppliers, hardware supply chain, VLA models, reward models, world models, and more.' },
+  all_oems: { title: 'All Humanoid Robot OEMs | Humanoid Atlas', description: 'Compare 29+ humanoid robot manufacturers worldwide. Detailed specs, shipment data, and side-by-side comparison for Tesla Optimus, Figure, 1X NEO, Unitree, Agility Digit, and more.' },
+  geopolitics: { title: 'Humanoid Robot Geopolitics — US vs China Supply Chain | Humanoid Atlas', description: 'Geopolitical analysis of the humanoid robot supply chain. Compare US, China, and global supplier dependencies, self-sufficiency scores, and bottleneck exposure.' },
+  network: { title: 'Humanoid Robot Supply Chain Network Graph | Humanoid Atlas', description: 'Interactive network visualization of all humanoid robot OEM-supplier relationships. Explore the full supply chain graph.' },
+  timeline: { title: 'Humanoid Robot Industry Buildout Timeline | Humanoid Atlas', description: 'Timeline of humanoid robot development milestones, production ramp-ups, and industry buildout.' },
+  sensors_general: { title: 'Humanoid Robot Sensors — Cameras, LiDAR, IMUs | Humanoid Atlas', description: 'Sensor supply chain for humanoid robots. Intel RealSense, Livox LiDAR, Sony image sensors, and more.' },
+  compute: { title: 'Humanoid Robot Compute — NVIDIA Jetson, SoCs | Humanoid Atlas', description: 'Compute platforms powering humanoid robots. NVIDIA Jetson Orin/Thor, Intel, Qualcomm, and custom SoCs.' },
+  batteries: { title: 'Humanoid Robot Batteries — Cells & Pack Design | Humanoid Atlas', description: 'Battery supply chain for humanoid robots. Panasonic, CATL, Samsung SDI, Molicel cells and pack designs.' },
+  motors: { title: 'Humanoid Robot Motors — BLDC Suppliers | Humanoid Atlas', description: 'BLDC motor supply chain for humanoid robots. Maxon, Allied Motion, ThinGap, T-Motor, and more.' },
+  reducers: { title: 'Humanoid Robot Reducers — Harmonic & Cycloidal | Humanoid Atlas', description: 'Harmonic and cycloidal reducer supply chain. Harmonic Drive, LKGEAR, Leaderdrive — a key supply chain bottleneck.' },
+  bearings: { title: 'Humanoid Robot Bearings — Cross-Roller & Ball | Humanoid Atlas', description: 'Bearing supply chain for humanoid robot joints. Cross-roller and ball bearings from key suppliers.' },
+  actuators_rotary: { title: 'Humanoid Robot Actuators — Rotary & Linear | Humanoid Atlas', description: 'Actuator modules for humanoid robots. Rotary and linear actuators combining motors, reducers, encoders, and torque sensors.' },
+  screws: { title: 'Humanoid Robot Planetary Roller Screws | Humanoid Atlas', description: 'Planetary roller screw supply chain — a critical bottleneck component for humanoid robot linear actuators.' },
+  end_effectors: { title: 'Humanoid Robot Hands & End Effectors | Humanoid Atlas', description: 'Dexterous hands and grippers for humanoid robots. From 3-finger grippers to 22-DOF anthropomorphic hands.' },
+  pcbs: { title: 'Humanoid Robot PCBs — Motor Drivers & Power | Humanoid Atlas', description: 'PCB and electronics supply chain for humanoid robots. Motor drivers, power management, and analog ICs.' },
+  vlas: { title: 'VLA Models — Vision-Language-Action for Robotics | Humanoid Atlas', description: 'Compare 19 Vision-Language-Action models. GR00T N1, pi0, OpenVLA, Gemini Robotics, Helix 02, and more with OEM integration maps.' },
+  reward_models: { title: 'Robotic Reward Models — Comparison & Scores | Humanoid Atlas', description: 'Compare 10 robotic reward models with interactive score comparison. Robometer, RoboReward, SARM, GVL, Eureka, and more.' },
+  world_models: { title: 'World Models for Robotics — Video, Latent, RL | Humanoid Atlas', description: 'Compare 19 world models for robotics. DreamDojo, Dreamer V4, NVIDIA Cosmos, V-JEPA 2, Field AI, Rhoda AI, and more.' },
+  viz_tools: { title: 'Robotics Visualization Tools — Foxglove, Rerun & More | Humanoid Atlas', description: 'Compare 10 robotics visualization tools with capability matrix. Foxglove, Rerun, RViz2, PlotJuggler, and more.' },
+  displays: { title: 'Humanoid Robot Displays & Head Designs | Humanoid Atlas', description: 'Compare 17 humanoid robot head/face designs. OLED screens, status displays, LED indicators, cameras, sensors, and interaction design.' },
+};
 
 // Per-model spin speed multipliers (normalize perceived rotation speed)
 const MODEL_SPIN: Record<string, number> = {
@@ -776,12 +830,20 @@ function getSPOFData() {
   return { spofRows };
 }
 
-// Parse initial hash route
-function parseHash(): { tab?: string; company?: string } {
-  const hash = window.location.hash.slice(1); // remove #
-  if (hash.startsWith('/company/')) return { company: hash.slice(9) };
-  if (hash.startsWith('/tab/')) return { tab: hash.slice(5) };
-  return {};
+// Legacy hash redirect — send old hash URLs to new paths
+function useLegacyHashRedirect(navigate: ReturnType<typeof useNavigate>) {
+  useEffect(() => {
+    const hash = window.location.hash.slice(1);
+    if (!hash) return;
+    if (hash.startsWith('/tab/')) {
+      const tabId = hash.slice(5);
+      const path = TAB_TO_PATH[tabId];
+      if (path) navigate(path, { replace: true });
+    } else if (hash.startsWith('/company/')) {
+      const companyId = hash.slice(9);
+      navigate(`/?company=${companyId}`, { replace: true });
+    }
+  }, []);
 }
 
 const TYPE_DISPLAY: Record<string, string> = {
@@ -790,10 +852,20 @@ const TYPE_DISPLAY: Record<string, string> = {
 };
 
 export default function App() {
-  const initialHash = useMemo(() => parseHash(), []);
-  const [activeTab, setActiveTab] = useState(initialHash.tab || 'skeleton');
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
+
+  // Redirect legacy hash URLs to path-based routes
+  useLegacyHashRedirect(navigate);
+
+  // Derive activeTab from URL path
+  const activeTab = useMemo(() => {
+    return PATH_TO_TAB[location.pathname] || 'skeleton';
+  }, [location.pathname]);
+
   const activeTabGroup = TABS.find((t) => t.id === activeTab)?.group || 'overview';
-  const [companyId, setCompanyId] = useState<string | null>(initialHash.company || null);
+  const [companyId, setCompanyId] = useState<string | null>(searchParams.get('company') || null);
   const [actuatorType, setActuatorType] = useState<'linear' | 'rotary'>('linear');
   const [chainFocus, setChainFocus] = useState<string | null>(null);
   const [vlaFilter, setVlaFilter] = useState<'all' | 'open' | 'closed'>('all');
@@ -842,29 +914,21 @@ export default function App() {
     [likes],
   );
 
-  // Hash routing — update URL on state change
+  // Sync companyId to URL query param
   useEffect(() => {
     if (companyId) {
-      window.location.hash = `/company/${companyId}`;
-    } else {
-      window.location.hash = `/tab/${activeTab}`;
+      const currentPath = TAB_TO_PATH[activeTab] || '/';
+      navigate(`${currentPath}?company=${companyId}`, { replace: true });
     }
-  }, [activeTab, companyId]);
+  }, [companyId]);
 
-  // Listen for browser back/forward
+  // Pick up company from URL on mount / navigation
   useEffect(() => {
-    const onHashChange = () => {
-      const { tab, company } = parseHash();
-      if (company) {
-        setCompanyId(company);
-      } else if (tab) {
-        setCompanyId(null);
-        setActiveTab(tab);
-      }
-    };
-    window.addEventListener('hashchange', onHashChange);
-    return () => window.removeEventListener('hashchange', onHashChange);
-  }, []);
+    const urlCompany = searchParams.get('company');
+    if (urlCompany && urlCompany !== companyId) {
+      setCompanyId(urlCompany);
+    }
+  }, [searchParams]);
 
   // Close search dropdown on outside click
   useEffect(() => {
@@ -1617,8 +1681,18 @@ export default function App() {
   }
 
   // ==================== MAIN VIEW (tabs) ====================
+  const tabMeta = TAB_META[activeTab] || TAB_META.skeleton;
+
   return (
     <div className="app">
+      <Helmet>
+        <title>{tabMeta.title}</title>
+        <meta name="description" content={tabMeta.description} />
+        <link rel="canonical" href={`https://www.humanoids.fyi${TAB_TO_PATH[activeTab] || '/'}`} />
+        <meta property="og:title" content={tabMeta.title} />
+        <meta property="og:description" content={tabMeta.description} />
+        <meta property="og:url" content={`https://www.humanoids.fyi${TAB_TO_PATH[activeTab] || '/'}`} />
+      </Helmet>
       <header className="header">
         <span className="header-title">Humanoid Atlas</span>
         <span className="header-sub">Built For Humanoid Enthusiasts</span>
@@ -1672,7 +1746,7 @@ export default function App() {
                 } else if (searchResults.length > 0) {
                   handleSelectCompany(searchResults[0].id);
                 } else if (vlaSearchResults.length > 0) {
-                  setActiveTab('vlas'); setChainFocus(vlaSearchResults[0].id); setSearchOpen(false); setSearchQuery('');
+                  navigate(TAB_TO_PATH['vlas']); setChainFocus(vlaSearchResults[0].id); setSearchOpen(false); setSearchQuery('');
                 }
               }
             }}
@@ -1712,7 +1786,7 @@ export default function App() {
                     </div>
                   ))}
                   {vlaSearchResults.map((m) => (
-                    <div key={m.id} className="search-result" onClick={() => { setActiveTab('vlas'); setChainFocus(m.id); setSearchOpen(false); setSearchQuery(''); }}>
+                    <div key={m.id} className="search-result" onClick={() => { navigate(TAB_TO_PATH['vlas']); setChainFocus(m.id); setSearchOpen(false); setSearchQuery(''); }}>
                       <span className="search-result__name">{m.name}</span>
                       <span className="search-result__meta">
                         <span>{m.country}</span>
@@ -1767,7 +1841,7 @@ export default function App() {
               className={`tab-group-pill ${activeTabGroup === g.id ? 'tab-group-pill--active' : ''}`}
               onClick={() => {
                 const firstTab = TABS.find((t) => t.group === g.id);
-                if (firstTab) { setActiveTab(firstTab.id); setChainFocus(null); }
+                if (firstTab) { navigate(TAB_TO_PATH[firstTab.id] || '/'); setChainFocus(null); }
               }}
             >{g.label}</button>
           ))}
@@ -1780,7 +1854,7 @@ export default function App() {
             <button
               key={t.id}
               className={`component-btn ${activeTab === t.id ? 'component-btn--active' : ''}`}
-              onClick={() => { setActiveTab(t.id); setChainFocus(null); }}
+              onClick={() => { navigate(TAB_TO_PATH[t.id] || '/'); setChainFocus(null); }}
             >
               {t.label}
             </button>

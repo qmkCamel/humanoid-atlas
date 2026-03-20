@@ -216,7 +216,7 @@ export const relationships: SupplyRelationship[] = [
   { id: 'r341', from: 'nvidia', to: 'dobot', component: 'GPU', description: '16GB GPU (1500 TOPS total system), Physics AI partner' },
 
   // LimX Dynamics (Oli)
-  { id: 'r350', from: 'nvidia', to: 'limx', component: 'Jetson Orin NX', description: 'AI/perception compute (157 TOPS)' },
+  { id: 'r350', from: 'nvidia', to: 'limx', component: 'Jetson Orin', description: 'Primary AI/perception compute' },
   { id: 'r351', from: 'intel', to: 'limx', component: 'Depth Cameras', description: 'RealSense D435i (head, chest, wrist, hip)' },
 
   // PUDU Robotics (D9)
