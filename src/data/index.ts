@@ -9,4 +9,5 @@ export { vizTools } from './vizTools';
 export { headDesigns } from './headDesigns';
 export { companyFunding, topInvestors } from './funding';
 export { companyProduction, factoryDirectory, manufacturingPartners } from './factories';
-export type { Company, SupplyRelationship, ComponentCategory, RobotSpecs, EntityType, Country, VLAModel, RewardModel, RewardModelType, WorldModel, WorldModelType, VizTool, VizToolType, HeadDesign, FaceDisplayType, FundingStatus, CompanyFunding, InvestorProfile, FactoryStatus, Factory, CompanyProduction, ManufacturingPartner } from './types';
+export { simPlatforms } from './simPlatforms';
+export type { Company, SupplyRelationship, ComponentCategory, RobotSpecs, EntityType, Country, VLAModel, RewardModel, RewardModelType, WorldModel, WorldModelType, VizTool, VizToolType, HeadDesign, FaceDisplayType, FundingStatus, CompanyFunding, InvestorProfile, FactoryStatus, Factory, CompanyProduction, ManufacturingPartner, SimPlatformType, SimPlatform } from './types';

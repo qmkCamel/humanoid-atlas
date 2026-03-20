@@ -159,6 +159,18 @@ export const componentCategories: ComponentCategory[] = [
     },
   },
   {
+    id: 'sim_platforms',
+    name: 'Simulation Platforms',
+    description: 'Simulation platforms provide the virtual environments where humanoid robots learn to walk, manipulate objects, and interact with the world before deploying in reality. GPU-accelerated physics engines run thousands of parallel simulations, training RL policies in minutes that would take months of real-world experience. The two dominant stacks — NVIDIA Isaac Sim/Lab and Google DeepMind MuJoCo — are converging via the open-source Newton physics engine.',
+    bottleneck: false,
+    keyMetrics: {
+      'Core Function': 'Physics simulation for robot training and validation',
+      'Key Platforms': 'NVIDIA Isaac Sim, MuJoCo, Genesis, Newton',
+      'Training Speed': '26 seconds for locomotion policy (Genesis on RTX 4090)',
+      'Industry Trend': 'Isaac + MuJoCo convergence via Newton engine',
+    },
+  },
+  {
     id: 'world_models',
     name: 'World Models',
     description: 'World models learn to simulate how the physical world evolves in response to robot actions. By predicting future states — as video frames, latent representations, or learned dynamics — they let robots practice tasks "in imagination" before acting in reality. This dramatically reduces the need for expensive real-world data collection and enables safer, faster policy training.',

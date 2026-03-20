@@ -3,8 +3,8 @@ import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import PLYViewer, { preloadPLY } from './components/PLYViewer';
 import SupplyChainGraph from './components/SupplyChainGraph';
-import { companies, relationships, componentCategories, vlaModels, rewardModels, rewardComparisons, worldModels, vizTools, headDesigns, companyFunding, topInvestors, companyProduction, factoryDirectory, manufacturingPartners } from './data';
-import type { RewardModelType, WorldModelType, VizToolType, FaceDisplayType, FundingStatus, FactoryStatus } from './data';
+import { companies, relationships, componentCategories, vlaModels, rewardModels, rewardComparisons, worldModels, vizTools, headDesigns, companyFunding, topInvestors, companyProduction, factoryDirectory, manufacturingPartners, simPlatforms } from './data';
+import type { RewardModelType, WorldModelType, VizToolType, FaceDisplayType, FundingStatus, FactoryStatus, SimPlatformType } from './data';
 import RewardChart from './components/RewardChart';
 import './App.css';
 
@@ -46,6 +46,7 @@ const TABS: { id: string; label: string; group: TabGroup }[] = [
   { id: 'vlas', label: 'VLA', group: 'software' },
   { id: 'reward_models', label: 'Reward Models', group: 'software' },
   { id: 'world_models', label: 'World Models', group: 'software' },
+  { id: 'sim_platforms', label: 'Sim Platforms', group: 'software' },
   { id: 'viz_tools', label: 'Viz Tools', group: 'software' },
   // HRI
   { id: 'displays', label: 'Displays', group: 'hri' },
@@ -73,6 +74,7 @@ const TAB_TO_PATH: Record<string, string> = {
   vlas: '/software/vla',
   reward_models: '/software/reward-models',
   world_models: '/software/world-models',
+  sim_platforms: '/software/sim-platforms',
   viz_tools: '/software/viz-tools',
   displays: '/hri/displays',
 };
@@ -108,6 +110,7 @@ const TAB_META: Record<string, { title: string; description: string }> = {
   vlas: { title: 'VLA Models — Vision-Language-Action for Robotics | Humanoid Atlas', description: 'Compare 19 Vision-Language-Action models. GR00T N1, pi0, OpenVLA, Gemini Robotics, Helix 02, and more with OEM integration maps.' },
   reward_models: { title: 'Robotic Reward Models — Comparison & Scores | Humanoid Atlas', description: 'Compare 10 robotic reward models with interactive score comparison. Robometer, RoboReward, SARM, GVL, Eureka, and more.' },
   world_models: { title: 'World Models for Robotics — Video, Latent, RL | Humanoid Atlas', description: 'Compare 19 world models for robotics. DreamDojo, Dreamer V4, NVIDIA Cosmos, V-JEPA 2, Field AI, Rhoda AI, and more.' },
+  sim_platforms: { title: 'Robotics Simulation Platforms — Isaac Sim, MuJoCo, Genesis | Humanoid Atlas', description: 'Compare 14 robotics simulation platforms with capability matrix. NVIDIA Isaac Sim, MuJoCo, Genesis, Drake, Gazebo, and more with OEM adoption maps.' },
   viz_tools: { title: 'Robotics Visualization Tools — Foxglove, Rerun & More | Humanoid Atlas', description: 'Compare 10 robotics visualization tools with capability matrix. Foxglove, Rerun, RViz2, PlotJuggler, and more.' },
   displays: { title: 'Humanoid Robot Displays & Head Designs | Humanoid Atlas', description: 'Compare 17 humanoid robot head/face designs. OLED screens, status displays, LED indicators, cameras, sensors, and interaction design.' },
 };
@@ -594,6 +597,41 @@ function getVizToolOverview() {
   };
 }
 
+const SIM_CAPABILITIES = [
+  'GPU Accel', 'Open Source', 'Humanoid', 'Sim-to-Real', 'Differentiable', 'Multi-Physics', 'ROS 2',
+] as const;
+
+function getSimCapabilities(p: { gpuAccelerated: boolean; openSource: boolean; humanoidModels: boolean; simToReal: boolean; differentiable: boolean; multiPhysics: boolean; ros2: boolean }): Set<string> {
+  const s = new Set<string>();
+  if (p.gpuAccelerated) s.add('GPU Accel');
+  if (p.openSource) s.add('Open Source');
+  if (p.humanoidModels) s.add('Humanoid');
+  if (p.simToReal) s.add('Sim-to-Real');
+  if (p.differentiable) s.add('Differentiable');
+  if (p.multiPhysics) s.add('Multi-Physics');
+  if (p.ros2) s.add('ROS 2');
+  return s;
+}
+
+function getSimPlatformTypeLabel(type: SimPlatformType) {
+  if (type === 'physics-engine') return 'Physics Engine';
+  if (type === 'rl-framework') return 'RL Framework';
+  if (type === 'environment') return 'Environment';
+  return 'World Model';
+}
+
+function getSimPlatformOverview() {
+  return {
+    trackedPlatforms: simPlatforms.length,
+    physicsEngines: simPlatforms.filter((p) => p.platformType === 'physics-engine').length,
+    rlFrameworks: simPlatforms.filter((p) => p.platformType === 'rl-framework').length,
+    environments: simPlatforms.filter((p) => p.platformType === 'environment').length,
+    worldModels: simPlatforms.filter((p) => p.platformType === 'world-model').length,
+    developerCount: new Set(simPlatforms.map((p) => p.developer)).size,
+    withOemLinks: simPlatforms.filter((p) => p.companyLinks.length > 0).length,
+  };
+}
+
 function getVLAOverview() {
   const linkedOemIds = new Set(
     vlaModels.flatMap((model) => model.companyLinks.map((link) => link.companyId))
@@ -888,6 +926,7 @@ export default function App() {
   const [headDesignFilter, setHeadDesignFilter] = useState<'all' | FaceDisplayType>('all');
   const [fundingStatusFilter, setFundingStatusFilter] = useState<'all' | FundingStatus>('all');
   const [factoryStatusFilter, setFactoryStatusFilter] = useState<'all' | FactoryStatus>('all');
+  const [simPlatformFilter, setSimPlatformFilter] = useState<'all' | SimPlatformType>('all');
   const [countryFilter, setCountryFilter] = useState<CountryGroup>(null);
   const [cutCountries, setCutCountries] = useState<Set<string>>(new Set());
   const [cutCompanies, setCutCompanies] = useState<Set<string>>(new Set());
@@ -1164,6 +1203,14 @@ export default function App() {
     return worldModels.filter((m) => m.modelType === worldModelFilter);
   }, [worldModelFilter]);
 
+  // Sim platform state
+  const simPlatformOverview = useMemo(() => getSimPlatformOverview(), []);
+
+  const focusedSimPlatform = useMemo(
+    () => simPlatforms.find((p) => p.id === chainFocus) || null,
+    [chainFocus]
+  );
+
   // Viz tool state
   const vizToolOverview = useMemo(() => getVizToolOverview(), []);
 
@@ -1205,6 +1252,12 @@ export default function App() {
       return (b.totalRaisedM ?? 0) - (a.totalRaisedM ?? 0);
     });
   }, [filteredFunding]);
+
+  const filteredSimPlatforms = useMemo(() => {
+    const base = simPlatforms.filter((p) => p.platformType !== 'world-model');
+    if (simPlatformFilter === 'all') return base;
+    return base.filter((p) => p.platformType === simPlatformFilter);
+  }, [simPlatformFilter]);
 
   const filteredFactories = useMemo(() => {
     if (factoryStatusFilter === 'all') return factoryDirectory;
@@ -2836,6 +2889,20 @@ export default function App() {
                         : `${worldModelOverview.trackedModels} tracked · ${worldModelOverview.videoGenModels} video gen · ${worldModelOverview.latentDynModels} latent · ${worldModelOverview.rlImaginModels} RL/imagination · ${worldModelOverview.foundationModels} platform`}
                     </span>
                   </div>
+                ) : activeTab === 'sim_platforms' ? (
+                  <div className="vla-placeholder">
+                    <span className="vla-placeholder__eyebrow">
+                      {focusedSimPlatform ? focusedSimPlatform.developer : 'Robotics Simulation Platforms'}
+                    </span>
+                    <span className="vla-placeholder__title">
+                      {focusedSimPlatform ? focusedSimPlatform.name : 'Sim Platforms'}
+                    </span>
+                    <span className="vla-placeholder__meta">
+                      {focusedSimPlatform
+                        ? `${focusedSimPlatform.country} · ${getSimPlatformTypeLabel(focusedSimPlatform.platformType)} · ${focusedSimPlatform.license}`
+                        : `${simPlatformOverview.trackedPlatforms - simPlatformOverview.worldModels} tracked · ${simPlatformOverview.physicsEngines} physics engines · ${simPlatformOverview.rlFrameworks} RL frameworks · ${simPlatformOverview.environments} environments`}
+                    </span>
+                  </div>
                 ) : activeTab === 'viz_tools' ? (
                   <div className="vla-placeholder">
                     <span className="vla-placeholder__eyebrow">
@@ -2882,9 +2949,11 @@ export default function App() {
                         ? focusedRewardModel.description
                         : activeTab === 'world_models' && focusedWorldModel
                           ? focusedWorldModel.description
-                          : activeTab === 'viz_tools' && focusedVizTool
-                            ? focusedVizTool.description
-                            : activeTab === 'displays' && focusedHeadDesign
+                          : activeTab === 'sim_platforms' && focusedSimPlatform
+                            ? focusedSimPlatform.description
+                            : activeTab === 'viz_tools' && focusedVizTool
+                              ? focusedVizTool.description
+                              : activeTab === 'displays' && focusedHeadDesign
                               ? focusedHeadDesign.description
                               : selectedComponent.description;
                   const metrics = isActuator
@@ -2952,6 +3021,26 @@ export default function App() {
                                 'Data & Analytics': `${vizToolOverview.analyticsTools} AI-powered analytics`,
                                 Developers: `${vizToolOverview.developerCount} organizations`,
                               }
+                          : activeTab === 'sim_platforms'
+                            ? focusedSimPlatform
+                              ? {
+                                  Developer: focusedSimPlatform.developer,
+                                  Type: getSimPlatformTypeLabel(focusedSimPlatform.platformType),
+                                  'Physics Engine': focusedSimPlatform.physicsEngine,
+                                  License: focusedSimPlatform.license,
+                                  Language: focusedSimPlatform.language,
+                                  ...(focusedSimPlatform.latestVersion ? { Version: focusedSimPlatform.latestVersion } : {}),
+                                  'OEM Links': focusedSimPlatform.companyLinks.length > 0 ? `${focusedSimPlatform.companyLinks.length} companies` : 'None',
+                                  Sources: focusedSimPlatform.sources.map((s) => s.label).join(' · '),
+                                }
+                              : {
+                                  'Tracked Platforms': `${simPlatformOverview.trackedPlatforms - simPlatformOverview.worldModels} simulation platforms`,
+                                  'Physics Engines': `${simPlatformOverview.physicsEngines} physics engines`,
+                                  'RL Frameworks': `${simPlatformOverview.rlFrameworks} RL training frameworks`,
+                                  Environments: `${simPlatformOverview.environments} task environments`,
+                                  'With OEM Links': `${simPlatformOverview.withOemLinks} platforms adopted by OEMs`,
+                                  Developers: `${simPlatformOverview.developerCount} organizations`,
+                                }
                           : activeTab === 'displays'
                             ? focusedHeadDesign
                               ? {
@@ -3175,6 +3264,103 @@ export default function App() {
                       </button>
                     ))}
                   </div>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'sim_platforms' && (
+              <div className="supply-chain">
+                <div className="supply-chain__header">
+                  <h3 className="section-title">Capability Matrix</h3>
+                </div>
+                <div className="cap-matrix">
+                  <table className="cap-matrix__table">
+                    <thead>
+                      <tr>
+                        <th className="cap-matrix__tool-header">Platform</th>
+                        {SIM_CAPABILITIES.map((cap) => (
+                          <th key={cap} className="cap-matrix__cap-header"><span>{cap}</span></th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredSimPlatforms.map((platform) => {
+                        const caps = getSimCapabilities(platform);
+                        const isFocused = focusedSimPlatform?.id === platform.id;
+                        const isDim = focusedSimPlatform && !isFocused;
+                        return (
+                          <tr
+                            key={platform.id}
+                            className={`cap-matrix__row ${isFocused ? 'cap-matrix__row--focused' : ''} ${isDim ? 'cap-matrix__row--dim' : ''}`}
+                            onClick={() => setChainFocus((prev) => prev === platform.id ? null : platform.id)}
+                          >
+                            <td className="cap-matrix__tool-name">{platform.name}</td>
+                            {SIM_CAPABILITIES.map((cap) => (
+                              <td key={cap} className="cap-matrix__cell">
+                                <span className={`cap-matrix__dot ${caps.has(cap) ? 'cap-matrix__dot--on' : ''}`} />
+                              </td>
+                            ))}
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'sim_platforms' && (
+              <div className="supply-chain">
+                <div className="supply-chain__header">
+                  <h3 className="section-title">Platform Directory</h3>
+                  <div className="vla-filters">
+                    <button className={`country-pill ${simPlatformFilter === 'all' ? 'country-pill--active' : ''}`} onClick={() => setSimPlatformFilter('all')}>All</button>
+                    <button className={`country-pill ${simPlatformFilter === 'physics-engine' ? 'country-pill--active' : ''}`} onClick={() => setSimPlatformFilter(simPlatformFilter === 'physics-engine' ? 'all' : 'physics-engine')}>Physics Engine</button>
+                    <button className={`country-pill ${simPlatformFilter === 'rl-framework' ? 'country-pill--active' : ''}`} onClick={() => setSimPlatformFilter(simPlatformFilter === 'rl-framework' ? 'all' : 'rl-framework')}>RL Framework</button>
+                    <button className={`country-pill ${simPlatformFilter === 'environment' ? 'country-pill--active' : ''}`} onClick={() => setSimPlatformFilter(simPlatformFilter === 'environment' ? 'all' : 'environment')}>Environment</button>
+                    {focusedSimPlatform && (
+                      <button className="chain-clear" onClick={() => setChainFocus(null)}>
+                        CLEAR FILTER
+                      </button>
+                    )}
+                  </div>
+                </div>
+                <div className="chain-flow">
+                  <div className="chain-tier">
+                    <div className="chain-tier-label">Platforms</div>
+                    {filteredSimPlatforms.map((platform) => (
+                      <button
+                        key={platform.id}
+                        className={`chain-entity ${focusedSimPlatform && focusedSimPlatform.id !== platform.id ? 'chain-entity--dim' : ''} ${focusedSimPlatform?.id === platform.id ? 'chain-entity--focused' : ''} ${countryFilter && getCountryFilterGroup(platform.country) !== countryFilter ? 'geo-dim' : ''}`}
+                        onClick={() => setChainFocus((prev) => prev === platform.id ? null : platform.id)}
+                      >
+                        <span className="chain-name">{platform.name}</span>
+                        <span className="chain-country">{platform.country}</span>
+                        <span className="chain-share">
+                          {platform.developer} · {getSimPlatformTypeLabel(platform.platformType)}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                  {focusedSimPlatform && focusedSimPlatform.companyLinks.length > 0 && (
+                    <div className="chain-tier">
+                      <div className="chain-tier-label">Linked OEMs</div>
+                      {focusedSimPlatform.companyLinks.map((link) => {
+                        const comp = companies.find((c) => c.id === link.companyId);
+                        return (
+                          <button
+                            key={link.companyId}
+                            className="chain-entity"
+                            onClick={() => handleSelectCompany(link.companyId)}
+                          >
+                            <span className="chain-name">{comp?.name || link.companyId}</span>
+                            <span className="chain-country">{comp?.country || ''}</span>
+                            {link.notes && <span className="chain-share">{link.notes}</span>}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               </div>
             )}

@@ -270,6 +270,43 @@ export interface ManufacturingPartner {
   sources: FactorySourceRef[];
 }
 
+// ── Sim Platforms ─────────────────────────────────────────────
+
+export type SimPlatformType = 'physics-engine' | 'rl-framework' | 'environment' | 'world-model';
+
+export interface SimPlatformSourceRef {
+  label: string;
+  url: string;
+}
+
+export interface SimCompanyLink {
+  companyId: string;
+  notes?: string;
+}
+
+export interface SimPlatform {
+  id: string;
+  name: string;
+  developer: string;
+  country: Country;
+  platformType: SimPlatformType;
+  description: string;
+  physicsEngine: string;
+  license: string;           // e.g. "Apache 2.0", "BSD 3-Clause", "Proprietary"
+  language: string;          // e.g. "Python, C++"
+  latestVersion?: string;
+  // Capability flags
+  gpuAccelerated: boolean;
+  openSource: boolean;
+  humanoidModels: boolean;
+  simToReal: boolean;
+  differentiable: boolean;
+  multiPhysics: boolean;
+  ros2: boolean;
+  sources: SimPlatformSourceRef[];
+  companyLinks: SimCompanyLink[];
+}
+
 export interface VLAModel {
   id: string;
   name: string;
