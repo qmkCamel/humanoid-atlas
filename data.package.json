@@ -1,0 +1,31 @@
+{
+  "name": "@kingjulio8238/data",
+  "version": "0.0.0",
+  "description": "Humanoid robotics supply chain data — OEMs, suppliers, relationships, funding, and more",
+  "type": "module",
+  "main": "./index.cjs",
+  "module": "./index.js",
+  "types": "./index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./index.js",
+      "require": "./index.cjs"
+    }
+  },
+  "files": [
+    "*.js",
+    "*.cjs",
+    "*.d.ts",
+    "*.d.cts",
+    "*.map"
+  ],
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kingjulio8238/humanoid-atlas.git"
+  },
+  "license": "MIT"
+}

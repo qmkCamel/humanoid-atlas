@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "build:data": "tsup src/data/index.ts --format esm,cjs --dts --out-dir dist/data --clean --tsconfig tsconfig.data.json",
     "lint": "eslint .",
     "preview": "vite preview"
   },
@@ -33,6 +34,7 @@
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.4.0",
+    "tsup": "^8.5.1",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.56.1",
     "vite": "^8.0.0"

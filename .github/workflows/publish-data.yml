@@ -1,0 +1,55 @@
+name: Publish Data Package
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/data/**'
+      - 'data.package.json'
+      - 'tsconfig.data.json'
+
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          registry-url: https://npm.pkg.github.com
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Build data package
+        run: pnpm build:data
+
+      - name: Prepare package for publishing
+        run: |
+          cp data.package.json dist/data/package.json
+          # Auto-increment patch version based on date + run number
+          PATCH_VERSION="0.1.${GITHUB_RUN_NUMBER}"
+          cd dist/data
+          node -e "
+            const pkg = require('./package.json');
+            pkg.version = '${PATCH_VERSION}';
+            require('fs').writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');
+          "
+          echo "Publishing @kingjulio8238/data@${PATCH_VERSION}"
+
+      - name: Publish to GitHub Packages
+        run: npm publish --access public
+        working-directory: dist/data
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

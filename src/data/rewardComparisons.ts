@@ -4,22 +4,7 @@
  * scores[i] maps to normalized_time = i / (numFrames - 1).
  */
 
-export interface RewardModelScores {
-  id: string;        // matches rewardModels.ts id where applicable
-  name: string;
-  color: string;
-  dashPattern: number[];  // [] = solid, [8,3] = dashed, etc.
-  scores: number[];       // progress 0-1, one per frame
-  voc: number;
-}
-
-export interface RewardComparison {
-  id: string;
-  instruction: string;
-  videoUrl: string;
-  numFrames: number;
-  models: RewardModelScores[];
-}
+import type { RewardComparison } from './types';
 
 export const rewardComparisons: RewardComparison[] = [
   {

@@ -366,3 +366,22 @@ export interface VLAModel {
   sources: VLASourceRef[];
   companyLinks: VLACompanyLink[];
 }
+
+// ── Reward Comparisons ──────────────────────────────────────
+
+export interface RewardModelScores {
+  id: string;        // matches rewardModels.ts id where applicable
+  name: string;
+  color: string;
+  dashPattern: number[];  // [] = solid, [8,3] = dashed, etc.
+  scores: number[];       // progress 0-1, one per frame
+  voc: number;
+}
+
+export interface RewardComparison {
+  id: string;
+  instruction: string;
+  videoUrl: string;
+  numFrames: number;
+  models: RewardModelScores[];
+}
