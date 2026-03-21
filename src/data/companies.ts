@@ -1600,6 +1600,7 @@ export const companies: Company[] = [
     type: 'component_maker',
     country: 'US',
     description: 'Prosthetic and robotic hand manufacturer. Supplies dexterous hands to Apptronik Apollo.',
+    plyModel: '/models/end-effector.ply',
   },
   {
     id: 'sharpa',
@@ -1607,6 +1608,23 @@ export const companies: Company[] = [
     type: 'component_maker',
     country: 'CN',
     description: 'Founded by Hesai co-founders. Replicating the Hesai playbook (cost reduction at scale) for dexterous robotic hands.',
+    plyModel: '/models/end-effector.ply',
+  },
+  {
+    id: 'shadow_robot',
+    name: 'Shadow Robot',
+    type: 'component_maker',
+    country: 'GB',
+    description: 'Britain\'s longest-running robot company (since 1987) and the world\'s leading specialist in dexterous robotic hands. The Shadow Dexterous Hand (24 movements, 20 DOF, 129 sensors, tendon-driven, ~€110K) is the de facto research standard — used by OpenAI for Rubik\'s Cube manipulation, Google DeepMind (5-year collaboration producing the DEX-EE hand), NASA, ESA, MIT, CMU, and Oxford. All hands are built to order in London. The newer DEX-EE line is hardened for RL research (high availability, impact resistance). ARIA-funded (£11M) for next-gen dexterity research.',
+    plyModel: '/models/end-effector.ply',
+  },
+  {
+    id: 'orca_dexterity',
+    name: 'ORCA Dexterity',
+    type: 'component_maker',
+    country: 'CH',
+    description: 'ETH Zurich spinoff democratizing dexterous robot hands through open-source design. The ORCA Hand (17 DOF, tendon-driven, ~1.3 kg, $3.5K kit / $5.9K assembled) is 50-70x cheaper than Shadow\'s equivalent while offering comparable research-grade dexterity. Three models: Lite (9 DOF, $1.5K), Standard (17 DOF), and Touch (17 DOF + 351 tactile taxels/hand, $6.1K). Fully open-source (MIT license), 3D-printable, field-repairable with "poppable" pin joints. Distributed via ROBOTIS. Simulation support via NVIDIA Isaac Gym.',
+    plyModel: '/models/end-effector.ply',
   },
   {
     id: 'cubemars',
@@ -1624,6 +1642,15 @@ export const companies: Company[] = [
     description: 'Chinese servo motor and industrial robot manufacturer. Growing presence in humanoid supply chain. Acquired Germany\'s Cloos Welding for industrial robot technology.',
     ticker: '002747.SZ',
     plyModel: '/models/bldc-motor.ply',
+  },
+  {
+    id: 'robotis',
+    name: 'ROBOTIS',
+    type: 'component_maker',
+    country: 'KR',
+    ticker: '108490.KQ',
+    description: 'South Korean robotics company (founded 1999, KOSDAQ-listed) and exclusive manufacturer of the DYNAMIXEL smart servo actuator line — the de facto standard servo motor in research robotics and open-source humanoid platforms worldwide. Product range spans educational servos (AX/XL) to industrial-grade actuators for full-scale humanoids (Y/P series), plus the DYD cycloidal speed reducer line. Dynamixel servos power Pollen Robotics\' Reachy 2 grippers, ETH Zurich\'s ORCA Hand, the Poppy Humanoid, and ROBOTIS\' own THORMANG3 full-size humanoid. Also distributes the ORCA v1 Hand in the US. Market cap ~₩3.8T (~$2.8B) at a ~746x P/E driven by robotics/AI hype.',
+    plyModel: '/models/end-effector.ply',
   },
   {
     id: 'horizon_robotics',

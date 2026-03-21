@@ -222,8 +222,10 @@ export const componentCategories: ComponentCategory[] = [
     plyModel: '/models/end-effector.ply',
     bottleneck: false,
     keyMetrics: {
-      'DOF Range': '3-finger gripper to 22-DOF hand',
+      'DOF Range': '3-finger gripper to 24-DOF hand',
       'Drive Types': 'Tendon, Motor+Gear, Dual Gripper',
+      'Research Standard': 'Shadow Robot (24 DOF, ~€110K, used by OpenAI/DeepMind)',
+      'Open-Source': 'ORCA Dexterity (17 DOF, $3.5K-$6.1K, ETH Zurich spinoff)',
       'Emerging': 'Sharpa Robotics (from Hesai founders)',
     },
   },
