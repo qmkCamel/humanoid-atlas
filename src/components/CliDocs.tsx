@@ -125,8 +125,9 @@ function CopyButton({ text }: { text: string }) {
 }
 
 function CodeBlock({ code }: { code: string }) {
+  const multiline = code.includes('\n');
   return (
-    <div className="api-code-block">
+    <div className={`api-code-block${multiline ? ' api-code-block--multiline' : ''}`}>
       <CopyButton text={code} />
       <pre><code>{code}</code></pre>
     </div>
@@ -382,9 +383,9 @@ const WORKFLOWS: Workflow[] = [
 
 /* ── Sub-tab content ── */
 const SUB_TABS: Record<string, { title: string; description: string }> = {
-  cli_install: { title: 'Install', description: 'Get started with the Humanoid Atlas CLI.' },
-  cli_commands: { title: 'Commands', description: 'Full command reference with flags and examples.' },
-  cli_examples: { title: 'Examples', description: 'Real-world workflows and usage patterns.' },
+  cli_install: { title: 'Install', description: 'Get started with the Humanoid Atlas CLI' },
+  cli_commands: { title: 'Commands', description: 'Full command reference with flags and examples' },
+  cli_examples: { title: 'Examples', description: 'Real-world workflows and usage patterns' },
 };
 
 /* ── Main component ── */

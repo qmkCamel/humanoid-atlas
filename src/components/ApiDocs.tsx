@@ -209,7 +209,7 @@ function EndpointCard({ ep }: { ep: Endpoint }) {
 
       <div className="api-params-section">
         <h4 className="api-section-label">Example Request</h4>
-        <div className="api-code-block">
+        <div className={`api-code-block${ep.exampleRequest.includes('\n') ? ' api-code-block--multiline' : ''}`}>
           <CopyButton text={ep.exampleRequest} />
           <pre><code>{ep.exampleRequest}</code></pre>
         </div>
@@ -239,7 +239,7 @@ function EndpointCard({ ep }: { ep: Endpoint }) {
 const SUB_TAB_DATA: Record<string, SubTabContent> = {
   api_getting_started: {
     title: 'Getting Started',
-    description: 'Base URL, response format, and system endpoints.',
+    description: 'Base URL, response format, and system endpoints',
     preamble: (
       <>
       <div className="api-base-url-card">
@@ -304,7 +304,7 @@ const SUB_TAB_DATA: Record<string, SubTabContent> = {
 
   api_companies: {
     title: 'Companies',
-    description: 'List, search, and retrieve detailed company profiles for OEMs and suppliers.',
+    description: 'List, search, and retrieve detailed company profiles for OEMs and suppliers',
     endpoints: [
       {
         method: 'GET',
@@ -359,7 +359,7 @@ const SUB_TAB_DATA: Record<string, SubTabContent> = {
 
   api_supply_chain: {
     title: 'Supply Chain',
-    description: 'Query supply chain relationships, traverse the dependency graph, analyze bottlenecks, and run what-if scenarios.',
+    description: 'Query supply chain relationships, traverse the dependency graph, analyze bottlenecks, and run what-if scenarios',
     endpoints: [
       {
         method: 'GET',
@@ -448,7 +448,7 @@ const SUB_TAB_DATA: Record<string, SubTabContent> = {
 
   api_resources: {
     title: 'Resources',
-    description: 'Reference data – components, funding, investors, production, factories, and manufacturing partners.',
+    description: 'Reference data – components, funding, investors, production, factories, and manufacturing partners',
     endpoints: [
       {
         method: 'GET',
@@ -528,7 +528,7 @@ const SUB_TAB_DATA: Record<string, SubTabContent> = {
 
   api_ai_sim: {
     title: 'AI & Sim',
-    description: 'Vision-Language-Action models, reward models, world models, simulation platforms, and visualization tools.',
+    description: 'Vision-Language-Action models, reward models, world models, simulation platforms, and visualization tools',
     endpoints: [
       {
         method: 'GET',
@@ -598,7 +598,7 @@ const SUB_TAB_DATA: Record<string, SubTabContent> = {
 
   api_safety: {
     title: 'Safety',
-    description: 'Safety standards, OEM compliance profiles, and head/face design catalog.',
+    description: 'Safety standards, OEM compliance profiles, and head/face design catalog',
     endpoints: [
       {
         method: 'GET',
@@ -641,7 +641,7 @@ const SUB_TAB_DATA: Record<string, SubTabContent> = {
 
   api_query: {
     title: 'Query',
-    description: 'LLM-powered search and side-by-side OEM comparison.',
+    description: 'LLM-powered search and side-by-side OEM comparison',
     endpoints: [
       {
         method: 'POST',

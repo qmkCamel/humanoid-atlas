@@ -4113,6 +4113,11 @@ body {
   border-color: var(--border);
 }
 
+.api-code-block--multiline .api-copy-btn {
+  top: 8px;
+  transform: none;
+}
+
 .api-code-block .api-copy-btn:hover {
   color: var(--text);
   border-color: var(--text);
