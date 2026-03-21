@@ -53,3 +53,11 @@ jobs:
         working-directory: dist/data
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Trigger API repo update
+        if: success()
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.DISPATCH_TOKEN }}
+          repository: kingjulio8238/humanoid-atlas-api
+          event-type: data-published
