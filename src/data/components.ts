@@ -4,7 +4,7 @@ export const componentCategories: ComponentCategory[] = [
   {
     id: 'skeleton',
     name: 'Skeleton / Frame',
-    description: 'Structural frame providing rigidity and mounting points. Materials range from aluminum alloys to carbon fiber composites.',
+    description: 'Structural frame providing rigidity and mounting points. Materials range from aluminum alloys to carbon fiber composites and titanium.',
     plyModel: '/models/skeleton.ply',
     bottleneck: false,
     keyMetrics: {
