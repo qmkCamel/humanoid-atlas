@@ -6,6 +6,7 @@ export const worldModels: WorldModel[] = [
     id: 'dreamdojo',
     name: 'DreamDojo',
     developer: 'NVIDIA / HKUST / UC Berkeley',
+    developerCompanyIds: ['nvidia'],
     country: 'US',
     modelType: 'video-generation',
     description:
@@ -27,6 +28,7 @@ export const worldModels: WorldModel[] = [
     id: '1x_world_model',
     name: '1X World Model',
     developer: '1X Technologies',
+    developerCompanyIds: ['1x'],
     country: 'NO',
     modelType: 'video-generation',
     description:
@@ -47,6 +49,7 @@ export const worldModels: WorldModel[] = [
     id: 'groot_dreams',
     name: 'GR00T-Dreams',
     developer: 'NVIDIA',
+    developerCompanyIds: ['nvidia'],
     country: 'US',
     modelType: 'video-generation',
     description:
@@ -70,6 +73,7 @@ export const worldModels: WorldModel[] = [
     id: 'genie2',
     name: 'Genie 2',
     developer: 'Google DeepMind',
+    developerCompanyIds: ['google_deepmind'],
     country: 'US',
     modelType: 'video-generation',
     description:
@@ -90,6 +94,7 @@ export const worldModels: WorldModel[] = [
     id: 'unisim',
     name: 'UniSim',
     developer: 'Google DeepMind / UC Berkeley / MIT',
+    developerCompanyIds: ['google_deepmind'],
     country: 'US',
     modelType: 'video-generation',
     description:
@@ -186,6 +191,7 @@ export const worldModels: WorldModel[] = [
     id: 'nerd',
     name: 'NeRD (Neural Robot Dynamics)',
     developer: 'NVIDIA Research',
+    developerCompanyIds: ['nvidia'],
     country: 'US',
     modelType: 'latent-dynamics',
     description:
@@ -224,6 +230,7 @@ export const worldModels: WorldModel[] = [
     id: 'dreamerv4',
     name: 'Dreamer V4',
     developer: 'Google DeepMind',
+    developerCompanyIds: ['google_deepmind'],
     country: 'US',
     modelType: 'rl-imagination',
     description:
@@ -317,6 +324,7 @@ export const worldModels: WorldModel[] = [
     id: 'cosmos',
     name: 'NVIDIA Cosmos',
     developer: 'NVIDIA',
+    developerCompanyIds: ['nvidia'],
     country: 'US',
     modelType: 'foundation-platform',
     description:
@@ -337,6 +345,7 @@ export const worldModels: WorldModel[] = [
     id: 'unifolm_wma',
     name: 'UnifoLM-WMA-0',
     developer: 'Unitree Robotics',
+    developerCompanyIds: ['unitree'],
     country: 'CN',
     modelType: 'foundation-platform',
     description:
@@ -361,6 +370,7 @@ export const worldModels: WorldModel[] = [
     id: 'agibot_world',
     name: 'AgiBot World',
     developer: 'AgiBot / OpenDriveLab',
+    developerCompanyIds: ['agibot'],
     country: 'CN',
     modelType: 'foundation-platform',
     description:

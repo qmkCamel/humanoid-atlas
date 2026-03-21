@@ -30,6 +30,7 @@ export const companyFunding: CompanyFunding[] = [
     totalRaisedM: 1850,
     latestValuationM: 39000,
     keyInvestors: ['Parkway Venture Capital', 'Microsoft', 'OpenAI', 'NVIDIA', 'Jeff Bezos', 'Intel Capital', 'Brookfield'],
+    keyInvestorIds: ['parkway', 'openai_fund', 'nvidia_ventures', 'bezos'],
     rounds: [
       {
         name: 'Seed',
@@ -110,6 +111,7 @@ export const companyFunding: CompanyFunding[] = [
     latestValuationM: 7000,
     latestValuationNote: 'market cap',
     keyInvestors: ['Tencent', 'CDH Investments', 'Qiming Venture Partners'],
+    keyInvestorIds: ['tencent'],
     rounds: [
       {
         name: 'Series A',
@@ -144,6 +146,7 @@ export const companyFunding: CompanyFunding[] = [
     totalRaisedM: 963,
     latestValuationM: 5300,
     keyInvestors: ['Google', 'Mercedes-Benz', 'B Capital', 'ARK Invest', 'Qatar Investment Authority'],
+    keyInvestorIds: ['google'],
     rounds: [
       {
         name: 'Seed',
@@ -181,6 +184,7 @@ export const companyFunding: CompanyFunding[] = [
     latestValuationNote: 'analyst est.',
     ipoPlans: 'Nasdaq ~2027',
     keyInvestors: ['Hyundai Motor Group', 'SoftBank'],
+    keyInvestorIds: ['softbank'],
     rounds: [
       {
         name: 'Acquisition by Hyundai',
@@ -204,6 +208,7 @@ export const companyFunding: CompanyFunding[] = [
     latestValuationM: 3000,
     ipoPlans: 'HKEX 2026',
     keyInvestors: ['CATL', 'GGV Capital', 'CICC Capital', 'Qiming Venture Partners', 'China Mobile'],
+    keyInvestorIds: ['catl_ventures'],
     rounds: [
       {
         name: 'Angel',
@@ -243,6 +248,7 @@ export const companyFunding: CompanyFunding[] = [
     latestValuationM: 2100,
     ipoPlans: 'HKEX Q3 2026',
     keyInvestors: ['Tencent', 'HongShan Capital', 'BYD', 'Hillhouse', 'LG Electronics'],
+    keyInvestorIds: ['tencent', 'sequoia'],
     rounds: [
       {
         name: 'Seed',
@@ -270,6 +276,7 @@ export const companyFunding: CompanyFunding[] = [
     totalRaisedM: 578,
     latestValuationM: 2150,
     keyInvestors: ['DCVC', 'SoftBank', 'Amazon', 'NVIDIA'],
+    keyInvestorIds: ['softbank', 'nvidia_ventures'],
     rounds: [
       {
         name: 'Seed',
@@ -372,6 +379,7 @@ export const companyFunding: CompanyFunding[] = [
     totalRaisedM: 210,
     ipoPlans: 'HKEX possibly 2026',
     keyInvestors: ['CATL', 'Vertex Ventures', 'CICC Capital'],
+    keyInvestorIds: ['catl_ventures'],
     rounds: [
       {
         name: 'Series A',
@@ -404,6 +412,7 @@ export const companyFunding: CompanyFunding[] = [
     totalRaisedM: 200,
     latestValuationM: 1150,
     keyInvestors: ['Coatue Management', 'Benchmark', 'Tiger Global', 'Fidelity'],
+    keyInvestorIds: ['tiger_global'],
     rounds: [
       {
         name: 'Seed',
@@ -432,6 +441,7 @@ export const companyFunding: CompanyFunding[] = [
     totalRaisedM: 193,
     latestValuationM: 1100,
     keyInvestors: ['SoftBank Vision Fund', 'IDG Capital', 'Prosperity7 Ventures'],
+    keyInvestorIds: ['softbank', 'prosperity7'],
     rounds: [
       {
         name: 'Series A',
@@ -464,6 +474,7 @@ export const companyFunding: CompanyFunding[] = [
     latestValuationM: 1000,
     latestValuationNote: 'target',
     keyInvestors: ['JD.com', 'XPeng', 'CATL Capital', 'Baidu Ventures'],
+    keyInvestorIds: ['catl_ventures'],
     rounds: [
       {
         name: 'Angel',
@@ -500,6 +511,7 @@ export const companyFunding: CompanyFunding[] = [
     revenue2025M: 248,
     netProfit2025M: 41.8,
     keyInvestors: ['Alibaba', 'Tencent', 'China Mobile', 'Ant Group', 'Meituan'],
+    keyInvestorIds: ['tencent'],
     rounds: [
       {
         name: 'Series B',
@@ -553,6 +565,7 @@ export const companyFunding: CompanyFunding[] = [
     totalRaisedM: 140,
     latestValuationM: 500,
     keyInvestors: ['General Catalyst', 'Sequoia Capital', 'Khosla Ventures', 'Mayo Clinic'],
+    keyInvestorIds: ['sequoia'],
     rounds: [
       {
         name: 'Seed',
@@ -587,6 +600,7 @@ export const companyFunding: CompanyFunding[] = [
     totalRaisedM: 137,
     latestValuationM: 820,
     keyInvestors: ['OpenAI Startup Fund', 'EQT Ventures', 'Samsung NEXT', 'Tiger Global'],
+    keyInvestorIds: ['openai_fund', 'samsung', 'tiger_global'],
     rounds: [
       {
         name: 'Series A2',

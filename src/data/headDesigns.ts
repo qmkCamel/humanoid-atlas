@@ -6,6 +6,7 @@ export const headDesigns: HeadDesign[] = [
     id: 'optimus_gen3',
     name: 'Optimus (Gen 3)',
     developer: 'Tesla',
+    developerCompanyId: 'tesla',
     country: 'US',
     faceType: 'oled-screen',
     description:
@@ -30,6 +31,7 @@ export const headDesigns: HeadDesign[] = [
     id: 'xpeng_iron',
     name: 'Iron',
     developer: 'XPeng',
+    developerCompanyId: 'xpeng',
     country: 'CN',
     faceType: 'oled-screen',
     description:
@@ -59,6 +61,7 @@ export const headDesigns: HeadDesign[] = [
     id: 'fourier_gr2',
     name: 'GR-2',
     developer: 'Fourier',
+    developerCompanyId: 'fourier',
     country: 'CN',
     faceType: 'status-screen',
     description:
@@ -79,6 +82,7 @@ export const headDesigns: HeadDesign[] = [
     id: 'agibot_a2',
     name: 'A2',
     developer: 'AgiBot',
+    developerCompanyId: 'agibot',
     country: 'CN',
     faceType: 'status-screen',
     description:
@@ -99,6 +103,7 @@ export const headDesigns: HeadDesign[] = [
     id: 'neura_4ne1',
     name: '4NE-1',
     developer: 'NEURA Robotics',
+    developerCompanyId: 'neura_4ne1',
     country: 'DE',
     faceType: 'status-screen',
     description:
@@ -122,6 +127,7 @@ export const headDesigns: HeadDesign[] = [
     id: 'apollo',
     name: 'Apollo',
     developer: 'Apptronik',
+    developerCompanyId: 'apptronik',
     country: 'US',
     faceType: 'status-screen',
     description:
@@ -148,6 +154,7 @@ export const headDesigns: HeadDesign[] = [
     id: 'digit',
     name: 'Digit',
     developer: 'Agility Robotics',
+    developerCompanyId: 'agility',
     country: 'US',
     faceType: 'led-indicator',
     description:
@@ -175,6 +182,7 @@ export const headDesigns: HeadDesign[] = [
     id: 'unitree_g1',
     name: 'G1',
     developer: 'Unitree',
+    developerCompanyId: 'unitree',
     country: 'CN',
     faceType: 'led-indicator',
     description:
@@ -194,6 +202,7 @@ export const headDesigns: HeadDesign[] = [
     id: 'neo_gamma',
     name: 'NEO Gamma',
     developer: '1X Technologies',
+    developerCompanyId: '1x',
     country: 'NO',
     faceType: 'led-indicator',
     description:
@@ -218,6 +227,7 @@ export const headDesigns: HeadDesign[] = [
     id: 'atlas_electric',
     name: 'Atlas (Electric)',
     developer: 'Boston Dynamics',
+    developerCompanyId: 'boston_dynamics',
     country: 'US',
     faceType: 'led-indicator',
     description:
@@ -246,6 +256,7 @@ export const headDesigns: HeadDesign[] = [
     id: 'phoenix',
     name: 'Phoenix',
     developer: 'Sanctuary AI',
+    developerCompanyId: 'sanctuary_ai',
     country: 'CA',
     faceType: 'no-display',
     description:
@@ -268,6 +279,7 @@ export const headDesigns: HeadDesign[] = [
     id: 'forerunner_k2',
     name: 'Forerunner K2',
     developer: 'Kepler Robotics',
+    developerCompanyId: 'kepler',
     country: 'CN',
     faceType: 'no-display',
     description:
@@ -290,6 +302,7 @@ export const headDesigns: HeadDesign[] = [
     id: 'walker_s2',
     name: 'Walker S2',
     developer: 'UBTech',
+    developerCompanyId: 'ubtech',
     country: 'CN',
     faceType: 'no-display',
     description:
@@ -313,6 +326,7 @@ export const headDesigns: HeadDesign[] = [
     id: 'unitree_h1',
     name: 'H1',
     developer: 'Unitree',
+    developerCompanyId: 'unitree',
     country: 'CN',
     faceType: 'no-display',
     description:
@@ -332,6 +346,7 @@ export const headDesigns: HeadDesign[] = [
     id: 'dexmate_vega',
     name: 'Vega',
     developer: 'Dexmate',
+    developerCompanyId: 'dexmate',
     country: 'CN',
     faceType: 'no-display',
     description:
@@ -356,6 +371,7 @@ export const headDesigns: HeadDesign[] = [
     id: 'figure_02',
     name: 'Figure 02',
     developer: 'Figure',
+    developerCompanyId: 'figure',
     country: 'US',
     faceType: 'concealed',
     description:
@@ -382,6 +398,7 @@ export const headDesigns: HeadDesign[] = [
     id: 'sunday_memo',
     name: 'Memo',
     developer: 'Sunday Robotics',
+    developerCompanyId: 'sunday',
     country: 'DE',
     faceType: 'concealed',
     description:

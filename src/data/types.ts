@@ -28,6 +28,7 @@ export interface RobotSpecs {
   battery: string;
   charging: string;
   aiPartner: string;
+  aiPartnerIds?: string[];
   software: string;
   dataCollection: string;
   bom?: string;
@@ -53,6 +54,7 @@ export interface SupplyRelationship {
   from: string;
   to: string;
   component: string;
+  componentCategoryId?: string;
   bomPercent?: number;
   costPercent?: number;
   description?: string;
@@ -118,6 +120,7 @@ export interface WorldModel {
   id: string;
   name: string;
   developer: string;
+  developerCompanyIds?: string[];
   country: Country;
   modelType: WorldModelType;
   description: string;
@@ -142,6 +145,7 @@ export interface HeadDesign {
   id: string;
   name: string;
   developer: string;
+  developerCompanyId?: string;
   country: Country;
   faceType: FaceDisplayType;
   description: string;
@@ -210,6 +214,7 @@ export interface CompanyFunding {
   revenue2025M?: number;       // 2025 revenue in millions USD
   netProfit2025M?: number;     // 2025 net profit in millions USD
   keyInvestors: string[];      // top investor names
+  keyInvestorIds?: string[];   // resolved topInvestors[].id values
   rounds: FundingRound[];
   sources: FundingSourceRef[];
 }
