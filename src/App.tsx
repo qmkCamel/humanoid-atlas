@@ -1707,7 +1707,7 @@ export default function App() {
             </div>
           </main>
           <footer className="footer">
-            <span><a href="/changelog" onClick={(e) => { e.preventDefault(); window.history.pushState({}, '', '/changelog'); window.dispatchEvent(new PopStateEvent('popstate')); }}>Changelog</a> · <a href="/sources" onClick={(e) => { e.preventDefault(); window.history.pushState({}, '', '/sources'); window.dispatchEvent(new PopStateEvent('popstate')); }}>Data Sources</a> · Created by <a href="https://x.com/JulianSaks" target="_blank" rel="noopener noreferrer">Julian Saks</a> · <a href="https://github.com/kingjulio8238/humanoid-atlas" target="_blank" rel="noopener noreferrer">Contribute</a>{viewCount !== null && <span className="view-count"> · {viewCount.toLocaleString()} visits</span>}</span>
+            <span><a href="https://github.com/kingjulio8238/humanoid-atlas" target="_blank" rel="noopener noreferrer">Contribute</a> · <a href="/changelog" onClick={(e) => { e.preventDefault(); window.history.pushState({}, '', '/changelog'); window.dispatchEvent(new PopStateEvent('popstate')); }}>Changelog</a> · <a href="/sources" onClick={(e) => { e.preventDefault(); window.history.pushState({}, '', '/sources'); window.dispatchEvent(new PopStateEvent('popstate')); }}>Data Sources</a> · Created by <a href="https://x.com/JulianSaks" target="_blank" rel="noopener noreferrer">Julian Saks</a>{viewCount !== null && <span className="view-count"> · {viewCount.toLocaleString()} visits</span>}</span>
           </footer>
         </div>
       );
@@ -2000,7 +2000,7 @@ export default function App() {
         </main>
 
         <footer className="footer">
-          <span><a href="/changelog" onClick={(e) => { e.preventDefault(); window.history.pushState({}, '', '/changelog'); window.dispatchEvent(new PopStateEvent('popstate')); }}>Changelog</a> · <a href="/sources" onClick={(e) => { e.preventDefault(); window.history.pushState({}, '', '/sources'); window.dispatchEvent(new PopStateEvent('popstate')); }}>Data Sources</a> · Created by <a href="https://x.com/JulianSaks" target="_blank" rel="noopener noreferrer">Julian Saks</a> · <a href="https://github.com/kingjulio8238/humanoid-atlas" target="_blank" rel="noopener noreferrer">Contribute</a>{viewCount !== null && <span className="view-count"> · {viewCount.toLocaleString()} visits</span>}</span>
+          <span><a href="https://github.com/kingjulio8238/humanoid-atlas" target="_blank" rel="noopener noreferrer">Contribute</a> · <a href="/changelog" onClick={(e) => { e.preventDefault(); window.history.pushState({}, '', '/changelog'); window.dispatchEvent(new PopStateEvent('popstate')); }}>Changelog</a> · <a href="/sources" onClick={(e) => { e.preventDefault(); window.history.pushState({}, '', '/sources'); window.dispatchEvent(new PopStateEvent('popstate')); }}>Data Sources</a> · Created by <a href="https://x.com/JulianSaks" target="_blank" rel="noopener noreferrer">Julian Saks</a>{viewCount !== null && <span className="view-count"> · {viewCount.toLocaleString()} visits</span>}</span>
         </footer>
       </div>
     );
@@ -2118,7 +2118,7 @@ export default function App() {
           </div>
         </main>
         <footer className="footer" style={{ marginTop: 'auto' }}>
-          <span><a href="/changelog" onClick={(e) => { e.preventDefault(); window.history.pushState({}, '', '/changelog'); window.dispatchEvent(new PopStateEvent('popstate')); }}>Changelog</a> · <a href="/sources" onClick={(e) => { e.preventDefault(); window.history.pushState({}, '', '/sources'); window.dispatchEvent(new PopStateEvent('popstate')); }}>Data Sources</a> · Created by <a href="https://x.com/JulianSaks" target="_blank" rel="noopener noreferrer">Julian Saks</a> · <a href="https://github.com/kingjulio8238/humanoid-atlas" target="_blank" rel="noopener noreferrer">Contribute</a>{viewCount !== null && <span className="view-count"> · {viewCount.toLocaleString()} visits</span>}</span>
+          <span><a href="https://github.com/kingjulio8238/humanoid-atlas" target="_blank" rel="noopener noreferrer">Contribute</a> · <a href="/changelog" onClick={(e) => { e.preventDefault(); window.history.pushState({}, '', '/changelog'); window.dispatchEvent(new PopStateEvent('popstate')); }}>Changelog</a> · <a href="/sources" onClick={(e) => { e.preventDefault(); window.history.pushState({}, '', '/sources'); window.dispatchEvent(new PopStateEvent('popstate')); }}>Data Sources</a> · Created by <a href="https://x.com/JulianSaks" target="_blank" rel="noopener noreferrer">Julian Saks</a>{viewCount !== null && <span className="view-count"> · {viewCount.toLocaleString()} visits</span>}</span>
         </footer>
       </div>
     );
@@ -2157,7 +2157,7 @@ export default function App() {
           </div>
         </main>
         <footer className="footer" style={{ marginTop: 'auto' }}>
-          <span><a href="/changelog" onClick={(e) => { e.preventDefault(); window.history.pushState({}, '', '/changelog'); window.dispatchEvent(new PopStateEvent('popstate')); }}>Changelog</a> · <a href="/sources" onClick={(e) => { e.preventDefault(); window.history.pushState({}, '', '/sources'); window.dispatchEvent(new PopStateEvent('popstate')); }}>Data Sources</a> · Created by <a href="https://x.com/JulianSaks" target="_blank" rel="noopener noreferrer">Julian Saks</a> · <a href="https://github.com/kingjulio8238/humanoid-atlas" target="_blank" rel="noopener noreferrer">Contribute</a>{viewCount !== null && <span className="view-count"> · {viewCount.toLocaleString()} visits</span>}</span>
+          <span><a href="https://github.com/kingjulio8238/humanoid-atlas" target="_blank" rel="noopener noreferrer">Contribute</a> · <a href="/changelog" onClick={(e) => { e.preventDefault(); window.history.pushState({}, '', '/changelog'); window.dispatchEvent(new PopStateEvent('popstate')); }}>Changelog</a> · <a href="/sources" onClick={(e) => { e.preventDefault(); window.history.pushState({}, '', '/sources'); window.dispatchEvent(new PopStateEvent('popstate')); }}>Data Sources</a> · Created by <a href="https://x.com/JulianSaks" target="_blank" rel="noopener noreferrer">Julian Saks</a>{viewCount !== null && <span className="view-count"> · {viewCount.toLocaleString()} visits</span>}</span>
         </footer>
       </div>
     );
@@ -4329,7 +4329,7 @@ export default function App() {
         <span>
           {oems.reduce((s, c) => s + (c.robotSpecs?.shipments2025 || 0), 0).toLocaleString()} units shipped (2025)
         </span>
-        <span className="footer-right"><a href="/changelog" onClick={(e) => { e.preventDefault(); window.history.pushState({}, '', '/changelog'); window.dispatchEvent(new PopStateEvent('popstate')); }}>Changelog</a> · <a href="/sources" onClick={(e) => { e.preventDefault(); window.history.pushState({}, '', '/sources'); window.dispatchEvent(new PopStateEvent('popstate')); }}>Data Sources</a> · Created by <a href="https://x.com/JulianSaks" target="_blank" rel="noopener noreferrer">Julian Saks</a> · <a href="https://github.com/kingjulio8238/humanoid-atlas" target="_blank" rel="noopener noreferrer">Contribute</a>{viewCount !== null && <span className="view-count"> · {viewCount.toLocaleString()} visits</span>}</span>
+        <span className="footer-right"><a href="https://github.com/kingjulio8238/humanoid-atlas" target="_blank" rel="noopener noreferrer">Contribute</a> · <a href="/changelog" onClick={(e) => { e.preventDefault(); window.history.pushState({}, '', '/changelog'); window.dispatchEvent(new PopStateEvent('popstate')); }}>Changelog</a> · <a href="/sources" onClick={(e) => { e.preventDefault(); window.history.pushState({}, '', '/sources'); window.dispatchEvent(new PopStateEvent('popstate')); }}>Data Sources</a> · Created by <a href="https://x.com/JulianSaks" target="_blank" rel="noopener noreferrer">Julian Saks</a>{viewCount !== null && <span className="view-count"> · {viewCount.toLocaleString()} visits</span>}</span>
       </footer>
     </div>
   );
