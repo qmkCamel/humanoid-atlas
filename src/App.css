@@ -1658,7 +1658,8 @@ body {
 
   /* Touch target increases */
   .back-btn { padding: 8px 12px; min-height: 36px; }
-  .country-pill { padding: 8px 12px; }
+  .country-pill { padding: 8px 12px; white-space: nowrap; }
+  .vla-filters { margin-bottom: 8px; }
   .cut-toggle { padding: 8px 12px; }
   .cut-reset { padding: 8px 10px; }
   .chain-clear { padding: 8px 10px; }
