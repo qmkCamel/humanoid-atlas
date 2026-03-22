@@ -2352,7 +2352,7 @@ export default function App() {
         {activeTab === 'skeleton' && (
           <div className={`skeleton-interactive${skeletonRegion && skeletonSidebarOpen && !isMobile ? ' skeleton-interactive--sidebar-open' : ''}`}>
             {!isMobile && !skeletonRegion && (
-              <div className="skeleton-prompt">Click a region to explore</div>
+              <div className="skeleton-prompt">Click a region of the humanoid to explore more</div>
             )}
             <div className="skeleton-center">
               <PLYViewer

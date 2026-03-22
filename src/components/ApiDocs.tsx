@@ -243,11 +243,11 @@ const SUB_TAB_DATA: Record<string, SubTabContent> = {
     preamble: (
       <>
       <div className="api-base-url-card">
-        <div className="api-base-url-header">
-          <h4 className="api-preamble-label">Base URL</h4>
+        <h4 className="api-preamble-label">Base URL</h4>
+        <div className="api-preamble-value api-preamble-url-row">
+          <code>{BASE_URL}</code>
           <CopyButton text={BASE_URL} />
         </div>
-        <code className="api-preamble-value api-preamble-url">{BASE_URL}</code>
       </div>
       <div className="api-preamble api-preamble-grid">
         <div className="api-preamble-item">
