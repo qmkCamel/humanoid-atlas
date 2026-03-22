@@ -93,7 +93,7 @@ function drawChart(
   const models = data.models.filter((m) => enabledModels.has(m.id));
   const n = data.numFrames;
 
-  // Draw each model line — progressively revealed up to `progress`
+  // Draw each model line - progressively revealed up to `progress`
   for (const model of models) {
     const scores = model.scores;
     ctx.strokeStyle = model.color;

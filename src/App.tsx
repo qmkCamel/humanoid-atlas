@@ -122,30 +122,30 @@ const TAB_META: Record<string, { title: string; description: string }> = {
   all_oems: { title: 'All Humanoid Robot OEMs | Humanoid Atlas', description: 'Compare 29+ humanoid robot manufacturers worldwide. Detailed specs, shipment data, and side-by-side comparison for Tesla Optimus, Figure, 1X NEO, Unitree, Agility Digit, and more.' },
   funding: { title: 'Humanoid Robot Funding & Valuations | Humanoid Atlas', description: 'Track funding rounds, valuations, and key investors across 25+ humanoid robotics companies. Compare total raised, latest valuations, and investor portfolios.' },
   factories: { title: 'Humanoid Robot Factories & Production Capacity | Humanoid Atlas', description: 'Compare production capacity, factory locations, and manufacturing targets across 20+ humanoid robot manufacturers. Track the global production ramp.' },
-  geopolitics: { title: 'Humanoid Robot Geopolitics — US vs China Supply Chain | Humanoid Atlas', description: 'Geopolitical analysis of the humanoid robot supply chain. Compare US, China, and global supplier dependencies, self-sufficiency scores, and bottleneck exposure.' },
+  geopolitics: { title: 'Humanoid Robot Geopolitics - US vs China Supply Chain | Humanoid Atlas', description: 'Geopolitical analysis of the humanoid robot supply chain. Compare US, China, and global supplier dependencies, self-sufficiency scores, and bottleneck exposure.' },
   network: { title: 'Humanoid Robot Supply Chain Network Graph | Humanoid Atlas', description: 'Interactive network visualization of all humanoid robot OEM-supplier relationships. Explore the full supply chain graph.' },
   timeline: { title: 'Humanoid Robot Industry Buildout Timeline | Humanoid Atlas', description: 'Timeline of humanoid robot development milestones, production ramp-ups, and industry buildout.' },
-  sensors_general: { title: 'Humanoid Robot Sensors — Cameras, LiDAR, IMUs | Humanoid Atlas', description: 'Sensor supply chain for humanoid robots. Intel RealSense, Livox LiDAR, Sony image sensors, and more.' },
-  compute: { title: 'Humanoid Robot Compute — NVIDIA Jetson, SoCs | Humanoid Atlas', description: 'Compute platforms powering humanoid robots. NVIDIA Jetson Orin/Thor, Intel, Qualcomm, and custom SoCs.' },
-  batteries: { title: 'Humanoid Robot Batteries — Cells & Pack Design | Humanoid Atlas', description: 'Battery supply chain for humanoid robots. Panasonic, CATL, Samsung SDI, Molicel cells and pack designs.' },
-  motors: { title: 'Humanoid Robot Motors — BLDC Suppliers | Humanoid Atlas', description: 'BLDC motor supply chain for humanoid robots. Maxon, Allied Motion, ThinGap, T-Motor, and more.' },
-  reducers: { title: 'Humanoid Robot Reducers — Harmonic & Cycloidal | Humanoid Atlas', description: 'Harmonic and cycloidal reducer supply chain. Harmonic Drive, LKGEAR, Leaderdrive — a key supply chain bottleneck.' },
-  bearings: { title: 'Humanoid Robot Bearings — Cross-Roller & Ball | Humanoid Atlas', description: 'Bearing supply chain for humanoid robot joints. Cross-roller and ball bearings from key suppliers.' },
-  actuators_rotary: { title: 'Humanoid Robot Actuators — Rotary & Linear | Humanoid Atlas', description: 'Actuator modules for humanoid robots. Rotary and linear actuators combining motors, reducers, encoders, and torque sensors.' },
-  screws: { title: 'Humanoid Robot Planetary Roller Screws | Humanoid Atlas', description: 'Planetary roller screw supply chain — a critical bottleneck component for humanoid robot linear actuators.' },
+  sensors_general: { title: 'Humanoid Robot Sensors - Cameras, LiDAR, IMUs | Humanoid Atlas', description: 'Sensor supply chain for humanoid robots. Intel RealSense, Livox LiDAR, Sony image sensors, and more.' },
+  compute: { title: 'Humanoid Robot Compute - NVIDIA Jetson, SoCs | Humanoid Atlas', description: 'Compute platforms powering humanoid robots. NVIDIA Jetson Orin/Thor, Intel, Qualcomm, and custom SoCs.' },
+  batteries: { title: 'Humanoid Robot Batteries - Cells & Pack Design | Humanoid Atlas', description: 'Battery supply chain for humanoid robots. Panasonic, CATL, Samsung SDI, Molicel cells and pack designs.' },
+  motors: { title: 'Humanoid Robot Motors - BLDC Suppliers | Humanoid Atlas', description: 'BLDC motor supply chain for humanoid robots. Maxon, Allied Motion, ThinGap, T-Motor, and more.' },
+  reducers: { title: 'Humanoid Robot Reducers - Harmonic & Cycloidal | Humanoid Atlas', description: 'Harmonic and cycloidal reducer supply chain. Harmonic Drive, LKGEAR, Leaderdrive - a key supply chain bottleneck.' },
+  bearings: { title: 'Humanoid Robot Bearings - Cross-Roller & Ball | Humanoid Atlas', description: 'Bearing supply chain for humanoid robot joints. Cross-roller and ball bearings from key suppliers.' },
+  actuators_rotary: { title: 'Humanoid Robot Actuators - Rotary & Linear | Humanoid Atlas', description: 'Actuator modules for humanoid robots. Rotary and linear actuators combining motors, reducers, encoders, and torque sensors.' },
+  screws: { title: 'Humanoid Robot Planetary Roller Screws | Humanoid Atlas', description: 'Planetary roller screw supply chain - a critical bottleneck component for humanoid robot linear actuators.' },
   end_effectors: { title: 'Humanoid Robot Hands & End Effectors | Humanoid Atlas', description: 'Dexterous hands and grippers for humanoid robots. From 3-finger grippers to 22-DOF anthropomorphic hands.' },
-  pcbs: { title: 'Humanoid Robot PCBs — Motor Drivers & Power | Humanoid Atlas', description: 'PCB and electronics supply chain for humanoid robots. Motor drivers, power management, and analog ICs.' },
-  vlas: { title: 'VLA Models — Vision-Language-Action for Robotics | Humanoid Atlas', description: 'Compare 19 Vision-Language-Action models. GR00T N1, pi0, OpenVLA, Gemini Robotics, Helix 02, and more with OEM integration maps.' },
-  reward_models: { title: 'Robotic Reward Models — Comparison & Scores | Humanoid Atlas', description: 'Compare 10 robotic reward models with interactive score comparison. Robometer, RoboReward, SARM, GVL, Eureka, and more.' },
-  world_models: { title: 'World Models for Robotics — Video, Latent, RL | Humanoid Atlas', description: 'Compare 19 world models for robotics. DreamDojo, Dreamer V4, NVIDIA Cosmos, V-JEPA 2, Field AI, Rhoda AI, and more.' },
-  sim_platforms: { title: 'Robotics Simulation Platforms — Isaac Sim, MuJoCo, Genesis | Humanoid Atlas', description: 'Compare 14 robotics simulation platforms with capability matrix. NVIDIA Isaac Sim, MuJoCo, Genesis, Drake, Gazebo, and more with OEM adoption maps.' },
-  viz_tools: { title: 'Robotics Visualization Tools — Foxglove, Rerun & More | Humanoid Atlas', description: 'Compare 10 robotics visualization tools with capability matrix. Foxglove, Rerun, RViz2, PlotJuggler, and more.' },
+  pcbs: { title: 'Humanoid Robot PCBs - Motor Drivers & Power | Humanoid Atlas', description: 'PCB and electronics supply chain for humanoid robots. Motor drivers, power management, and analog ICs.' },
+  vlas: { title: 'VLA Models - Vision-Language-Action for Robotics | Humanoid Atlas', description: 'Compare 19 Vision-Language-Action models. GR00T N1, pi0, OpenVLA, Gemini Robotics, Helix 02, and more with OEM integration maps.' },
+  reward_models: { title: 'Robotic Reward Models - Comparison & Scores | Humanoid Atlas', description: 'Compare 10 robotic reward models with interactive score comparison. Robometer, RoboReward, SARM, GVL, Eureka, and more.' },
+  world_models: { title: 'World Models for Robotics - Video, Latent, RL | Humanoid Atlas', description: 'Compare 19 world models for robotics. DreamDojo, Dreamer V4, NVIDIA Cosmos, V-JEPA 2, Field AI, Rhoda AI, and more.' },
+  sim_platforms: { title: 'Robotics Simulation Platforms - Isaac Sim, MuJoCo, Genesis | Humanoid Atlas', description: 'Compare 14 robotics simulation platforms with capability matrix. NVIDIA Isaac Sim, MuJoCo, Genesis, Drake, Gazebo, and more with OEM adoption maps.' },
+  viz_tools: { title: 'Robotics Visualization Tools - Foxglove, Rerun & More | Humanoid Atlas', description: 'Compare 10 robotics visualization tools with capability matrix. Foxglove, Rerun, RViz2, PlotJuggler, and more.' },
   safety_standards: { title: 'Humanoid Robot Safety Standards & Compliance | Humanoid Atlas', description: 'Track safety standards (ISO 25785-1, ANSI R15.06, EU AI Act), OEM compliance profiles, and safety design features across 12 humanoid robotics companies.' },
   displays: { title: 'Humanoid Robot Displays & Head Designs | Humanoid Atlas', description: 'Compare 17 humanoid robot head/face designs. OLED screens, status displays, LED indicators, cameras, sensors, and interaction design.' },
   cli_install: { title: 'Atlas CLI Installation | Humanoid Atlas', description: 'Install the Humanoid Atlas CLI tool. Query the humanoid robot supply chain from your terminal.' },
   cli_commands: { title: 'Atlas CLI Command Reference | Humanoid Atlas', description: 'Full command reference for the Atlas CLI. Companies, supply chain, bottlenecks, scenarios, AI models, and more.' },
   cli_examples: { title: 'Atlas CLI Examples & Workflows | Humanoid Atlas', description: 'Real-world CLI workflows for querying the humanoid robot supply chain, running scenarios, and piping data to coding agents.' },
-  api_getting_started: { title: 'API Getting Started — Authentication & Base URL | Humanoid Atlas', description: 'Get started with the Humanoid Atlas API. Base URL, authentication, response format, and system health endpoints.' },
+  api_getting_started: { title: 'API Getting Started - Authentication & Base URL | Humanoid Atlas', description: 'Get started with the Humanoid Atlas API. Base URL, authentication, response format, and system health endpoints.' },
   api_companies: { title: 'API Companies Endpoints | Humanoid Atlas', description: 'List, search, and retrieve detailed company profiles for OEMs and suppliers via the Humanoid Atlas API.' },
   api_supply_chain: { title: 'API Supply Chain Endpoints | Humanoid Atlas', description: 'Query supply chain relationships, traverse dependency graphs, analyze bottlenecks, and run what-if scenarios.' },
   api_resources: { title: 'API Resource Endpoints | Humanoid Atlas', description: 'Access components, funding, investors, production data, factories, and manufacturing partners via the API.' },
@@ -189,7 +189,7 @@ const MODEL_ROTATIONS: Record<string, [number, number, number]> = {
 
 const ACTUATOR_INFO = {
   linear: {
-    description: 'Linear actuators convert rotary motion into push/pull force using planetary roller screws. They provide the high-force movements needed in legs and torso — extending and retracting to walk, squat, and lift. Tesla Optimus uses 14 linear actuators across three force classes. The planetary roller screw is the critical precision component, and a key supply chain bottleneck.',
+    description: 'Linear actuators convert rotary motion into push/pull force using planetary roller screws. They provide the high-force movements needed in legs and torso - extending and retracting to walk, squat, and lift. Tesla Optimus uses 14 linear actuators across three force classes. The planetary roller screw is the critical precision component, and a key supply chain bottleneck.',
     keyMetrics: {
       'Tesla Optimus Count': '14 linear actuators',
       'Force Classes (Tesla)': '500N, 3900N, 8000N',
@@ -200,7 +200,7 @@ const ACTUATOR_INFO = {
     },
   },
   rotary: {
-    description: 'Rotary actuators handle all joint movements — shoulders, elbows, hips, knees, wrists. Each is a self-contained module combining a frameless BLDC motor + harmonic reducer + dual encoders + torque sensor. The harmonic reducer alone accounts for ~36% of the actuator cost, making it the most expensive single component. Unitree achieves ~$300/unit through Chinese supply chain optimization.',
+    description: 'Rotary actuators handle all joint movements - shoulders, elbows, hips, knees, wrists. Each is a self-contained module combining a frameless BLDC motor + harmonic reducer + dual encoders + torque sensor. The harmonic reducer alone accounts for ~36% of the actuator cost, making it the most expensive single component. Unitree achieves ~$300/unit through Chinese supply chain optimization.',
     keyMetrics: {
       'Tesla Optimus Count': '20 rotary actuators',
       'Torque Classes (Tesla)': '20Nm, 110Nm, 180Nm',
@@ -208,7 +208,7 @@ const ACTUATOR_INFO = {
       'Unitree Cost': '~$300/unit',
       'Encoders': '2 per rotary actuator',
       'Design Trend': 'Quasi-Direct Drive (QDD)',
-      'Alt Approach': 'Tendon drive (1X Neo — no gearboxes)',
+      'Alt Approach': 'Tendon drive (1X Neo - no gearboxes)',
     },
   },
 };
@@ -362,35 +362,35 @@ const SCENARIOS = [
   {
     id: 'taiwan_strait',
     label: 'Taiwan Strait Crisis',
-    description: 'TSMC goes offline — NVIDIA and Intel lose chip fabrication, cascading to the majority of humanoid OEMs.',
+    description: 'TSMC goes offline - NVIDIA and Intel lose chip fabrication, cascading to the majority of humanoid OEMs.',
     cutCompanies: ['tsmc'],
     cutCountries: [] as string[],
   },
   {
     id: 'harmonic_shortage',
     label: 'Harmonic Drive Shortage',
-    description: `Japan's Harmonic Drive Systems cannot ship — the single most expensive actuator component disappears from ${_countOemCustomers('harmonic_drive')} of ${_totalOems} OEMs.`,
+    description: `Japan's Harmonic Drive Systems cannot ship - the single most expensive actuator component disappears from ${_countOemCustomers('harmonic_drive')} of ${_totalOems} OEMs.`,
     cutCompanies: ['harmonic_drive'],
     cutCountries: [],
   },
   {
     id: 'china_export_ban',
     label: 'China Export Ban',
-    description: 'All Chinese suppliers cut off — batteries, motors, LiDAR, depth sensors, and rare earth magnets disrupted.',
+    description: 'All Chinese suppliers cut off - batteries, motors, LiDAR, depth sensors, and rare earth magnets disrupted.',
     cutCompanies: [],
     cutCountries: ['CN'],
   },
   {
     id: 'rare_earth_embargo',
     label: 'Rare Earth Embargo',
-    description: 'All rare earth suppliers disrupted — every BLDC motor in every humanoid depends on NdFeB magnets.',
+    description: 'All rare earth suppliers disrupted - every BLDC motor in every humanoid depends on NdFeB magnets.',
     cutCompanies: ['mp_materials', 'lynas', 'jl_mag'],
     cutCountries: [],
   },
   {
     id: 'nvidia_blacklist',
     label: 'NVIDIA Blacklist',
-    description: `NVIDIA cut from supply chain — ${_countOemCustomers('nvidia')} of ${_totalOems} OEMs lose their primary compute platform.`,
+    description: `NVIDIA cut from supply chain - ${_countOemCustomers('nvidia')} of ${_totalOems} OEMs lose their primary compute platform.`,
     cutCompanies: ['nvidia'],
     cutCountries: [],
   },
@@ -724,14 +724,14 @@ function getVLAOverview() {
 
 type CountryGroup = 'US' | 'CN' | 'JP' | 'KR' | 'OTHER' | null;
 
-// Geopolitical grouping (US vs CN vs Other) — used for scoreboard analytics, supply chain bars, scenario cuts
+// Geopolitical grouping (US vs CN vs Other) - used for scoreboard analytics, supply chain bars, scenario cuts
 function getCountryGroup(country: string): 'US' | 'CN' | 'OTHER' {
   if (country === 'US') return 'US';
   if (country === 'CN') return 'CN';
   return 'OTHER';
 }
 
-// Filter grouping — used for the country filter pills (distinguishes JP and KR)
+// Filter grouping - used for the country filter pills (distinguishes JP and KR)
 function getCountryFilterGroup(country: string): 'US' | 'CN' | 'JP' | 'KR' | 'OTHER' {
   if (country === 'US') return 'US';
   if (country === 'CN') return 'CN';
@@ -956,7 +956,7 @@ function getSPOFData() {
   return { spofRows };
 }
 
-// Legacy hash redirect — send old hash URLs to new paths
+// Legacy hash redirect - send old hash URLs to new paths
 function useLegacyHashRedirect(navigate: ReturnType<typeof useNavigate>) {
   useEffect(() => {
     const hash = window.location.hash.slice(1);
@@ -1406,7 +1406,7 @@ export default function App() {
     })
       .then((r) => r.json())
       .then((data) => {
-        // Server returned actual count — sync it (handles alreadyVoted case)
+        // Server returned actual count - sync it (handles alreadyVoted case)
         if (typeof data.likes === 'number') {
           setLikes((prev) => ({ ...prev, [oemId]: data.likes }));
         }
@@ -1475,7 +1475,7 @@ export default function App() {
 
       const specRow = (label: string, valA: string | undefined, valB: string | undefined) => {
         if (!valA && !valB) return null;
-        return { label, valA: valA || '—', valB: valB || '—' };
+        return { label, valA: valA || ' - ', valB: valB || ' - ' };
       };
       const specs = [
         specRow('BOM', compA.robotSpecs?.bom, compB.robotSpecs?.bom),
@@ -1570,7 +1570,7 @@ export default function App() {
             </div>
           </main>
           <footer className="footer">
-            <span><a href="/sources" onClick={(e) => { e.preventDefault(); window.history.pushState({}, '', '/sources'); window.dispatchEvent(new PopStateEvent('popstate')); }}>Data Sources</a> · Created by <a href="https://x.com/JulianSaks" target="_blank" rel="noopener noreferrer">Julian Saks</a> · <a href="https://github.com/kingjulio8238/humanoid-atlas" target="_blank" rel="noopener noreferrer">Contribute</a>{viewCount !== null && <span className="view-count"> · {viewCount.toLocaleString()} visits</span>}</span>
+            <span><a href="/changelog" onClick={(e) => { e.preventDefault(); window.history.pushState({}, '', '/changelog'); window.dispatchEvent(new PopStateEvent('popstate')); }}>Changelog</a> · <a href="/sources" onClick={(e) => { e.preventDefault(); window.history.pushState({}, '', '/sources'); window.dispatchEvent(new PopStateEvent('popstate')); }}>Data Sources</a> · Created by <a href="https://x.com/JulianSaks" target="_blank" rel="noopener noreferrer">Julian Saks</a> · <a href="https://github.com/kingjulio8238/humanoid-atlas" target="_blank" rel="noopener noreferrer">Contribute</a>{viewCount !== null && <span className="view-count"> · {viewCount.toLocaleString()} visits</span>}</span>
           </footer>
         </div>
       );
@@ -1786,7 +1786,7 @@ export default function App() {
               )}
 
               <div className="company-section">
-                <h3 className="section-title">Alternative Suppliers{supplierAnalysis.componentLabel ? ` — ${supplierAnalysis.componentLabel}` : ''}</h3>
+                <h3 className="section-title">Alternative Suppliers{supplierAnalysis.componentLabel ? ` - ${supplierAnalysis.componentLabel}` : ''}</h3>
                 {supplierAnalysis.alternatives.length > 0 ? (
                   <div className="supplier-alts">
                     {supplierAnalysis.alternatives.map((alt) => (
@@ -1799,7 +1799,7 @@ export default function App() {
                     ))}
                   </div>
                 ) : (
-                  <p className="supplier-alts--none">Sole supplier in dataset — no alternatives tracked</p>
+                  <p className="supplier-alts--none">Sole supplier in dataset - no alternatives tracked</p>
                 )}
               </div>
 
@@ -1863,7 +1863,125 @@ export default function App() {
         </main>
 
         <footer className="footer">
-          <span><a href="/sources" onClick={(e) => { e.preventDefault(); window.history.pushState({}, '', '/sources'); window.dispatchEvent(new PopStateEvent('popstate')); }}>Data Sources</a> · Created by <a href="https://x.com/JulianSaks" target="_blank" rel="noopener noreferrer">Julian Saks</a> · <a href="https://github.com/kingjulio8238/humanoid-atlas" target="_blank" rel="noopener noreferrer">Contribute</a>{viewCount !== null && <span className="view-count"> · {viewCount.toLocaleString()} visits</span>}</span>
+          <span><a href="/changelog" onClick={(e) => { e.preventDefault(); window.history.pushState({}, '', '/changelog'); window.dispatchEvent(new PopStateEvent('popstate')); }}>Changelog</a> · <a href="/sources" onClick={(e) => { e.preventDefault(); window.history.pushState({}, '', '/sources'); window.dispatchEvent(new PopStateEvent('popstate')); }}>Data Sources</a> · Created by <a href="https://x.com/JulianSaks" target="_blank" rel="noopener noreferrer">Julian Saks</a> · <a href="https://github.com/kingjulio8238/humanoid-atlas" target="_blank" rel="noopener noreferrer">Contribute</a>{viewCount !== null && <span className="view-count"> · {viewCount.toLocaleString()} visits</span>}</span>
+        </footer>
+      </div>
+    );
+  }
+
+  // ==================== CHANGELOG VIEW ====================
+  if (location.pathname === '/changelog') {
+    return (
+      <div className="app" style={{ position: 'relative', display: 'flex', flexDirection: 'column', minHeight: '100vh', height: 'auto', overflow: 'visible' }}>
+        <Helmet>
+          <title>Changelog | Humanoid Atlas</title>
+          <meta name="description" content="Changelog for the Humanoid Atlas - major updates, new OEMs, tabs, and data additions." />
+        </Helmet>
+        <button className="back-btn" onClick={() => navigate('/')} style={{ position: 'absolute', top: '1.5rem', left: '1.5rem' }}>
+          <span className="back-arrow">&larr;</span>
+        </button>
+        <main className="main" style={{ maxWidth: 600, margin: '0 auto', padding: '6rem 2rem 8rem' }}>
+          <h1 style={{ fontFamily: 'var(--font-mono)', fontSize: '1.3rem', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '0.6rem', color: 'var(--text-primary)' }}>Changelog</h1>
+          <p style={{ color: 'var(--text-dim)', fontSize: '0.9rem', marginBottom: '3.5rem' }}>View more on the open source Atlas <a href="https://github.com/kingjulio8238/humanoid-atlas" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-dim)', textDecoration: 'underline' }}>repo</a></p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2.8rem' }}>
+
+            <div>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '1.05rem', color: 'var(--text-primary)' }}>March 22, 2026</span>
+              <ul style={{ color: 'var(--text-dim)', fontSize: '0.9rem', marginTop: '0.5rem', paddingLeft: '1.2rem', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+                <li>Added CLI documentation tab</li>
+                <li>Mobile UX polish - horizontal scroll on tab nav, filter spacing, focus states</li>
+              </ul>
+            </div>
+
+            <div>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '1.05rem', color: 'var(--text-primary)' }}>March 21, 2026</span>
+              <ul style={{ color: 'var(--text-dim)', fontSize: '0.9rem', marginTop: '0.5rem', paddingLeft: '1.2rem', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+                <li>Added API documentation tab with 7 sub-tabs</li>
+                <li>Added data package build for API consumption</li>
+                <li>Added Data Sources page</li>
+                <li>Added 8 new OEMs - PAL, Ameca, Reachy 2, Clone, Qinglong, Unitree H2, Mentee Robotics, Booster K1</li>
+                <li>Added 3 new hand suppliers - Shadow Robot, ORCA Dexterity, ROBOTIS</li>
+                <li>Updated Unitree data - IPO filing, 5.5K shipments, financials</li>
+              </ul>
+            </div>
+
+            <div>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '1.05rem', color: 'var(--text-primary)' }}>March 20, 2026</span>
+              <ul style={{ color: 'var(--text-dim)', fontSize: '0.9rem', marginTop: '0.5rem', paddingLeft: '1.2rem', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+                <li>Added Safety &amp; Standards tab - 10 standards, 12 OEM safety profiles</li>
+                <li>Added Sim Platforms tab - 13 platforms with capability matrix</li>
+                <li>Added Factories tab</li>
+                <li>Added Industry tab group with Funding tab - 26 companies, 12 investors</li>
+                <li>Added SEO/GEO - path-based routing, meta tags, structured data, sitemap, llms.txt</li>
+                <li>Added World Models tab - 17 models across 4 categories</li>
+                <li>Added HRI tab group with Displays tab - 17 head/face designs</li>
+                <li>Added Viz Tools tab - 10 tools across 4 categories</li>
+                <li>Added Vanar Robots - first Indian OEM</li>
+              </ul>
+            </div>
+
+            <div>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '1.05rem', color: 'var(--text-primary)' }}>March 19, 2026</span>
+              <ul style={{ color: 'var(--text-dim)', fontSize: '0.9rem', marginTop: '0.5rem', paddingLeft: '1.2rem', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+                <li>Added Robometer scores for all reward models</li>
+                <li>Added Reward Models tab - 10 curated models under Software</li>
+                <li>Added tab grouping - Overview, Hardware, Software</li>
+                <li>Added Fauna Robotics (Sprout) as new OEM</li>
+                <li>Added OEM like/unlike voting with heart button</li>
+                <li>Added Japan and South Korea country filters</li>
+              </ul>
+            </div>
+
+            <div>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '1.05rem', color: 'var(--text-primary)' }}>March 18, 2026</span>
+              <ul style={{ color: 'var(--text-dim)', fontSize: '0.9rem', marginTop: '0.5rem', paddingLeft: '1.2rem', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+                <li>Added 11 new humanoid OEMs</li>
+                <li>Added VLA tab - 20 vision-language-action models with OEM links, search &amp; filters</li>
+                <li>Open-sourced repository - CONTRIBUTING guide, issue/PR templates, CI</li>
+                <li>Optimized images - PNG to WebP conversion</li>
+              </ul>
+            </div>
+
+            <div>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '1.05rem', color: 'var(--text-primary)' }}>March 17, 2026</span>
+              <ul style={{ color: 'var(--text-dim)', fontSize: '0.9rem', marginTop: '0.5rem', paddingLeft: '1.2rem', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+                <li>Public release</li>
+                <li>Added 15 new humanoid OEMs with enriched specs</li>
+                <li>Fixed open API proxy vulnerability - restricted CORS and sanitized errors</li>
+              </ul>
+            </div>
+
+            <div>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '1.05rem', color: 'var(--text-primary)' }}>March 16, 2026</span>
+              <ul style={{ color: 'var(--text-dim)', fontSize: '0.9rem', marginTop: '0.5rem', paddingLeft: '1.2rem', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+                <li>Added competitive comparison view</li>
+                <li>Added AI features via Groq - smart search, scenario analysis, investment thesis, graph query</li>
+                <li>Added Timeline tab with swim-lane OEM launch history</li>
+                <li>Added Network graph tab with column-based supply chain layout</li>
+                <li>Added BOM &amp; Cost Analysis</li>
+                <li>Added Supply Chain Simulator with named scenarios and cascade logic</li>
+                <li>Added Geopolitics - Single Points of Failure analysis</li>
+                <li>Expanded atlas - 3 new OEMs, supplier enrichment, 16 new relationships</li>
+              </ul>
+            </div>
+
+            <div>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '1.05rem', color: 'var(--text-primary)' }}>March 15, 2026</span>
+              <ul style={{ color: 'var(--text-dim)', fontSize: '0.9rem', marginTop: '0.5rem', paddingLeft: '1.2rem', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+                <li>Initial build - supply chain explorer for humanoid robotics</li>
+                <li>Tab-based navigation with supply chain data for all components</li>
+                <li>3D PLY models with per-model spin speed and scale normalization</li>
+                <li>Robot image gallery for all 13 humanoids</li>
+                <li>Geopolitics features - country filter, sovereignty scoreboard, cut the wire</li>
+                <li>Mobile responsive design</li>
+                <li>Live page view counter and analytics</li>
+              </ul>
+            </div>
+
+          </div>
+        </main>
+        <footer className="footer" style={{ marginTop: 'auto' }}>
+          <span><a href="/changelog" onClick={(e) => { e.preventDefault(); window.history.pushState({}, '', '/changelog'); window.dispatchEvent(new PopStateEvent('popstate')); }}>Changelog</a> · <a href="/sources" onClick={(e) => { e.preventDefault(); window.history.pushState({}, '', '/sources'); window.dispatchEvent(new PopStateEvent('popstate')); }}>Data Sources</a> · Created by <a href="https://x.com/JulianSaks" target="_blank" rel="noopener noreferrer">Julian Saks</a> · <a href="https://github.com/kingjulio8238/humanoid-atlas" target="_blank" rel="noopener noreferrer">Contribute</a>{viewCount !== null && <span className="view-count"> · {viewCount.toLocaleString()} visits</span>}</span>
         </footer>
       </div>
     );
@@ -1872,10 +1990,10 @@ export default function App() {
   // ==================== SOURCES VIEW ====================
   if (location.pathname === '/sources') {
     return (
-      <div className="app" style={{ position: 'relative', display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+      <div className="app" style={{ position: 'relative', display: 'flex', flexDirection: 'column', minHeight: '100vh', height: 'auto', overflow: 'visible' }}>
         <Helmet>
           <title>Data Sources | Humanoid Atlas</title>
-          <meta name="description" content="Data sources powering the Humanoid Atlas — OEM specs, supply chain data, and industry intelligence." />
+          <meta name="description" content="Data sources powering the Humanoid Atlas - OEM specs, supply chain data, and industry intelligence." />
         </Helmet>
         <button className="back-btn" onClick={() => navigate('/')} style={{ position: 'absolute', top: '1.5rem', left: '1.5rem' }}>
           <span className="back-arrow">&larr;</span>
@@ -1902,7 +2020,7 @@ export default function App() {
           </div>
         </main>
         <footer className="footer" style={{ marginTop: 'auto' }}>
-          <span><a href="/sources" onClick={(e) => { e.preventDefault(); window.history.pushState({}, '', '/sources'); window.dispatchEvent(new PopStateEvent('popstate')); }}>Data Sources</a> · Created by <a href="https://x.com/JulianSaks" target="_blank" rel="noopener noreferrer">Julian Saks</a> · <a href="https://github.com/kingjulio8238/humanoid-atlas" target="_blank" rel="noopener noreferrer">Contribute</a>{viewCount !== null && <span className="view-count"> · {viewCount.toLocaleString()} visits</span>}</span>
+          <span><a href="/changelog" onClick={(e) => { e.preventDefault(); window.history.pushState({}, '', '/changelog'); window.dispatchEvent(new PopStateEvent('popstate')); }}>Changelog</a> · <a href="/sources" onClick={(e) => { e.preventDefault(); window.history.pushState({}, '', '/sources'); window.dispatchEvent(new PopStateEvent('popstate')); }}>Data Sources</a> · Created by <a href="https://x.com/JulianSaks" target="_blank" rel="noopener noreferrer">Julian Saks</a> · <a href="https://github.com/kingjulio8238/humanoid-atlas" target="_blank" rel="noopener noreferrer">Contribute</a>{viewCount !== null && <span className="view-count"> · {viewCount.toLocaleString()} visits</span>}</span>
         </footer>
       </div>
     );
@@ -2176,7 +2294,7 @@ export default function App() {
 
                 <div className="bom-subsection">
                   <h4 className="cut-subtitle">Rotary Actuator Cost Breakdown</h4>
-                  <p className="bom-note">Each humanoid uses ~20 rotary actuators. The reducer alone is 36% of each unit's cost — the single biggest cost driver.</p>
+                  <p className="bom-note">Each humanoid uses ~20 rotary actuators. The reducer alone is 36% of each unit's cost - the single biggest cost driver.</p>
                   <div className="actuator-waterfall">
                     <div className="actuator-bar">
                       {bomData.actuatorBreakdown.map((seg) => (
@@ -2207,7 +2325,7 @@ export default function App() {
 
         {/* Funding tab */}
         {activeTab === 'funding' && (() => {
-          // Shared linear scale — exclude mega-cap outliers (>$100B)
+          // Shared linear scale - exclude mega-cap outliers (>$100B)
           // so diversified public companies don't crush the scale
           const scaleMax = Math.max(
             ...filteredFunding.map((f) => f.totalRaisedM ?? 0),
@@ -2324,7 +2442,7 @@ export default function App() {
 
         {/* Factories tab */}
         {activeTab === 'factories' && (() => {
-          // Shared linear scale — exclude Tesla's 10M aspirational capacity
+          // Shared linear scale - exclude Tesla's 10M aspirational capacity
           const scaleMax = Math.max(
             ...productionSorted.map((p) => p.shipped2025 ?? 0),
             ...productionSorted
@@ -2485,7 +2603,7 @@ export default function App() {
           return (
             <div className="geo-content">
               <section className="geo-section">
-                <h3 className="section-title">US vs China vs Rest — Scoreboard</h3>
+                <h3 className="section-title">US vs China vs Rest - Scoreboard</h3>
                 <div className="scoreboard-grid">
                   {scoreboard.map((col) => (
                     <div key={col.group} className={`scoreboard-col scoreboard-col--${col.group.toLowerCase()}`}>
@@ -2518,7 +2636,7 @@ export default function App() {
               </section>
 
               <section className="geo-section">
-                <h3 className="section-title">Stack Sovereignty — Supplier Origin by Component</h3>
+                <h3 className="section-title">Stack Sovereignty - Supplier Origin by Component</h3>
                 <div className="sovereignty-stack">
                   {sovereignty.map((row) => (
                     <div key={row.id} className="sovereignty-row">
@@ -2556,7 +2674,7 @@ export default function App() {
               </section>
 
               <section className="geo-section">
-                <h3 className="section-title">Critical Suppliers — Single Points of Failure</h3>
+                <h3 className="section-title">Critical Suppliers - Single Points of Failure</h3>
                 <div className="spof-list">
                   {spofRows.map((row) => (
                     <div
@@ -2586,7 +2704,7 @@ export default function App() {
                       </div>
                       <div className={`spof-alts ${row.alternatives.length === 0 ? 'spof-alts--none' : ''}`}>
                         Alts: {row.alternatives.length === 0
-                          ? 'None in dataset — sole supplier'
+                          ? 'None in dataset - sole supplier'
                           : row.alternatives.map((a) => `${a.name} (${a.country})`).join(', ')}
                       </div>
                       <div className="spof-oems">
@@ -2599,7 +2717,7 @@ export default function App() {
               </section>
 
               <section className="geo-section">
-                <h3 className="section-title">OEM Supply Chain Dependency — Supplier Origin per OEM</h3>
+                <h3 className="section-title">OEM Supply Chain Dependency - Supplier Origin per OEM</h3>
                 <div className="oem-nationality-grid">
                   {oemNationality.map((oem) => (
                     <div key={oem.id} className="oem-nat-card" onClick={() => handleSelectCompany(oem.id)}>
@@ -2868,7 +2986,7 @@ export default function App() {
           const tl = getTimelineData();
           return (
             <div className="timeline-view">
-              {/* Year axis — offset to align with track column */}
+              {/* Year axis - offset to align with track column */}
               <div className="timeline-header">
                 <div className="timeline-header__spacer" />
                 <div className="timeline-axis">
@@ -3888,7 +4006,7 @@ export default function App() {
         <span>
           {oems.reduce((s, c) => s + (c.robotSpecs?.shipments2025 || 0), 0).toLocaleString()} units shipped (2025)
         </span>
-        <span className="footer-right"><a href="/sources" onClick={(e) => { e.preventDefault(); window.history.pushState({}, '', '/sources'); window.dispatchEvent(new PopStateEvent('popstate')); }}>Data Sources</a> · Created by <a href="https://x.com/JulianSaks" target="_blank" rel="noopener noreferrer">Julian Saks</a> · <a href="https://github.com/kingjulio8238/humanoid-atlas" target="_blank" rel="noopener noreferrer">Contribute</a>{viewCount !== null && <span className="view-count"> · {viewCount.toLocaleString()} visits</span>}</span>
+        <span className="footer-right"><a href="/changelog" onClick={(e) => { e.preventDefault(); window.history.pushState({}, '', '/changelog'); window.dispatchEvent(new PopStateEvent('popstate')); }}>Changelog</a> · <a href="/sources" onClick={(e) => { e.preventDefault(); window.history.pushState({}, '', '/sources'); window.dispatchEvent(new PopStateEvent('popstate')); }}>Data Sources</a> · Created by <a href="https://x.com/JulianSaks" target="_blank" rel="noopener noreferrer">Julian Saks</a> · <a href="https://github.com/kingjulio8238/humanoid-atlas" target="_blank" rel="noopener noreferrer">Contribute</a>{viewCount !== null && <span className="view-count"> · {viewCount.toLocaleString()} visits</span>}</span>
       </footer>
     </div>
   );

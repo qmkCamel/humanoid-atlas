@@ -3,7 +3,7 @@ import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { PLYLoader } from 'three/examples/jsm/loaders/PLYLoader.js';
 
-// Global geometry cache — parsed geometries persist across mounts/tab switches
+// Global geometry cache - parsed geometries persist across mounts/tab switches
 const geometryCache = new Map<string, THREE.BufferGeometry>();
 const loadingPromises = new Map<string, Promise<THREE.BufferGeometry>>();
 
@@ -26,7 +26,7 @@ function loadPLY(url: string): Promise<THREE.BufferGeometry> {
   return promise;
 }
 
-// Preload a model without rendering — call early to start fetching
+// Preload a model without rendering - call early to start fetching
 export function preloadPLY(url: string) {
   loadPLY(url);
 }
@@ -55,7 +55,7 @@ function PointCloud({ url, color = '#1a1a1a', initialRotation, spinSpeed = 1, sc
 
   const c = useMemo(() => new THREE.Color(color), [color]);
 
-  // Adapt point size to vertex density — dense models need smaller dots
+  // Adapt point size to vertex density - dense models need smaller dots
   const vertexCount = geometry?.attributes.position?.count || 20000;
   const densityScale = Math.min(1.0, 20000 / vertexCount);
   const adaptedSize = 1.2 * (0.3 + 0.7 * densityScale);

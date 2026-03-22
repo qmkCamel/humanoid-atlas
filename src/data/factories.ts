@@ -16,7 +16,7 @@ export const companyProduction: CompanyProduction[] = [
     target2027: '10M/yr capacity at Giga Texas',
     sources: [
       { label: 'Tesla Q4 2025 Earnings Call', url: 'https://ir.tesla.com/' },
-      { label: 'Reuters — Tesla Optimus factory plans', url: 'https://www.reuters.com/technology/tesla-plans-produce-millions-optimus-robots-2025/' },
+      { label: 'Reuters - Tesla Optimus factory plans', url: 'https://www.reuters.com/technology/tesla-plans-produce-millions-optimus-robots-2025/' },
     ],
   },
   {
@@ -46,7 +46,7 @@ export const companyProduction: CompanyProduction[] = [
     target2027: 'IPO + scale',
     sources: [
       { label: 'Unitree G1 mass production update', url: 'https://www.unitree.com/' },
-      { label: 'South China Morning Post — Unitree shipments', url: 'https://www.scmp.com/tech/tech-trends/' },
+      { label: 'South China Morning Post - Unitree shipments', url: 'https://www.scmp.com/tech/tech-trends/' },
     ],
   },
   {
@@ -60,7 +60,7 @@ export const companyProduction: CompanyProduction[] = [
     target2027: '100K within 4 years of BotQ launch',
     sources: [
       { label: 'Figure AI BotQ factory announcement', url: 'https://www.figure.ai/' },
-      { label: 'TechCrunch — Figure BotQ production', url: 'https://techcrunch.com/2025/figure-botq/' },
+      { label: 'TechCrunch - Figure BotQ production', url: 'https://techcrunch.com/2025/figure-botq/' },
     ],
   },
   {
@@ -75,7 +75,7 @@ export const companyProduction: CompanyProduction[] = [
     target2026: '12,000/yr across 3 factories',
     sources: [
       { label: 'Noetix Robotics production capacity', url: 'https://www.noetixrobotics.com/' },
-      { label: '36Kr — Noetix vertical integration', url: 'https://36kr.com/' },
+      { label: '36Kr - Noetix vertical integration', url: 'https://36kr.com/' },
     ],
   },
   {
@@ -90,7 +90,7 @@ export const companyProduction: CompanyProduction[] = [
     target2026: 'scale toward 10K/yr',
     sources: [
       { label: 'Agility Robotics RoboFab overview', url: 'https://agilityrobotics.com/robofab' },
-      { label: 'IEEE Spectrum — Agility production plans', url: 'https://spectrum.ieee.org/agility-robotics-digit' },
+      { label: 'IEEE Spectrum - Agility production plans', url: 'https://spectrum.ieee.org/agility-robotics-digit' },
     ],
   },
   {
@@ -104,7 +104,7 @@ export const companyProduction: CompanyProduction[] = [
     target2026: '10,000 units',
     sources: [
       { label: 'AgiBot mass production milestone', url: 'https://agibot.com/' },
-      { label: 'PanDaily — AgiBot Lingang output', url: 'https://pandaily.com/' },
+      { label: 'PanDaily - AgiBot Lingang output', url: 'https://pandaily.com/' },
     ],
   },
   {
@@ -118,7 +118,7 @@ export const companyProduction: CompanyProduction[] = [
     target2026: 'scale to 10K/yr',
     sources: [
       { label: 'RobotEra production target', url: 'https://www.robotera.com/' },
-      { label: 'CnEVPost — RobotEra factory expansion', url: 'https://cnevpost.com/' },
+      { label: 'CnEVPost - RobotEra factory expansion', url: 'https://cnevpost.com/' },
     ],
   },
   {
@@ -133,7 +133,7 @@ export const companyProduction: CompanyProduction[] = [
     target2027: 'hundreds of thousands',
     sources: [
       { label: '1X Technologies NEO production', url: 'https://www.1x.tech/' },
-      { label: 'Bloomberg — 1X factory expansion', url: 'https://www.bloomberg.com/news/' },
+      { label: 'Bloomberg - 1X factory expansion', url: 'https://www.bloomberg.com/news/' },
     ],
   },
   {
@@ -176,7 +176,7 @@ export const companyProduction: CompanyProduction[] = [
     target2026: 'tens of thousands',
     sources: [
       { label: 'Booster Robotics shipments update', url: 'https://www.boosterrobotics.com/' },
-      { label: '36Kr — Booster production milestone', url: 'https://36kr.com/' },
+      { label: '36Kr - Booster production milestone', url: 'https://36kr.com/' },
     ],
   },
   {
@@ -192,7 +192,7 @@ export const companyProduction: CompanyProduction[] = [
     target2027: '1,000/yr',
     sources: [
       { label: 'Enchanted Tools Miroki production', url: 'https://enchanted.tools/' },
-      { label: 'TechCrunch — Enchanted Tools factory plans', url: 'https://techcrunch.com/' },
+      { label: 'TechCrunch - Enchanted Tools factory plans', url: 'https://techcrunch.com/' },
     ],
   },
   {
@@ -205,7 +205,7 @@ export const companyProduction: CompanyProduction[] = [
     target2027: '1M cumulative by 2030',
     sources: [
       { label: 'XPeng IRON robot factory groundbreaking', url: 'https://heyxpeng.com/' },
-      { label: 'CnEVPost — XPeng humanoid robot plans', url: 'https://cnevpost.com/' },
+      { label: 'CnEVPost - XPeng humanoid robot plans', url: 'https://cnevpost.com/' },
     ],
   },
   {
@@ -217,7 +217,7 @@ export const companyProduction: CompanyProduction[] = [
     target2026: 'NEURA Hive production method',
     sources: [
       { label: 'NEURA Robotics x Bosch partnership', url: 'https://neura-robotics.com/' },
-      { label: 'Handelsblatt — NEURA Hive production', url: 'https://www.handelsblatt.com/' },
+      { label: 'Handelsblatt - NEURA Hive production', url: 'https://www.handelsblatt.com/' },
     ],
   },
   {
@@ -229,7 +229,7 @@ export const companyProduction: CompanyProduction[] = [
     target2026: 'commercial H2 2026',
     sources: [
       { label: 'Apptronik x Jabil manufacturing partnership', url: 'https://apptronik.com/' },
-      { label: 'Jabil press release — Apollo manufacturing', url: 'https://www.jabil.com/insights/blog-main/' },
+      { label: 'Jabil press release - Apollo manufacturing', url: 'https://www.jabil.com/insights/blog-main/' },
     ],
   },
   {
@@ -242,7 +242,7 @@ export const companyProduction: CompanyProduction[] = [
     target2026: 'scaling T800 production',
     sources: [
       { label: 'EngineAI T800 production update', url: 'https://www.engineai.com/' },
-      { label: 'PanDaily — EngineAI shipments', url: 'https://pandaily.com/' },
+      { label: 'PanDaily - EngineAI shipments', url: 'https://pandaily.com/' },
     ],
   },
   {
@@ -254,7 +254,7 @@ export const companyProduction: CompanyProduction[] = [
     target2026: 'scaling from framework agreements',
     sources: [
       { label: 'Kepler K2 mass production start', url: 'https://www.keplerbot.com/' },
-      { label: '36Kr — Kepler framework deals', url: 'https://36kr.com/' },
+      { label: '36Kr - Kepler framework deals', url: 'https://36kr.com/' },
     ],
   },
   {
@@ -266,7 +266,7 @@ export const companyProduction: CompanyProduction[] = [
     target2026: 'batch 3+ ramping',
     sources: [
       { label: 'Dobot humanoid batch production', url: 'https://www.dobot-robots.com/' },
-      { label: 'EqualOcean — Dobot production update', url: 'https://equalocean.com/' },
+      { label: 'EqualOcean - Dobot production update', url: 'https://equalocean.com/' },
     ],
   },
   {
@@ -277,7 +277,7 @@ export const companyProduction: CompanyProduction[] = [
     capacityNote: 'Magna contract manufacturing',
     sources: [
       { label: 'Sanctuary AI x Magna partnership', url: 'https://sanctuary.ai/' },
-      { label: 'The Globe and Mail — Magna humanoid robots', url: 'https://www.theglobeandmail.com/' },
+      { label: 'The Globe and Mail - Magna humanoid robots', url: 'https://www.theglobeandmail.com/' },
     ],
   },
 ];
@@ -298,7 +298,7 @@ export const factoryDirectory: Factory[] = [
     notes: 'Groundbreaking Nov 2025. 10M/yr aspirational capacity.',
     sources: [
       { label: 'Tesla Giga Texas expansion plans', url: 'https://ir.tesla.com/' },
-      { label: 'Reuters — Tesla Optimus factory groundbreaking', url: 'https://www.reuters.com/technology/tesla-optimus-factory-2025/' },
+      { label: 'Reuters - Tesla Optimus factory groundbreaking', url: 'https://www.reuters.com/technology/tesla-optimus-factory-2025/' },
     ],
   },
   {
@@ -313,7 +313,7 @@ export const factoryDirectory: Factory[] = [
     notes: 'Optimus V3 pilot production.',
     sources: [
       { label: 'Tesla Fremont factory overview', url: 'https://ir.tesla.com/' },
-      { label: 'Electrek — Optimus pilot line at Fremont', url: 'https://electrek.co/' },
+      { label: 'Electrek - Optimus pilot line at Fremont', url: 'https://electrek.co/' },
     ],
   },
   {
@@ -329,7 +329,7 @@ export const factoryDirectory: Factory[] = [
     notes: '12K/yr capacity. Robots building robots on the line.',
     sources: [
       { label: 'Figure AI BotQ factory tour', url: 'https://www.figure.ai/' },
-      { label: 'TechCrunch — Figure BotQ production facility', url: 'https://techcrunch.com/2025/figure-botq/' },
+      { label: 'TechCrunch - Figure BotQ production facility', url: 'https://techcrunch.com/2025/figure-botq/' },
     ],
   },
   {
@@ -345,7 +345,7 @@ export const factoryDirectory: Factory[] = [
     notes: 'First purpose-built humanoid robot factory. 10K/yr at full capacity.',
     sources: [
       { label: 'Agility Robotics RoboFab page', url: 'https://agilityrobotics.com/robofab' },
-      { label: 'IEEE Spectrum — Inside RoboFab', url: 'https://spectrum.ieee.org/agility-robotics-robofab' },
+      { label: 'IEEE Spectrum - Inside RoboFab', url: 'https://spectrum.ieee.org/agility-robotics-robofab' },
     ],
   },
   {
@@ -360,7 +360,7 @@ export const factoryDirectory: Factory[] = [
     notes: 'Initial Atlas production started Jan 2026.',
     sources: [
       { label: 'Boston Dynamics Atlas commercial launch', url: 'https://bostondynamics.com/blog/electric-new-atlas/' },
-      { label: 'The Robot Report — Atlas production begins', url: 'https://www.therobotreport.com/' },
+      { label: 'The Robot Report - Atlas production begins', url: 'https://www.therobotreport.com/' },
     ],
   },
   {
@@ -375,7 +375,7 @@ export const factoryDirectory: Factory[] = [
     notes: '30K/yr by 2028. Part of Hyundai $26B US investment.',
     sources: [
       { label: 'Hyundai Metaplant America announcement', url: 'https://www.hyundai.com/worldwide/en/company/newsroom' },
-      { label: 'Bloomberg — Hyundai $26B US investment', url: 'https://www.bloomberg.com/news/' },
+      { label: 'Bloomberg - Hyundai $26B US investment', url: 'https://www.bloomberg.com/news/' },
     ],
   },
   {
@@ -390,7 +390,7 @@ export const factoryDirectory: Factory[] = [
     notes: '5-10x capacity of previous EVE production.',
     sources: [
       { label: '1X Technologies Moss factory', url: 'https://www.1x.tech/' },
-      { label: 'TechCrunch — 1X Norway factory expansion', url: 'https://techcrunch.com/' },
+      { label: 'TechCrunch - 1X Norway factory expansion', url: 'https://techcrunch.com/' },
     ],
   },
   {
@@ -405,7 +405,7 @@ export const factoryDirectory: Factory[] = [
     notes: 'NEO factory and manufacturing operations.',
     sources: [
       { label: '1X San Carlos facility', url: 'https://www.1x.tech/' },
-      { label: 'Bloomberg — 1X US expansion', url: 'https://www.bloomberg.com/news/' },
+      { label: 'Bloomberg - 1X US expansion', url: 'https://www.bloomberg.com/news/' },
     ],
   },
   {
@@ -421,7 +421,7 @@ export const factoryDirectory: Factory[] = [
     notes: 'In-house motor and actuator manufacturing.',
     sources: [
       { label: 'Unitree official site', url: 'https://www.unitree.com/' },
-      { label: 'South China Morning Post — Unitree production', url: 'https://www.scmp.com/tech/' },
+      { label: 'South China Morning Post - Unitree production', url: 'https://www.scmp.com/tech/' },
     ],
   },
   {
@@ -437,7 +437,7 @@ export const factoryDirectory: Factory[] = [
     notes: 'Mass production began Dec 2024. 962 units by Dec 15.',
     sources: [
       { label: 'AgiBot Lingang factory', url: 'https://agibot.com/' },
-      { label: 'PanDaily — AgiBot production milestones', url: 'https://pandaily.com/' },
+      { label: 'PanDaily - AgiBot production milestones', url: 'https://pandaily.com/' },
     ],
   },
   {
@@ -452,7 +452,7 @@ export const factoryDirectory: Factory[] = [
     notes: '400+ robots/month target capacity.',
     sources: [
       { label: 'AgiBot Pudong expansion plans', url: 'https://agibot.com/' },
-      { label: 'Shanghai Daily — AgiBot Pudong plant', url: 'https://www.shanghaidaily.com/' },
+      { label: 'Shanghai Daily - AgiBot Pudong plant', url: 'https://www.shanghaidaily.com/' },
     ],
   },
   {
@@ -482,7 +482,7 @@ export const factoryDirectory: Factory[] = [
     notes: 'Walker S2 mass production. 1,000th unit Dec 2025.',
     sources: [
       { label: 'UBTECH Walker S2 production milestone', url: 'https://www.ubtrobot.com/' },
-      { label: 'South China Morning Post — UBTECH Liuzhou', url: 'https://www.scmp.com/tech/' },
+      { label: 'South China Morning Post - UBTECH Liuzhou', url: 'https://www.scmp.com/tech/' },
     ],
   },
   {
@@ -497,7 +497,7 @@ export const factoryDirectory: Factory[] = [
     notes: '$1B Infini Capital partnership. Mega factory + R&D center.',
     sources: [
       { label: 'UBTECH x Infini Capital UAE factory', url: 'https://www.ubtrobot.com/' },
-      { label: 'Arabian Business — UBTECH UAE superfactory', url: 'https://www.arabianbusiness.com/' },
+      { label: 'Arabian Business - UBTECH UAE superfactory', url: 'https://www.arabianbusiness.com/' },
     ],
   },
   {
@@ -513,7 +513,7 @@ export const factoryDirectory: Factory[] = [
     notes: 'Groundbreaking Q1 2026. Full-chain humanoid mass production base.',
     sources: [
       { label: 'XPeng IRON factory groundbreaking', url: 'https://heyxpeng.com/' },
-      { label: 'CnEVPost — XPeng humanoid factory', url: 'https://cnevpost.com/' },
+      { label: 'CnEVPost - XPeng humanoid factory', url: 'https://cnevpost.com/' },
     ],
   },
   {
@@ -528,7 +528,7 @@ export const factoryDirectory: Factory[] = [
     notes: 'Production moved from China to Germany in 2024. Bosch partnership for scaling.',
     sources: [
       { label: 'NEURA Robotics Metzingen HQ', url: 'https://neura-robotics.com/' },
-      { label: 'Handelsblatt — NEURA reshoring production', url: 'https://www.handelsblatt.com/' },
+      { label: 'Handelsblatt - NEURA reshoring production', url: 'https://www.handelsblatt.com/' },
     ],
   },
   {
@@ -544,7 +544,7 @@ export const factoryDirectory: Factory[] = [
     notes: '4NE-1 humanoid development facility.',
     sources: [
       { label: 'NEURA Robotics Zurich site', url: 'https://neura-robotics.com/' },
-      { label: 'Swiss Innovation — NEURA Zurich expansion', url: 'https://www.startupticker.ch/' },
+      { label: 'Swiss Innovation - NEURA Zurich expansion', url: 'https://www.startupticker.ch/' },
     ],
   },
   {
@@ -575,7 +575,7 @@ export const factoryDirectory: Factory[] = [
     notes: 'K2 mass production began Aug 2025.',
     sources: [
       { label: 'Kepler Robotics K2 production start', url: 'https://www.keplerbot.com/' },
-      { label: '36Kr — Kepler K2 mass production', url: 'https://36kr.com/' },
+      { label: '36Kr - Kepler K2 mass production', url: 'https://36kr.com/' },
     ],
   },
   {
@@ -590,7 +590,7 @@ export const factoryDirectory: Factory[] = [
     notes: 'In-house control boards and motor drivers.',
     sources: [
       { label: 'Noetix Robotics Beijing HQ', url: 'https://www.noetixrobotics.com/' },
-      { label: '36Kr — Noetix vertical integration', url: 'https://36kr.com/' },
+      { label: '36Kr - Noetix vertical integration', url: 'https://36kr.com/' },
     ],
   },
   {
@@ -618,7 +618,7 @@ export const factoryDirectory: Factory[] = [
     notes: 'T800 mass production commenced.',
     sources: [
       { label: 'EngineAI T800 production', url: 'https://www.engineai.com/' },
-      { label: 'PanDaily — EngineAI Shenzhen plant', url: 'https://pandaily.com/' },
+      { label: 'PanDaily - EngineAI Shenzhen plant', url: 'https://pandaily.com/' },
     ],
   },
   {
@@ -633,7 +633,7 @@ export const factoryDirectory: Factory[] = [
     notes: 'Pilot manufacturing. Apollo building Apollo.',
     sources: [
       { label: 'Apptronik x Jabil partnership', url: 'https://apptronik.com/' },
-      { label: 'Jabil blog — Apollo manufacturing', url: 'https://www.jabil.com/insights/blog-main/' },
+      { label: 'Jabil blog - Apollo manufacturing', url: 'https://www.jabil.com/insights/blog-main/' },
     ],
   },
   {
@@ -648,7 +648,7 @@ export const factoryDirectory: Factory[] = [
     notes: 'Triple role: investor, manufacturer, end user.',
     sources: [
       { label: 'Sanctuary AI x Magna partnership', url: 'https://sanctuary.ai/' },
-      { label: 'The Globe and Mail — Magna humanoid robots', url: 'https://www.theglobeandmail.com/' },
+      { label: 'The Globe and Mail - Magna humanoid robots', url: 'https://www.theglobeandmail.com/' },
     ],
   },
   {
@@ -663,7 +663,7 @@ export const factoryDirectory: Factory[] = [
     notes: '$150M investment. Part of Alat $100B plan by 2030.',
     sources: [
       { label: 'Alat x SoftBank robot factory', url: 'https://alat.com/' },
-      { label: 'Bloomberg — Alat $100B plan', url: 'https://www.bloomberg.com/news/' },
+      { label: 'Bloomberg - Alat $100B plan', url: 'https://www.bloomberg.com/news/' },
     ],
   },
 ];
@@ -681,7 +681,7 @@ export const manufacturingPartners: ManufacturingPartner[] = [
       'Worldwide manufacturing partner for Apollo humanoid robots. Jabil builds and deploys robots in its own factories for validation.',
     sources: [
       { label: 'Jabil x Apptronik Apollo partnership', url: 'https://www.jabil.com/insights/blog-main/' },
-      { label: 'Apptronik press release — Jabil partnership', url: 'https://apptronik.com/' },
+      { label: 'Apptronik press release - Jabil partnership', url: 'https://apptronik.com/' },
     ],
   },
   {
@@ -694,7 +694,7 @@ export const manufacturingPartners: ManufacturingPartner[] = [
       'Triple role: investor, contract manufacturer, and end user. Phoenix robots deployed at Magna plants for real-world data collection.',
     sources: [
       { label: 'Sanctuary AI x Magna partnership', url: 'https://sanctuary.ai/' },
-      { label: 'The Globe and Mail — Magna humanoid manufacturing', url: 'https://www.theglobeandmail.com/' },
+      { label: 'The Globe and Mail - Magna humanoid manufacturing', url: 'https://www.theglobeandmail.com/' },
     ],
   },
   {
@@ -707,7 +707,7 @@ export const manufacturingPartners: ManufacturingPartner[] = [
       '80% owner of Boston Dynamics. 30K Atlas robots/year planned at Savannah GA Metaplant by 2028. Part of $26B US investment.',
     sources: [
       { label: 'Hyundai Metaplant America announcement', url: 'https://www.hyundai.com/worldwide/en/company/newsroom' },
-      { label: 'Bloomberg — Hyundai $26B US investment plan', url: 'https://www.bloomberg.com/news/' },
+      { label: 'Bloomberg - Hyundai $26B US investment plan', url: 'https://www.bloomberg.com/news/' },
     ],
   },
   {
@@ -733,7 +733,7 @@ export const manufacturingPartners: ManufacturingPartner[] = [
       'Component supply, motor production, and potential final assembly for 4NE-1 humanoid. NEURA Hive robots-building-robots method.',
     sources: [
       { label: 'NEURA x Bosch partnership', url: 'https://neura-robotics.com/' },
-      { label: 'Handelsblatt — Bosch humanoid robot production', url: 'https://www.handelsblatt.com/' },
+      { label: 'Handelsblatt - Bosch humanoid robot production', url: 'https://www.handelsblatt.com/' },
     ],
   },
   {
@@ -746,7 +746,7 @@ export const manufacturingPartners: ManufacturingPartner[] = [
       'Deploying humanoid robots at Houston AI server factory. Co-developing proprietary humanoids with NVIDIA. UBTECH Chitu validated on Foxconn lines.',
     sources: [
       { label: 'Foxconn humanoid robot deployment', url: 'https://www.foxconn.com/' },
-      { label: 'Reuters — Foxconn NVIDIA humanoid co-development', url: 'https://www.reuters.com/' },
+      { label: 'Reuters - Foxconn NVIDIA humanoid co-development', url: 'https://www.reuters.com/' },
     ],
   },
 ];

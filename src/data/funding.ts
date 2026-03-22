@@ -58,8 +58,8 @@ export const companyFunding: CompanyFunding[] = [
       },
     ],
     sources: [
-      { label: 'Figure AI Series B — TechCrunch', url: 'https://techcrunch.com/2024/02/29/figure-raises-675m-at-2-6b-valuation/' },
-      { label: 'Figure AI Series C — Bloomberg', url: 'https://www.bloomberg.com/news/articles/2025-09-04/figure-ai-raises-1-billion-at-39-billion-valuation' },
+      { label: 'Figure AI Series B - TechCrunch', url: 'https://techcrunch.com/2024/02/29/figure-raises-675m-at-2-6b-valuation/' },
+      { label: 'Figure AI Series C - Bloomberg', url: 'https://www.bloomberg.com/news/articles/2025-09-04/figure-ai-raises-1-billion-at-39-billion-valuation' },
     ],
   },
   {
@@ -97,8 +97,8 @@ export const companyFunding: CompanyFunding[] = [
       },
     ],
     sources: [
-      { label: 'NEURA Robotics Series C — Reuters', url: 'https://www.reuters.com/technology/neura-robotics-raises-1-2-billion-led-by-tether-2026-03-10/' },
-      { label: 'NEURA Robotics Series B — TechCrunch', url: 'https://techcrunch.com/2025/01/15/neura-robotics-raises-130m-series-b/' },
+      { label: 'NEURA Robotics Series C - Reuters', url: 'https://www.reuters.com/technology/neura-robotics-raises-1-2-billion-led-by-tether-2026-03-10/' },
+      { label: 'NEURA Robotics Series B - TechCrunch', url: 'https://techcrunch.com/2025/01/15/neura-robotics-raises-130m-series-b/' },
     ],
   },
   {
@@ -134,8 +134,8 @@ export const companyFunding: CompanyFunding[] = [
       },
     ],
     sources: [
-      { label: 'UBTECH IPO — SCMP', url: 'https://www.scmp.com/tech/tech-trends/article/3245678/ubtech-robotics-ipo-hong-kong' },
-      { label: 'UBTECH Series C — Crunchbase', url: 'https://www.crunchbase.com/organization/ubtech-robotics' },
+      { label: 'UBTECH IPO - SCMP', url: 'https://www.scmp.com/tech/tech-trends/article/3245678/ubtech-robotics-ipo-hong-kong' },
+      { label: 'UBTECH Series C - Crunchbase', url: 'https://www.crunchbase.com/organization/ubtech-robotics' },
     ],
   },
   {
@@ -170,8 +170,8 @@ export const companyFunding: CompanyFunding[] = [
       },
     ],
     sources: [
-      { label: 'Apptronik Series A ext — Bloomberg', url: 'https://www.bloomberg.com/news/articles/2026-02-20/google-leads-520m-investment-in-apptronik' },
-      { label: 'Apptronik Series A — TechCrunch', url: 'https://techcrunch.com/2025/02/12/apptronik-raises-415m-series-a/' },
+      { label: 'Apptronik Series A ext - Bloomberg', url: 'https://www.bloomberg.com/news/articles/2026-02-20/google-leads-520m-investment-in-apptronik' },
+      { label: 'Apptronik Series A - TechCrunch', url: 'https://techcrunch.com/2025/02/12/apptronik-raises-415m-series-a/' },
     ],
   },
   {
@@ -195,8 +195,8 @@ export const companyFunding: CompanyFunding[] = [
       },
     ],
     sources: [
-      { label: 'Hyundai acquires Boston Dynamics — Reuters', url: 'https://www.reuters.com/business/autos-transportation/hyundai-motor-completes-boston-dynamics-acquisition-2021-06-21/' },
-      { label: 'Boston Dynamics IPO plans — Bloomberg', url: 'https://www.bloomberg.com/news/articles/2025-06-15/hyundai-considers-boston-dynamics-ipo' },
+      { label: 'Hyundai acquires Boston Dynamics - Reuters', url: 'https://www.reuters.com/business/autos-transportation/hyundai-motor-completes-boston-dynamics-acquisition-2021-06-21/' },
+      { label: 'Boston Dynamics IPO plans - Bloomberg', url: 'https://www.bloomberg.com/news/articles/2025-06-15/hyundai-considers-boston-dynamics-ipo' },
     ],
   },
   {
@@ -235,8 +235,8 @@ export const companyFunding: CompanyFunding[] = [
       },
     ],
     sources: [
-      { label: 'Galbot Series D — 36Kr', url: 'https://36kr.com/p/galbot-series-d-300m-2025' },
-      { label: 'Galbot HKEX IPO plans — SCMP', url: 'https://www.scmp.com/tech/big-tech/article/3296789/galbot-hkex-ipo-2026' },
+      { label: 'Galbot Series D - 36Kr', url: 'https://36kr.com/p/galbot-series-d-300m-2025' },
+      { label: 'Galbot HKEX IPO plans - SCMP', url: 'https://www.scmp.com/tech/big-tech/article/3296789/galbot-hkex-ipo-2026' },
     ],
   },
   {
@@ -264,8 +264,8 @@ export const companyFunding: CompanyFunding[] = [
       },
     ],
     sources: [
-      { label: 'AgiBot Series B — 36Kr', url: 'https://36kr.com/p/agibot-series-b-tencent-2025' },
-      { label: 'AgiBot HKEX IPO filing — Reuters', url: 'https://www.reuters.com/technology/agibot-files-hkex-ipo-2026' },
+      { label: 'AgiBot Series B - 36Kr', url: 'https://36kr.com/p/agibot-series-b-tencent-2025' },
+      { label: 'AgiBot HKEX IPO filing - Reuters', url: 'https://www.reuters.com/technology/agibot-files-hkex-ipo-2026' },
     ],
   },
   {
@@ -302,8 +302,8 @@ export const companyFunding: CompanyFunding[] = [
       },
     ],
     sources: [
-      { label: 'Agility Robotics Series C — TechCrunch', url: 'https://techcrunch.com/2025/03/18/agility-robotics-raises-400m-series-c/' },
-      { label: 'Agility Robotics funding history — Crunchbase', url: 'https://www.crunchbase.com/organization/agility-robotics' },
+      { label: 'Agility Robotics Series C - TechCrunch', url: 'https://techcrunch.com/2025/03/18/agility-robotics-raises-400m-series-c/' },
+      { label: 'Agility Robotics funding history - Crunchbase', url: 'https://www.crunchbase.com/organization/agility-robotics' },
     ],
   },
   {
@@ -334,8 +334,8 @@ export const companyFunding: CompanyFunding[] = [
       },
     ],
     sources: [
-      { label: 'Galaxea AI Series B — 36Kr', url: 'https://36kr.com/p/galaxea-ai-series-b-2026' },
-      { label: 'Galaxea AI funding — PitchBook', url: 'https://pitchbook.com/profiles/company/galaxea-ai' },
+      { label: 'Galaxea AI Series B - 36Kr', url: 'https://36kr.com/p/galaxea-ai-series-b-2026' },
+      { label: 'Galaxea AI funding - PitchBook', url: 'https://pitchbook.com/profiles/company/galaxea-ai' },
     ],
   },
   {
@@ -367,8 +367,8 @@ export const companyFunding: CompanyFunding[] = [
       },
     ],
     sources: [
-      { label: 'RobotEra Series A+ — 36Kr', url: 'https://36kr.com/p/robotera-series-a-plus-geely-2025' },
-      { label: 'RobotEra Pre-A — TechNode', url: 'https://technode.com/2024/10/robotera-raises-42m/' },
+      { label: 'RobotEra Series A+ - 36Kr', url: 'https://36kr.com/p/robotera-series-a-plus-geely-2025' },
+      { label: 'RobotEra Pre-A - TechNode', url: 'https://technode.com/2024/10/robotera-raises-42m/' },
     ],
   },
   {
@@ -400,8 +400,8 @@ export const companyFunding: CompanyFunding[] = [
       },
     ],
     sources: [
-      { label: 'Noetix Series B — 36Kr', url: 'https://36kr.com/p/noetix-series-b-catl-2026' },
-      { label: 'Noetix funding — PitchBook', url: 'https://pitchbook.com/profiles/company/noetix' },
+      { label: 'Noetix Series B - 36Kr', url: 'https://36kr.com/p/noetix-series-b-catl-2026' },
+      { label: 'Noetix funding - PitchBook', url: 'https://pitchbook.com/profiles/company/noetix' },
     ],
   },
   {
@@ -429,8 +429,8 @@ export const companyFunding: CompanyFunding[] = [
       },
     ],
     sources: [
-      { label: 'Sunday Robotics Series B — TechCrunch', url: 'https://techcrunch.com/2026/03/10/sunday-robotics-raises-165m-series-b/' },
-      { label: 'Sunday Robotics Seed — The Information', url: 'https://www.theinformation.com/articles/sunday-robotics-raises-35m-seed' },
+      { label: 'Sunday Robotics Series B - TechCrunch', url: 'https://techcrunch.com/2026/03/10/sunday-robotics-raises-165m-series-b/' },
+      { label: 'Sunday Robotics Seed - The Information', url: 'https://www.theinformation.com/articles/sunday-robotics-raises-35m-seed' },
     ],
   },
   {
@@ -461,8 +461,8 @@ export const companyFunding: CompanyFunding[] = [
       },
     ],
     sources: [
-      { label: 'Fourier Intelligence Series E — 36Kr', url: 'https://36kr.com/p/fourier-series-e-2025' },
-      { label: 'Fourier Intelligence funding — Crunchbase', url: 'https://www.crunchbase.com/organization/fourier-intelligence' },
+      { label: 'Fourier Intelligence Series E - 36Kr', url: 'https://36kr.com/p/fourier-series-e-2025' },
+      { label: 'Fourier Intelligence funding - Crunchbase', url: 'https://www.crunchbase.com/organization/fourier-intelligence' },
     ],
   },
   {
@@ -494,8 +494,8 @@ export const companyFunding: CompanyFunding[] = [
       },
     ],
     sources: [
-      { label: 'EngineAI Series A1 — 36Kr', url: 'https://36kr.com/p/engineai-series-a1-jd-2025' },
-      { label: 'EngineAI funding — PitchBook', url: 'https://pitchbook.com/profiles/company/engineai' },
+      { label: 'EngineAI Series A1 - 36Kr', url: 'https://36kr.com/p/engineai-series-a1-jd-2025' },
+      { label: 'EngineAI funding - PitchBook', url: 'https://pitchbook.com/profiles/company/engineai' },
     ],
   },
   {
@@ -506,7 +506,7 @@ export const companyFunding: CompanyFunding[] = [
     totalRaisedM: 155,
     latestValuationM: 7000,
     latestValuationNote: 'pre-IPO target, not finalized',
-    ipoPlans: 'STAR Market — filed Mar 2026, targeting ~$610M raise',
+    ipoPlans: 'STAR Market - filed Mar 2026, targeting ~$610M raise',
     ipoRaiseTargetM: 610,
     revenue2025M: 248,
     netProfit2025M: 41.8,
@@ -527,8 +527,8 @@ export const companyFunding: CompanyFunding[] = [
       },
     ],
     sources: [
-      { label: 'Unitree STAR Market IPO filing — Reuters', url: 'https://www.reuters.com/technology/unitree-files-star-market-ipo-2026' },
-      { label: 'Unitree Series C — 36Kr', url: 'https://36kr.com/p/unitree-series-c-2025' },
+      { label: 'Unitree STAR Market IPO filing - Reuters', url: 'https://www.reuters.com/technology/unitree-files-star-market-ipo-2026' },
+      { label: 'Unitree Series C - 36Kr', url: 'https://36kr.com/p/unitree-series-c-2025' },
     ],
   },
   {
@@ -553,8 +553,8 @@ export const companyFunding: CompanyFunding[] = [
       },
     ],
     sources: [
-      { label: 'Sanctuary AI Strategic Round — BetaKit', url: 'https://betakit.com/sanctuary-ai-raises-strategic-round-2024/' },
-      { label: 'Sanctuary AI funding — Crunchbase', url: 'https://www.crunchbase.com/organization/sanctuary-cognitive-systems' },
+      { label: 'Sanctuary AI Strategic Round - BetaKit', url: 'https://betakit.com/sanctuary-ai-raises-strategic-round-2024/' },
+      { label: 'Sanctuary AI funding - Crunchbase', url: 'https://www.crunchbase.com/organization/sanctuary-cognitive-systems' },
     ],
   },
   {
@@ -588,8 +588,8 @@ export const companyFunding: CompanyFunding[] = [
       },
     ],
     sources: [
-      { label: 'Collaborative Robotics Series B — TechCrunch', url: 'https://techcrunch.com/2024/04/03/collaborative-robotics-raises-100m-series-b/' },
-      { label: 'Collaborative Robotics funding — Crunchbase', url: 'https://www.crunchbase.com/organization/collaborative-robotics' },
+      { label: 'Collaborative Robotics Series B - TechCrunch', url: 'https://techcrunch.com/2024/04/03/collaborative-robotics-raises-100m-series-b/' },
+      { label: 'Collaborative Robotics funding - Crunchbase', url: 'https://www.crunchbase.com/organization/collaborative-robotics' },
     ],
   },
   {
@@ -617,8 +617,8 @@ export const companyFunding: CompanyFunding[] = [
       },
     ],
     sources: [
-      { label: '1X Series B — TechCrunch', url: 'https://techcrunch.com/2024/01/11/1x-raises-100m-series-b/' },
-      { label: '1X Series A2 — Reuters', url: 'https://www.reuters.com/technology/openai-backed-1x-raises-24-million-2023-03-23/' },
+      { label: '1X Series B - TechCrunch', url: 'https://techcrunch.com/2024/01/11/1x-raises-100m-series-b/' },
+      { label: '1X Series A2 - Reuters', url: 'https://www.reuters.com/technology/openai-backed-1x-raises-24-million-2023-03-23/' },
     ],
   },
   {
@@ -640,8 +640,8 @@ export const companyFunding: CompanyFunding[] = [
       },
     ],
     sources: [
-      { label: 'Dobot IPO — HKEX Listing', url: 'https://www.hkex.com.hk/Market-Data/Securities-Prices/Equities/Equities-Quote?sym=2432' },
-      { label: 'Dobot IPO — SCMP', url: 'https://www.scmp.com/tech/big-tech/article/3290123/dobot-ipo-hkex-2024' },
+      { label: 'Dobot IPO - HKEX Listing', url: 'https://www.hkex.com.hk/Market-Data/Securities-Prices/Equities/Equities-Quote?sym=2432' },
+      { label: 'Dobot IPO - SCMP', url: 'https://www.scmp.com/tech/big-tech/article/3290123/dobot-ipo-hkex-2024' },
     ],
   },
   {
@@ -666,8 +666,8 @@ export const companyFunding: CompanyFunding[] = [
       },
     ],
     sources: [
-      { label: 'MagicLab Series A — 36Kr', url: 'https://36kr.com/p/magiclab-series-a-tuopu-2026' },
-      { label: 'MagicLab funding — PitchBook', url: 'https://pitchbook.com/profiles/company/magiclab' },
+      { label: 'MagicLab Series A - 36Kr', url: 'https://36kr.com/p/magiclab-series-a-tuopu-2026' },
+      { label: 'MagicLab funding - PitchBook', url: 'https://pitchbook.com/profiles/company/magiclab' },
     ],
   },
   {
@@ -696,8 +696,8 @@ export const companyFunding: CompanyFunding[] = [
       },
     ],
     sources: [
-      { label: 'Booster Robotics Series A — 36Kr', url: 'https://36kr.com/p/booster-robotics-series-a-2025' },
-      { label: 'Booster Robotics funding — PitchBook', url: 'https://pitchbook.com/profiles/company/booster-robotics' },
+      { label: 'Booster Robotics Series A - 36Kr', url: 'https://36kr.com/p/booster-robotics-series-a-2025' },
+      { label: 'Booster Robotics funding - PitchBook', url: 'https://pitchbook.com/profiles/company/booster-robotics' },
     ],
   },
   {
@@ -724,8 +724,8 @@ export const companyFunding: CompanyFunding[] = [
       },
     ],
     sources: [
-      { label: 'Mobileye acquires Mentee Robotics — Reuters', url: 'https://www.reuters.com/technology/mobileye-acquires-mentee-robotics-900m-2026-01/' },
-      { label: 'Mentee Robotics Venture — Globes', url: 'https://en.globes.co.il/en/article-mentee-robotics-raises-17m-2024' },
+      { label: 'Mobileye acquires Mentee Robotics - Reuters', url: 'https://www.reuters.com/technology/mobileye-acquires-mentee-robotics-900m-2026-01/' },
+      { label: 'Mentee Robotics Venture - Globes', url: 'https://en.globes.co.il/en/article-mentee-robotics-raises-17m-2024' },
     ],
   },
   {
@@ -743,7 +743,7 @@ export const companyFunding: CompanyFunding[] = [
       },
     ],
     sources: [
-      { label: 'Fauna Robotics Series B — TechCrunch', url: 'https://techcrunch.com/2025/02/20/fauna-robotics-raises-17m/' },
+      { label: 'Fauna Robotics Series B - TechCrunch', url: 'https://techcrunch.com/2025/02/20/fauna-robotics-raises-17m/' },
     ],
   },
   {
@@ -761,7 +761,7 @@ export const companyFunding: CompanyFunding[] = [
       },
     ],
     sources: [
-      { label: 'Enchanted Tools Seed — Crunchbase', url: 'https://www.crunchbase.com/organization/enchanted-tools' },
+      { label: 'Enchanted Tools Seed - Crunchbase', url: 'https://www.crunchbase.com/organization/enchanted-tools' },
     ],
   },
   {
@@ -781,7 +781,7 @@ export const companyFunding: CompanyFunding[] = [
       },
     ],
     sources: [
-      { label: 'Clone Robotics Seed — Crunchbase', url: 'https://www.crunchbase.com/organization/clone-robotics' },
+      { label: 'Clone Robotics Seed - Crunchbase', url: 'https://www.crunchbase.com/organization/clone-robotics' },
     ],
   },
 ];
@@ -795,8 +795,8 @@ export const topInvestors: InvestorProfile[] = [
     portfolioCompanyIds: ['figure', 'agility'],
     description: 'Dual strategy: sell Jetson compute modules as the de facto humanoid brain, and take equity in top OEMs. 30 deals in 2025 vs 1 in 2022.',
     sources: [
-      { label: 'NVIDIA robotics investment strategy — Bloomberg', url: 'https://www.bloomberg.com/news/articles/2025-05-20/nvidia-ramps-humanoid-robotics-investments' },
-      { label: 'NVentures portfolio — NVIDIA Blog', url: 'https://blogs.nvidia.com/blog/nventures-robotics-investments/' },
+      { label: 'NVIDIA robotics investment strategy - Bloomberg', url: 'https://www.bloomberg.com/news/articles/2025-05-20/nvidia-ramps-humanoid-robotics-investments' },
+      { label: 'NVentures portfolio - NVIDIA Blog', url: 'https://blogs.nvidia.com/blog/nventures-robotics-investments/' },
     ],
   },
   {
@@ -807,8 +807,8 @@ export const topInvestors: InvestorProfile[] = [
     portfolioCompanyIds: ['figure', '1x'],
     description: 'Sees humanoid robotics as the physical embodiment layer for foundation models. Backed Figure and 1X as complementary bets.',
     sources: [
-      { label: 'OpenAI Startup Fund robotics thesis — The Information', url: 'https://www.theinformation.com/articles/openai-startup-fund-robotics-bets' },
-      { label: 'OpenAI-1X partnership — TechCrunch', url: 'https://techcrunch.com/2023/03/23/openai-backed-1x-raises-24m/' },
+      { label: 'OpenAI Startup Fund robotics thesis - The Information', url: 'https://www.theinformation.com/articles/openai-startup-fund-robotics-bets' },
+      { label: 'OpenAI-1X partnership - TechCrunch', url: 'https://techcrunch.com/2023/03/23/openai-backed-1x-raises-24m/' },
     ],
   },
   {
@@ -819,8 +819,8 @@ export const topInvestors: InvestorProfile[] = [
     portfolioCompanyIds: ['figure', 'agility'],
     description: 'Personal investments via Explore Investments LLC. Amazon warehouse operations are the obvious deployment target.',
     sources: [
-      { label: 'Bezos invests in Figure — Bloomberg', url: 'https://www.bloomberg.com/news/articles/2024-02-29/bezos-backs-figure-ai-humanoid-robot-startup' },
-      { label: 'Bezos robotics investments — Forbes', url: 'https://www.forbes.com/sites/bezos-robotics-investments/' },
+      { label: 'Bezos invests in Figure - Bloomberg', url: 'https://www.bloomberg.com/news/articles/2024-02-29/bezos-backs-figure-ai-humanoid-robot-startup' },
+      { label: 'Bezos robotics investments - Forbes', url: 'https://www.forbes.com/sites/bezos-robotics-investments/' },
     ],
   },
   {
@@ -831,8 +831,8 @@ export const topInvestors: InvestorProfile[] = [
     portfolioCompanyIds: ['agility', 'fourier', 'boston_dynamics'],
     description: 'Positioned as physical AI infrastructure play. $5.4B ABB Robotics acquisition plus humanoid equity bets.',
     sources: [
-      { label: 'SoftBank robotics strategy — Reuters', url: 'https://www.reuters.com/technology/softbank-robotics-investment-strategy-2025/' },
-      { label: 'SoftBank acquires ABB Robotics — Financial Times', url: 'https://www.ft.com/content/softbank-abb-robotics-acquisition' },
+      { label: 'SoftBank robotics strategy - Reuters', url: 'https://www.reuters.com/technology/softbank-robotics-investment-strategy-2025/' },
+      { label: 'SoftBank acquires ABB Robotics - Financial Times', url: 'https://www.ft.com/content/softbank-abb-robotics-acquisition' },
     ],
   },
   {
@@ -843,8 +843,8 @@ export const topInvestors: InvestorProfile[] = [
     portfolioCompanyIds: ['ubtech', 'agibot', 'unitree'],
     description: 'Dominant Chinese tech investor in humanoid space. Leading rounds for AgiBot and co-leading Unitree Series C.',
     sources: [
-      { label: 'Tencent humanoid investments — SCMP', url: 'https://www.scmp.com/tech/big-tech/article/tencent-humanoid-robotics-investments' },
-      { label: 'Tencent leads AgiBot round — 36Kr', url: 'https://36kr.com/p/tencent-agibot-series-b-2025' },
+      { label: 'Tencent humanoid investments - SCMP', url: 'https://www.scmp.com/tech/big-tech/article/tencent-humanoid-robotics-investments' },
+      { label: 'Tencent leads AgiBot round - 36Kr', url: 'https://36kr.com/p/tencent-agibot-series-b-2025' },
     ],
   },
   {
@@ -855,8 +855,8 @@ export const topInvestors: InvestorProfile[] = [
     portfolioCompanyIds: ['1x'],
     description: 'Vertically integrated strategy: owns Rainbow Robotics (35%), supplies components (MLCCs, batteries, cameras), invests in complementary companies.',
     sources: [
-      { label: 'Samsung NEXT robotics investments — Samsung Newsroom', url: 'https://news.samsung.com/global/samsung-next-robotics-portfolio' },
-      { label: 'Samsung Rainbow Robotics stake — Reuters', url: 'https://www.reuters.com/technology/samsung-rainbow-robotics-stake-2024/' },
+      { label: 'Samsung NEXT robotics investments - Samsung Newsroom', url: 'https://news.samsung.com/global/samsung-next-robotics-portfolio' },
+      { label: 'Samsung Rainbow Robotics stake - Reuters', url: 'https://www.reuters.com/technology/samsung-rainbow-robotics-stake-2024/' },
     ],
   },
   {
@@ -867,8 +867,8 @@ export const topInvestors: InvestorProfile[] = [
     portfolioCompanyIds: ['collaborative_robotics', 'agibot', 'unitree'],
     description: 'Betting across the stack. China arm (HongShan) holds 7.13% of Unitree and backs AgiBot.',
     sources: [
-      { label: 'Sequoia robotics thesis — The Information', url: 'https://www.theinformation.com/articles/sequoia-robotics-thesis' },
-      { label: 'HongShan Unitree stake — 36Kr', url: 'https://36kr.com/p/hongshan-unitree-stake-2024' },
+      { label: 'Sequoia robotics thesis - The Information', url: 'https://www.theinformation.com/articles/sequoia-robotics-thesis' },
+      { label: 'HongShan Unitree stake - 36Kr', url: 'https://36kr.com/p/hongshan-unitree-stake-2024' },
     ],
   },
   {
@@ -879,8 +879,8 @@ export const topInvestors: InvestorProfile[] = [
     portfolioCompanyIds: ['galbot', 'noetix', 'engineai'],
     description: 'Battery giant extending into humanoid robotics via investment arm. Leading rounds for Galbot and Noetix.',
     sources: [
-      { label: 'CATL humanoid robotics investments — 36Kr', url: 'https://36kr.com/p/catl-humanoid-robotics-investments-2025' },
-      { label: 'CATL leads Noetix Series B — Reuters', url: 'https://www.reuters.com/technology/catl-leads-noetix-series-b-2026/' },
+      { label: 'CATL humanoid robotics investments - 36Kr', url: 'https://36kr.com/p/catl-humanoid-robotics-investments-2025' },
+      { label: 'CATL leads Noetix Series B - Reuters', url: 'https://www.reuters.com/technology/catl-leads-noetix-series-b-2026/' },
     ],
   },
   {
@@ -891,8 +891,8 @@ export const topInvestors: InvestorProfile[] = [
     portfolioCompanyIds: ['apptronik'],
     description: 'Google DeepMind provides AI models for Apptronik and Boston Dynamics. Led Apptronik Series A extension.',
     sources: [
-      { label: 'Google leads Apptronik round — Bloomberg', url: 'https://www.bloomberg.com/news/articles/2026-02-20/google-leads-apptronik-investment' },
-      { label: 'DeepMind robotics partnerships — Google Blog', url: 'https://blog.google/technology/ai/deepmind-robotics-partnerships/' },
+      { label: 'Google leads Apptronik round - Bloomberg', url: 'https://www.bloomberg.com/news/articles/2026-02-20/google-leads-apptronik-investment' },
+      { label: 'DeepMind robotics partnerships - Google Blog', url: 'https://blog.google/technology/ai/deepmind-robotics-partnerships/' },
     ],
   },
   {
@@ -903,8 +903,8 @@ export const topInvestors: InvestorProfile[] = [
     portfolioCompanyIds: ['1x', 'sunday'],
     description: 'Focus on high-growth consumer and enterprise markets. Backed 1X for home humanoids and Sunday for household tasks.',
     sources: [
-      { label: 'Tiger Global robotics bets — The Information', url: 'https://www.theinformation.com/articles/tiger-global-robotics-bets' },
-      { label: 'Tiger Global 1X investment — PitchBook', url: 'https://pitchbook.com/profiles/company/1x-technologies' },
+      { label: 'Tiger Global robotics bets - The Information', url: 'https://www.theinformation.com/articles/tiger-global-robotics-bets' },
+      { label: 'Tiger Global 1X investment - PitchBook', url: 'https://pitchbook.com/profiles/company/1x-technologies' },
     ],
   },
   {
@@ -915,8 +915,8 @@ export const topInvestors: InvestorProfile[] = [
     portfolioCompanyIds: ['figure'],
     description: 'Led Figure AI Series A and Series C. Identified robotics workforce automation as a megatrend.',
     sources: [
-      { label: 'Parkway leads Figure Series C — Bloomberg', url: 'https://www.bloomberg.com/news/articles/2025-09-04/parkway-leads-figure-ai-series-c' },
-      { label: 'Parkway Venture Capital — Crunchbase', url: 'https://www.crunchbase.com/organization/parkway-venture-capital' },
+      { label: 'Parkway leads Figure Series C - Bloomberg', url: 'https://www.bloomberg.com/news/articles/2025-09-04/parkway-leads-figure-ai-series-c' },
+      { label: 'Parkway Venture Capital - Crunchbase', url: 'https://www.crunchbase.com/organization/parkway-venture-capital' },
     ],
   },
   {
@@ -927,8 +927,8 @@ export const topInvestors: InvestorProfile[] = [
     portfolioCompanyIds: ['fourier'],
     description: 'Saudi Aramco $3B VC arm. Backed Fourier Series D and E. Part of broader Saudi push into robotics and AI.',
     sources: [
-      { label: 'Prosperity7 robotics portfolio — Arabian Business', url: 'https://www.arabianbusiness.com/prosperity7-robotics-portfolio' },
-      { label: 'Prosperity7 Fourier investment — PitchBook', url: 'https://pitchbook.com/profiles/company/fourier-intelligence' },
+      { label: 'Prosperity7 robotics portfolio - Arabian Business', url: 'https://www.arabianbusiness.com/prosperity7-robotics-portfolio' },
+      { label: 'Prosperity7 Fourier investment - PitchBook', url: 'https://pitchbook.com/profiles/company/fourier-intelligence' },
     ],
   },
 ];

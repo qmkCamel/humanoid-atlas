@@ -57,7 +57,7 @@ export const safetyStandards: SafetyStandard[] = [
       'Major overhaul after 8 years. Part 1 expanded to 95 pages, Part 2 to 223 pages. New Class I/II system, integrates ISO/TS 15066 collaborative requirements. Replaces term "cobot" with "collaborative application."',
     sources: [
       {
-        label: 'ISO – ISO 10218-1:2025 Industrial Robots — Safety Requirements',
+        label: 'ISO – ISO 10218-1:2025 Industrial Robots - Safety Requirements',
         url: 'https://www.iso.org/standard/82585.html',
       },
       {
@@ -79,7 +79,7 @@ export const safetyStandards: SafetyStandard[] = [
       'Covers non-industrial robots in close contact with the public. Revision expands scope from personal care to broader service robots including humanoids in homes, hospitals, and public spaces.',
     sources: [
       {
-        label: 'ISO – ISO/FDIS 13482 Robots for Personal Care — Safety Requirements',
+        label: 'ISO – ISO/FDIS 13482 Robots for Personal Care - Safety Requirements',
         url: 'https://www.iso.org/standard/83498.html',
       },
       {

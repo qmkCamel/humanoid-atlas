@@ -25,7 +25,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       `${c.name} (${c.country}, ${c.type})`)
     .join(', ');
 
-  const prompt = `You are a supply chain analyst for the humanoid robotics industry. Answer the user's question about the company below. Be concise (1-3 sentences). Use ONLY the data provided — do not invent facts.
+  const prompt = `You are a supply chain analyst for the humanoid robotics industry. Answer the user's question about the company below. Be concise (1-3 sentences). Use ONLY the data provided - do not invent facts.
 
 COMPANY:
 - Name: ${company.name}

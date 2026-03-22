@@ -66,7 +66,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const count = await redis.hincrby(REDIS_KEY, oemId, 1);
         return res.json({ oemId, likes: count });
       } else {
-        // DELETE: unlike — remove IP from voted set and decrement
+        // DELETE: unlike - remove IP from voted set and decrement
         const wasVoted = await redis.srem(votedKey, ip);
         if (!wasVoted) {
           const current = (await redis.hget<number>(REDIS_KEY, oemId)) || 0;

@@ -49,7 +49,7 @@ export function applySecurity(req: VercelRequest, res: VercelResponse): boolean 
   return false;
 }
 
-/** Sanitize error for client — never leak internal details */
+/** Sanitize error for client - never leak internal details */
 export function safeError(res: VercelResponse, status: number, message: string, err?: unknown) {
   if (err) console.error(message, err);
   return res.status(status).json({ error: message });

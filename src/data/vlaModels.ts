@@ -506,7 +506,7 @@ export const vlaModels: VLAModel[] = [
     developer: 'Allen Institute for AI (Ai2)',
     country: 'US',
     relationshipType: 'open',
-    description: 'The first Action Reasoning Model (ARM) — a new class of VLA that "thinks" in 3D by grounding reasoning through depth-aware perception tokens rather than text chain-of-thought. Three-stage autoregressive pipeline: depth perception (100 VQVAE tokens encoding geometric structure), visual trace planning (1-5 waypoints in image space, embodiment-agnostic), and action decoding (7-DoF discretized control). Trained on 26.3M samples across 93 manipulation tasks. State-of-the-art on SimplerEnv (70.5% zero-shot) and LIBERO (86.6% avg), outperforming π0-FAST by +10% single-arm, +22.7% bimanual, and +23.3% OOD in real-world tests — with 35x less training data than GR00T N1.5.',
+    description: 'The first Action Reasoning Model (ARM) - a new class of VLA that "thinks" in 3D by grounding reasoning through depth-aware perception tokens rather than text chain-of-thought. Three-stage autoregressive pipeline: depth perception (100 VQVAE tokens encoding geometric structure), visual trace planning (1-5 waypoints in image space, embodiment-agnostic), and action decoding (7-DoF discretized control). Trained on 26.3M samples across 93 manipulation tasks. State-of-the-art on SimplerEnv (70.5% zero-shot) and LIBERO (86.6% avg), outperforming π0-FAST by +10% single-arm, +22.7% bimanual, and +23.3% OOD in real-world tests - with 35x less training data than GR00T N1.5.',
     release: '2025',
     focus: 'Action reasoning via depth perception + visual trace planning',
     availability: 'Open weights + code + data (Apache 2.0)',

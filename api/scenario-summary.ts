@@ -29,7 +29,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       `${c.sourceName} → ${c.affected.map((a: { name: string }) => a.name).join(', ')}`)
     .join('; ');
 
-  const prompt = `You are a supply chain analyst for the humanoid robotics industry. Given this scenario simulation result, write a 2-3 sentence analyst summary. Be specific with numbers and company names. Be direct and insightful — focus on who is most affected and why.
+  const prompt = `You are a supply chain analyst for the humanoid robotics industry. Given this scenario simulation result, write a 2-3 sentence analyst summary. Be specific with numbers and company names. Be direct and insightful - focus on who is most affected and why.
 
 Scenario: ${scenarioNames || 'Custom simulation'}
 ${cascadeSummary ? `Cascade: ${cascadeSummary}` : ''}

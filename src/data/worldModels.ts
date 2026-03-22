@@ -10,7 +10,7 @@ export const worldModels: WorldModel[] = [
     country: 'US',
     modelType: 'video-generation',
     description:
-      'Foundation world model that predicts future video frames conditioned on robot actions. Pretrained on 44,000 hours of diverse human egocentric video (DreamDojo-HV dataset — 15x longer, 96x more skills, 2,000x more scenes than prior largest dataset), then post-trained on target robot embodiments with continuous actions. Uses autoregressive few-step distillation for 10 FPS real-time generation over 1+ minute horizons.',
+      'Foundation world model that predicts future video frames conditioned on robot actions. Pretrained on 44,000 hours of diverse human egocentric video (DreamDojo-HV dataset - 15x longer, 96x more skills, 2,000x more scenes than prior largest dataset), then post-trained on target robot embodiments with continuous actions. Uses autoregressive few-step distillation for 10 FPS real-time generation over 1+ minute horizons.',
     backbone: 'Autoregressive video diffusion',
     params: '14B',
     trainingData: '44K hrs human egocentric video',
@@ -53,7 +53,7 @@ export const worldModels: WorldModel[] = [
     country: 'US',
     modelType: 'video-generation',
     description:
-      'Reference workflow built on Cosmos that generates massive synthetic trajectory data for teaching humanoid robots new actions. From a single image and language prompt, uses Cosmos-Predict2 and Cosmos-Reason1 to "dream" new robot scenarios not present in real training data. Used to train GR00T N1.5 in just 36 hours — replacing ~3 months of manual data collection.',
+      'Reference workflow built on Cosmos that generates massive synthetic trajectory data for teaching humanoid robots new actions. From a single image and language prompt, uses Cosmos-Predict2 and Cosmos-Reason1 to "dream" new robot scenarios not present in real training data. Used to train GR00T N1.5 in just 36 hours - replacing ~3 months of manual data collection.',
     backbone: 'Cosmos-Predict2 + Cosmos-Reason1',
     params: '14B (Cosmos backbone)',
     trainingData: 'Single image + language prompt',
@@ -116,7 +116,7 @@ export const worldModels: WorldModel[] = [
     country: 'US',
     modelType: 'video-generation',
     description:
-      'Direct Video-Action model that predicts future video frames then converts them to motor torques via an inverse dynamics model — explicitly not a VLA. Causal Video Model pretrained on hundreds of millions of internet videos to learn motion, physics, and 3D structure. Natively processes hundreds of video frames (vs a few frames for typical VLAs). Learns new manipulation tasks from only 10-20 hours of teleoperation data. Demonstrated 1.5 hours continuous autonomous operation in automotive factory. $450M raised at $1.7B valuation, founded by serial entrepreneur Jagdeep Singh (Infinera, QuantumScape, Raxium).',
+      'Direct Video-Action model that predicts future video frames then converts them to motor torques via an inverse dynamics model - explicitly not a VLA. Causal Video Model pretrained on hundreds of millions of internet videos to learn motion, physics, and 3D structure. Natively processes hundreds of video frames (vs a few frames for typical VLAs). Learns new manipulation tasks from only 10-20 hours of teleoperation data. Demonstrated 1.5 hours continuous autonomous operation in automotive factory. $450M raised at $1.7B valuation, founded by serial entrepreneur Jagdeep Singh (Infinera, QuantumScape, Raxium).',
     backbone: 'Causal Video Model + Inverse Dynamics Model',
     trainingData: 'Hundreds of millions of internet videos + 10-20 hrs robot data per task',
     release: '2026',
@@ -137,7 +137,7 @@ export const worldModels: WorldModel[] = [
     country: 'CH',
     modelType: 'latent-dynamics',
     description:
-      'Learned black-box neural simulator that predicts future observations from past observation-action history. Uses a dual-autoregressive mechanism (GRU with inner history updates and outer prediction feedback) for reliable long-horizon predictions. Domain-agnostic — works across legged locomotion, manipulation, and diverse robotic tasks without domain-specific inductive biases.',
+      'Learned black-box neural simulator that predicts future observations from past observation-action history. Uses a dual-autoregressive mechanism (GRU with inner history updates and outer prediction feedback) for reliable long-horizon predictions. Domain-agnostic - works across legged locomotion, manipulation, and diverse robotic tasks without domain-specific inductive biases.',
     backbone: 'GRU dual-autoregressive',
     release: '2025',
     venue: 'NeurIPS 2025 Workshop (Outstanding Paper)',
@@ -175,7 +175,7 @@ export const worldModels: WorldModel[] = [
     country: 'CH',
     modelType: 'latent-dynamics',
     description:
-      'IRIS treats world modeling as a sequence modeling problem using a discrete autoencoder + autoregressive Transformer. Outperformed humans on 10/26 Atari games with only 2 hours equivalent gameplay. Delta-IRIS (ICML 2024) improves this by encoding stochastic deltas between timesteps and using continuous tokens — an order of magnitude faster to train.',
+      'IRIS treats world modeling as a sequence modeling problem using a discrete autoencoder + autoregressive Transformer. Outperformed humans on 10/26 Atari games with only 2 hours equivalent gameplay. Delta-IRIS (ICML 2024) improves this by encoding stochastic deltas between timesteps and using continuous tokens - an order of magnitude faster to train.',
     backbone: 'Discrete autoencoder + Transformer',
     release: '2023',
     venue: 'ICLR 2023 (Notable Top 5%)',
@@ -213,7 +213,7 @@ export const worldModels: WorldModel[] = [
     country: 'US',
     modelType: 'latent-dynamics',
     description:
-      'Suite of physics-first foundation models built from scratch for embodied AI — explicitly not adapted from LLMs/VLMs. Includes Belief World Model (BWM) for risk-aware predictive reasoning under uncertainty, Dynamics Foundation Model (DFM) for robot dynamics, and Multiagent Foundation Model (MFM) for multi-robot coordination. Runs on-robot at the edge with no cloud or GPS dependency. Deployed on Boston Dynamics Spot in construction environments. $405M raised at $2B valuation, founded by ex-NASA JPL team led by Ali Agha.',
+      'Suite of physics-first foundation models built from scratch for embodied AI - explicitly not adapted from LLMs/VLMs. Includes Belief World Model (BWM) for risk-aware predictive reasoning under uncertainty, Dynamics Foundation Model (DFM) for robot dynamics, and Multiagent Foundation Model (MFM) for multi-robot coordination. Runs on-robot at the edge with no cloud or GPS dependency. Deployed on Boston Dynamics Spot in construction environments. $405M raised at $2B valuation, founded by ex-NASA JPL team led by Ali Agha.',
     backbone: 'Physics-first foundation models (BWM + DFM + MFM)',
     release: '2024',
     venue: 'Field AI',
@@ -234,7 +234,7 @@ export const worldModels: WorldModel[] = [
     country: 'US',
     modelType: 'rl-imagination',
     description:
-      'World-model-based agent that learns to solve control tasks by training entirely "in imagination." Practices behaviors via reinforcement learning inside a learned world model rather than requiring direct environment interaction. First agent to obtain diamonds in Minecraft purely from offline data — a task requiring 20,000+ action sequences from raw pixels. Outperforms OpenAI VPT while using 100x less data.',
+      'World-model-based agent that learns to solve control tasks by training entirely "in imagination." Practices behaviors via reinforcement learning inside a learned world model rather than requiring direct environment interaction. First agent to obtain diamonds in Minecraft purely from offline data - a task requiring 20,000+ action sequences from raw pixels. Outperforms OpenAI VPT while using 100x less data.',
     backbone: 'Block-causal transformer (shortcut forcing)',
     release: '2025',
     venue: 'arXiv',
@@ -271,7 +271,7 @@ export const worldModels: WorldModel[] = [
     country: 'CH',
     modelType: 'rl-imagination',
     description:
-      'DIffusion As a Model Of eNvironment Dreams — the first world model to use diffusion models for environment simulation instead of discrete tokenization. Agents train entirely inside the diffusion-generated world. Achieved mean human normalized score of 1.46 on Atari 100k — the best for any agent trained entirely within a world model. Also demonstrated as an interactive neural game engine.',
+      'DIffusion As a Model Of eNvironment Dreams - the first world model to use diffusion models for environment simulation instead of discrete tokenization. Agents train entirely inside the diffusion-generated world. Achieved mean human normalized score of 1.46 on Atari 100k - the best for any agent trained entirely within a world model. Also demonstrated as an interactive neural game engine.',
     backbone: 'Diffusion model',
     release: '2024',
     venue: 'NeurIPS 2024 (Spotlight)',

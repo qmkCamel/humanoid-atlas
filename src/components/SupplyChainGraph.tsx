@@ -11,7 +11,7 @@ import '@xyflow/react/dist/style.css';
 import { companies, relationships } from '../data';
 import type { EntityType, Country } from '../data/types';
 
-// Country colors — consistent with App.tsx sovereignty palette
+// Country colors - consistent with App.tsx sovereignty palette
 const COUNTRY_COLORS: Record<string, string> = {
   US: '#3b82f6',
   CN: '#ef4444',
@@ -97,7 +97,7 @@ function columnLayout(
     }
   });
 
-  // Count edges per node (for vertical sort tiebreaker — more connected = higher)
+  // Count edges per node (for vertical sort tiebreaker - more connected = higher)
   const edgeCount: Record<string, number> = {};
   allRelationships.forEach((r) => {
     edgeCount[r.from] = (edgeCount[r.from] || 0) + 1;

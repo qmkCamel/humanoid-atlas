@@ -14,7 +14,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   const altText = alternatives?.length > 0
     ? `Alternatives: ${alternatives.map((a: { name: string; country: string }) => `${a.name} (${a.country})`).join(', ')}`
-    : 'No tracked alternatives — sole supplier in this category.';
+    : 'No tracked alternatives - sole supplier in this category.';
 
   const customerText = customers?.length > 0
     ? `OEM customers (${oemCount}/${totalOems}): ${customers.map((c: { name: string; country: string }) => `${c.name} (${c.country})`).join(', ')}`
@@ -22,9 +22,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   const prompt = `You are a supply chain investment analyst specializing in the humanoid robotics industry. Write a 2-3 paragraph investment thesis for the following supplier. Be specific, analytical, and direct. Reference concrete numbers from the data. Cover:
 
-1. Revenue exposure to humanoid robotics — how dependent is this company on the humanoid market, and how large is the opportunity?
-2. Competitive moat — what makes this supplier hard to replace? Or easy to replace?
-3. Geopolitical risk — how does this company's country of origin and customer base create risk or advantage?
+1. Revenue exposure to humanoid robotics - how dependent is this company on the humanoid market, and how large is the opportunity?
+2. Competitive moat - what makes this supplier hard to replace? Or easy to replace?
+3. Geopolitical risk - how does this company's country of origin and customer base create risk or advantage?
 
 SUPPLIER DATA:
 - Name: ${name}

@@ -70,7 +70,7 @@ export const componentCategories: ComponentCategory[] = [
   {
     id: 'actuators_rotary',
     name: 'Actuators',
-    description: 'A typical humanoid uses 25-30 actuators split between two types. Rotary actuators handle joints (shoulders, elbows, hips, knees) and combine a BLDC motor + harmonic reducer + encoder + torque sensor into a single module. Linear actuators convert rotary motion to push/pull force via planetary roller screws — used in legs and torso for high-force movements. Tesla Optimus uses 20 rotary and 14 linear actuators. The actuator is where all the key components converge, making it the most cost-sensitive subsystem.',
+    description: 'A typical humanoid uses 25-30 actuators split between two types. Rotary actuators handle joints (shoulders, elbows, hips, knees) and combine a BLDC motor + harmonic reducer + encoder + torque sensor into a single module. Linear actuators convert rotary motion to push/pull force via planetary roller screws - used in legs and torso for high-force movements. Tesla Optimus uses 20 rotary and 14 linear actuators. The actuator is where all the key components converge, making it the most cost-sensitive subsystem.',
     plyModel: '/models/linear-actuator.ply',
     bottleneck: false,
     keyMetrics: {
@@ -81,7 +81,7 @@ export const componentCategories: ComponentCategory[] = [
       'Rotary Torques (Tesla)': '20Nm, 110Nm, 180Nm',
       'Linear Forces (Tesla)': '500N, 3900N, 8000N',
       'Design Trend': 'Quasi-Direct Drive (QDD)',
-      'Alt Approach': 'Tendon drive (1X Neo — no gearboxes)',
+      'Alt Approach': 'Tendon drive (1X Neo - no gearboxes)',
     },
   },
   {
@@ -137,7 +137,7 @@ export const componentCategories: ComponentCategory[] = [
   {
     id: 'reward_models',
     name: 'Reward Models',
-    description: 'Reward models evaluate how well a robot is performing a task by scoring video trajectories against language instructions. They provide the dense reward signals that VLA policies need for reinforcement learning, data filtering, and quality estimation — bridging the gap between human intent and robot behavior.',
+    description: 'Reward models evaluate how well a robot is performing a task by scoring video trajectories against language instructions. They provide the dense reward signals that VLA policies need for reinforcement learning, data filtering, and quality estimation - bridging the gap between human intent and robot behavior.',
     bottleneck: false,
     keyMetrics: {
       'Core Input': 'Video trajectory + language instruction',
@@ -149,19 +149,19 @@ export const componentCategories: ComponentCategory[] = [
   {
     id: 'viz_tools',
     name: 'Visualization Tools',
-    description: 'Visualization tools let robotics engineers see, debug, and understand what their robots are doing. From 3D scene viewers and time series plotters to full observability platforms, these tools turn raw sensor data, logs, and telemetry into actionable insight — accelerating the development loop from data collection through fleet deployment.',
+    description: 'Visualization tools let robotics engineers see, debug, and understand what their robots are doing. From 3D scene viewers and time series plotters to full observability platforms, these tools turn raw sensor data, logs, and telemetry into actionable insight - accelerating the development loop from data collection through fleet deployment.',
     bottleneck: false,
     keyMetrics: {
       'Core Function': 'Visualize, debug, and inspect robot data',
       'Input Types': '3D scenes, point clouds, images, video, time series, logs',
       'Deployment Modes': 'Desktop, web, cloud, on-robot, VR/AR',
-      'Key Trend': 'Platform convergence — observability + ML pipeline integration',
+      'Key Trend': 'Platform convergence - observability + ML pipeline integration',
     },
   },
   {
     id: 'sim_platforms',
     name: 'Simulation Platforms',
-    description: 'Simulation platforms provide the virtual environments where humanoid robots learn to walk, manipulate objects, and interact with the world before deploying in reality. GPU-accelerated physics engines run thousands of parallel simulations, training RL policies in minutes that would take months of real-world experience. The two dominant stacks — NVIDIA Isaac Sim/Lab and Google DeepMind MuJoCo — are converging via the open-source Newton physics engine.',
+    description: 'Simulation platforms provide the virtual environments where humanoid robots learn to walk, manipulate objects, and interact with the world before deploying in reality. GPU-accelerated physics engines run thousands of parallel simulations, training RL policies in minutes that would take months of real-world experience. The two dominant stacks - NVIDIA Isaac Sim/Lab and Google DeepMind MuJoCo - are converging via the open-source Newton physics engine.',
     bottleneck: false,
     keyMetrics: {
       'Core Function': 'Physics simulation for robot training and validation',
@@ -173,7 +173,7 @@ export const componentCategories: ComponentCategory[] = [
   {
     id: 'world_models',
     name: 'World Models',
-    description: 'World models learn to simulate how the physical world evolves in response to robot actions. By predicting future states — as video frames, latent representations, or learned dynamics — they let robots practice tasks "in imagination" before acting in reality. This dramatically reduces the need for expensive real-world data collection and enables safer, faster policy training.',
+    description: 'World models learn to simulate how the physical world evolves in response to robot actions. By predicting future states - as video frames, latent representations, or learned dynamics - they let robots practice tasks "in imagination" before acting in reality. This dramatically reduces the need for expensive real-world data collection and enables safer, faster policy training.',
     bottleneck: false,
     keyMetrics: {
       'Core Function': 'Predict future world state from actions',
@@ -232,7 +232,7 @@ export const componentCategories: ComponentCategory[] = [
   {
     id: 'displays',
     name: 'Displays',
-    description: 'The face of the humanoid — display screens, LED indicators, cameras, and sensors that define how a robot perceives the world and communicates with humans. Design approaches range from full OLED expression screens to minimal LED status lights to deliberately faceless sensor pods, reflecting deep trade-offs between anthropomorphism, uncanny valley avoidance, and functional perception.',
+    description: 'The face of the humanoid - display screens, LED indicators, cameras, and sensors that define how a robot perceives the world and communicates with humans. Design approaches range from full OLED expression screens to minimal LED status lights to deliberately faceless sensor pods, reflecting deep trade-offs between anthropomorphism, uncanny valley avoidance, and functional perception.',
     bottleneck: false,
     keyMetrics: {
       'Display Approaches': 'OLED screen, status screen, LED indicator, concealed, none',
@@ -244,11 +244,11 @@ export const componentCategories: ComponentCategory[] = [
   {
     id: 'safety_standards',
     name: 'Safety & Standards',
-    description: 'The regulatory and safety landscape for humanoid robots is rapidly evolving. ISO 25785-1, the first standard specifically for bipedal robots, is in working draft. Meanwhile, companies must navigate ISO 10218 (industrial), ISO 13482 (service), UL 3300 (OSHA-listed), EU Machinery Regulation, and the EU AI Act. Only one humanoid — Agility Digit — has achieved NRTL certification.',
+    description: 'The regulatory and safety landscape for humanoid robots is rapidly evolving. ISO 25785-1, the first standard specifically for bipedal robots, is in working draft. Meanwhile, companies must navigate ISO 10218 (industrial), ISO 13482 (service), UL 3300 (OSHA-listed), EU Machinery Regulation, and the EU AI Act. Only one humanoid - Agility Digit - has achieved NRTL certification.',
     bottleneck: false,
     keyMetrics: {
-      'Key Standard': 'ISO 25785-1 (bipedal robots) — Working Draft, expected 2026-2027',
-      'First Certified': 'Agility Robotics Digit — NRTL field tested',
+      'Key Standard': 'ISO 25785-1 (bipedal robots) - Working Draft, expected 2026-2027',
+      'First Certified': 'Agility Robotics Digit - NRTL field tested',
       'EU Deadline': 'Machinery Regulation applies Jan 2027, AI Act Aug 2026',
       'Critical Gap': 'No published standard addresses humanoid fall behavior',
     },
