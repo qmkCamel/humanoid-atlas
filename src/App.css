@@ -1623,6 +1623,9 @@ body {
   .header { padding: 10px 16px; gap: 8px; }
   .filter-bar { padding: 8px 16px; flex-wrap: wrap; gap: 8px; }
   .filter-bar__separator { display: none; }
+  .tab-group-nav { overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .tab-group-nav::-webkit-scrollbar { display: none; }
+  .tab-group-pill { white-space: nowrap; flex-shrink: 0; }
   .component-nav { padding: 0 8px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
   .component-nav::-webkit-scrollbar { display: none; }
   .component-btn { padding: 10px 10px; font-size: 10px; letter-spacing: 1px; white-space: nowrap; flex-shrink: 0; }
