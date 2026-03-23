@@ -2025,6 +2025,7 @@ export default function App() {
             <div>
               <span style={{ fontFamily: 'var(--font-mono)', fontSize: '1.05rem', color: 'var(--text-primary)' }}>March 22, 2026</span>
               <ul style={{ color: 'var(--text-dim)', fontSize: '0.9rem', marginTop: '0.5rem', paddingLeft: '1.2rem', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+                <li>Added interactive skeleton with clickable body regions and component sidebar</li>
                 <li>Added CLI documentation tab</li>
                 <li>Mobile UX polish - horizontal scroll on tab nav, filter spacing, focus states</li>
               </ul>
