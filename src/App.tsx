@@ -19,7 +19,7 @@ type TabGroup = 'overview' | 'industry' | 'data' | 'hardware' | 'software' | 'hr
 const TAB_GROUPS: { id: TabGroup; label: string }[] = [
   { id: 'overview', label: 'Overview' },
   { id: 'industry', label: 'Industry' },
-  // { id: 'data', label: 'Data' }, // Hidden until ready — uncomment to enable
+  { id: 'data', label: 'Data' }, // Hidden until ready — uncomment to enable
   { id: 'hardware', label: 'Hardware' },
   { id: 'software', label: 'Software' },
   { id: 'hri', label: 'HRI' },
@@ -41,6 +41,7 @@ const TABS: { id: string; label: string; group: TabGroup }[] = [
   { id: 'buy_data', label: 'Buy Data', group: 'data' },
   { id: 'sell_data', label: 'Sell Data', group: 'data' },
   { id: 'collect_data', label: 'Collect Data', group: 'data' },
+  { id: 'account', label: 'Sign Out', group: 'data' },
   // Hardware
   { id: 'sensors_general', label: 'Sensors', group: 'hardware' },
   { id: 'compute', label: 'Compute', group: 'hardware' },
@@ -87,6 +88,7 @@ const TAB_TO_PATH: Record<string, string> = {
   buy_data: '/data/buy',
   sell_data: '/data/sell',
   collect_data: '/data/collect',
+  account: '/data/account',
   sensors_general: '/hardware/sensors',
   compute: '/hardware/compute',
   batteries: '/hardware/battery',
@@ -137,6 +139,7 @@ const TAB_META: Record<string, { title: string; description: string }> = {
   buy_data: { title: 'Buy Training Data | Atlas Data Brokerage', description: 'Browse and purchase humanoid robot training datasets. Egocentric video, teleoperation, tactile, motion capture data from verified providers.' },
   sell_data: { title: 'Sell Training Data | Atlas Data Brokerage', description: 'List your training datasets on Atlas Data Brokerage. Reach OEM buyers, set your own prices, get paid via Stripe.' },
   collect_data: { title: 'Collect Training Data | Atlas Data Brokerage', description: 'Join data collection programs and earn by gathering training data for humanoid robots.' },
+  account: { title: 'Account | Atlas Data Brokerage', description: 'Manage your Atlas Data Brokerage account.' },
   sensors_general: { title: 'Humanoid Robot Sensors - Cameras, LiDAR, IMUs | Humanoid Atlas', description: 'Sensor supply chain for humanoid robots. Intel RealSense, Livox LiDAR, Sony image sensors, and more.' },
   compute: { title: 'Humanoid Robot Compute - NVIDIA Jetson, SoCs | Humanoid Atlas', description: 'Compute platforms powering humanoid robots. NVIDIA Jetson Orin/Thor, Intel, Qualcomm, and custom SoCs.' },
   batteries: { title: 'Humanoid Robot Batteries - Cells & Pack Design | Humanoid Atlas', description: 'Battery supply chain for humanoid robots. Panasonic, CATL, Samsung SDI, Molicel cells and pack designs.' },
@@ -1132,6 +1135,13 @@ export default function App() {
   const [cutCompanies, setCutCompanies] = useState<Set<string>>(new Set());
   const [activeScenarios, setActiveScenarios] = useState<Set<string>>(new Set());
   const [viewCount, setViewCount] = useState<number | null>(null);
+  const [clerkSignedIn, setClerkSignedIn] = useState(false);
+
+  useEffect(() => {
+    const handler = (e: Event) => setClerkSignedIn((e as CustomEvent).detail?.isSignedIn ?? false);
+    window.addEventListener('clerk-auth-change', handler);
+    return () => window.removeEventListener('clerk-auth-change', handler);
+  }, []);
 
   // Skeleton interactive state
   const [skeletonRegion, setSkeletonRegion] = useState<string | null>(null);
@@ -2354,7 +2364,7 @@ export default function App() {
       </div>
 
       <nav className="component-nav">
-        {TABS.filter((t) => t.group === activeTabGroup).map((t) => {
+        {TABS.filter((t) => t.group === activeTabGroup).filter((t) => t.id !== 'account' || clerkSignedIn).map((t) => {
           return (
             <button
               key={t.id}
@@ -4333,7 +4343,7 @@ export default function App() {
         )}
 
         {activeTabGroup === 'data' && (
-          <DataBrokerage activeSubTab={activeTab} />
+          <DataBrokerage activeSubTab={activeTab} viewCount={viewCount} />
         )}
 
         {activeTabGroup === 'cli' && (
