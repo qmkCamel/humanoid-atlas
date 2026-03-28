@@ -799,6 +799,7 @@ function ProviderDashboard() {
   const tabs = [
     { id: 'listings', label: 'My Listings' },
     { id: 'create', label: 'Create Listing' },
+    { id: 'programs', label: 'Programs' },
     { id: 'analytics', label: 'Analytics' },
     { id: 'stripe', label: 'Settings' },
   ];
@@ -859,6 +860,7 @@ function ProviderDashboard() {
       )}
 
       {activeTab === 'create' && <CreateListingForm />}
+      {activeTab === 'programs' && <CollectionProgramsManager />}
       {activeTab === 'analytics' && <ProviderAnalytics />}
       {activeTab === 'stripe' && <StripeStatus />}
     </div>
@@ -1296,6 +1298,223 @@ function DonutChart({ segments, label }: { segments: { name: string; value: numb
           ))}
         </div>
       </div>
+    </div>
+  );
+}
+
+function CollectionProgramsManager() {
+  const [programs, setPrograms] = useState<Record<string, unknown>[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedProgramId, setSelectedProgramId] = useState<string | null>(null);
+  const [showCreate, setShowCreate] = useState(false);
+
+  const fetchPrograms = () => {
+    setLoading(true);
+    api.get<{ data: Record<string, unknown>[] }>('/provider/collection-programs')
+      .then(r => setPrograms(r.data))
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => { fetchPrograms(); }, []);
+
+  if (loading) return <div className="db-loading">Loading programs...</div>;
+
+  if (selectedProgramId) {
+    return <ProgramSignups programId={selectedProgramId} program={programs.find(p => String(p.id) === selectedProgramId)} onBack={() => setSelectedProgramId(null)} />;
+  }
+
+  return (
+    <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+        <div className="db-meta-label" style={{ fontSize: 11 }}>{programs.length} program{programs.length !== 1 ? 's' : ''}</div>
+        <button className="db-filter-pill" style={{ fontSize: 9, padding: '5px 16px', cursor: 'pointer' }} onClick={() => setShowCreate(!showCreate)}>
+          {showCreate ? 'Cancel' : '+ New program'}
+        </button>
+      </div>
+
+      {showCreate && <CreateProgramForm onCreated={() => { setShowCreate(false); fetchPrograms(); }} />}
+
+      {programs.length === 0 && !showCreate ? (
+        <div className="db-empty">No collection programs yet. Create one to start recruiting data collectors.</div>
+      ) : (
+        programs.map(p => {
+          const signups = p.collector_signups as Array<{ count: number }> | undefined;
+          const count = signups?.[0]?.count ?? 0;
+          return (
+            <div key={String(p.id)} className="db-catalog-row" onClick={() => setSelectedProgramId(String(p.id))}>
+              <div className="db-catalog-row__line1">
+                <span className="db-catalog-row__title">{String(p.title)}</span>
+                <span className="db-catalog-row__view">Manage →</span>
+              </div>
+              <div className="db-catalog-row__line2">
+                <div className="db-catalog-row__meta">
+                  <span className="db-catalog-row__details">
+                    {count} signup{count !== 1 ? 's' : ''} · ${((p.referral_fee_cents as number ?? 0) / 100).toFixed(0)} referral fee
+                    {p.is_active ? '' : ' · inactive'}
+                  </span>
+                </div>
+                <span className={`db-status-badge db-status-badge--${p.is_active ? 'approved' : 'rejected'}`}>
+                  {p.is_active ? 'active' : 'inactive'}
+                </span>
+              </div>
+            </div>
+          );
+        })
+      )}
+    </div>
+  );
+}
+
+function ProgramSignups({ programId, program, onBack }: { programId: string; program?: Record<string, unknown>; onBack: () => void }) {
+  const [signups, setSignups] = useState<Record<string, unknown>[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
+
+  const fetchSignups = () => {
+    setLoading(true);
+    api.get<{ data: Record<string, unknown>[] }>(`/provider/collection-programs/${programId}/signups`)
+      .then(r => setSignups(r.data))
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => { fetchSignups(); }, [programId]);
+
+  const handleStatusChange = async (signupId: string, status: string) => {
+    setActionLoading(signupId);
+    try {
+      await api.patch(`/provider/collection-programs/${programId}/signups/${signupId}`, { status });
+      fetchSignups();
+    } catch (err) {
+      console.error('Failed to update status:', err);
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const formatUsd = (cents: number) => `$${(cents / 100).toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
+
+  return (
+    <div>
+      <button className="db-back-btn" onClick={onBack}>&larr; Back to programs</button>
+
+      {program && (
+        <div className="api-preamble" style={{ marginTop: 12, marginBottom: 20 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+            <div className="db-catalog-row__title" style={{ fontSize: 16 }}>{String(program.title)}</div>
+            <span className={`db-status-badge db-status-badge--${program.is_active ? 'approved' : 'rejected'}`}>
+              {program.is_active ? 'active' : 'inactive'}
+            </span>
+          </div>
+          <div className="db-meta-grid">
+            <div><div className="db-meta-label">Compensation</div><div className="db-meta-value">{String(program.compensation_description ?? '—')}</div></div>
+            <div><div className="db-meta-label">Referral fee</div><div className="db-meta-value">{formatUsd((program.referral_fee_cents as number) ?? 0)}</div></div>
+            <div><div className="db-meta-label">Signup type</div><div className="db-meta-value">{String(program.signup_type ?? 'atlas_form')}</div></div>
+          </div>
+          {program.requirements && <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 12 }}><strong>Requirements:</strong> {String(program.requirements)}</div>}
+        </div>
+      )}
+
+      <div className="db-meta-label" style={{ marginBottom: 12 }}>{signups.length} signup{signups.length !== 1 ? 's' : ''}</div>
+
+      {loading ? <div className="db-loading">Loading signups...</div> :
+       signups.length === 0 ? <div className="db-empty">No signups yet for this program.</div> :
+        signups.map(s => (
+          <div key={String(s.id)} className="api-preamble" style={{ marginBottom: 12 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+              <div>
+                <span style={{ fontWeight: 500, fontSize: 13 }}>{String(s.name)}</span>
+                <span style={{ color: 'var(--text-secondary)', fontSize: 11, marginLeft: 8 }}>{String(s.email)}</span>
+              </div>
+              <span className={`db-status-badge db-status-badge--${String(s.status) === 'active' || String(s.status) === 'accepted' ? 'approved' : String(s.status) === 'rejected' ? 'rejected' : String(s.status) === 'completed' ? 'approved' : 'pending'}`}>
+                {String(s.status)}
+              </span>
+            </div>
+            <div className="db-meta-grid">
+              <div><div className="db-meta-label">Referral code</div><div className="db-meta-value" style={{ fontFamily: 'Share Tech Mono, monospace' }}>{String(s.referral_code)}</div></div>
+              <div><div className="db-meta-label">Hours</div><div className="db-meta-value">{String(s.hours_collected ?? 0)}</div></div>
+              <div><div className="db-meta-label">Earnings</div><div className="db-meta-value">{formatUsd((s.earnings_cents as number) ?? 0)}</div></div>
+              <div><div className="db-meta-label">Last activity</div><div className="db-meta-value">{s.last_activity_at ? new Date(String(s.last_activity_at)).toLocaleDateString() : '—'}</div></div>
+            </div>
+            {String(s.status) === 'submitted' && (
+              <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+                <button className="db-add-cart-btn" style={{ fontSize: 9, padding: '5px 14px' }}
+                  disabled={actionLoading === String(s.id)}
+                  onClick={() => handleStatusChange(String(s.id), 'accepted')}>
+                  {actionLoading === String(s.id) ? '...' : 'Accept'}
+                </button>
+                <button className="db-back-btn" style={{ fontSize: 9, padding: '5px 14px', color: 'var(--red, #c53030)' }}
+                  disabled={actionLoading === String(s.id)}
+                  onClick={() => handleStatusChange(String(s.id), 'rejected')}>
+                  Reject
+                </button>
+              </div>
+            )}
+          </div>
+        ))
+      }
+    </div>
+  );
+}
+
+function CreateProgramForm({ onCreated }: { onCreated: () => void }) {
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [requirements, setRequirements] = useState('');
+  const [compensation, setCompensation] = useState('');
+  const [referralFee, setReferralFee] = useState('50');
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleSubmit = async () => {
+    if (!title || !description) { setError('Title and description are required'); return; }
+    setSubmitting(true);
+    setError('');
+    try {
+      await api.post('/provider/collection-programs', {
+        title,
+        description,
+        requirements: requirements || undefined,
+        compensation_description: compensation || undefined,
+        referral_fee_cents: Math.round(parseFloat(referralFee || '0') * 100),
+      });
+      onCreated();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to create program');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="api-preamble" style={{ marginBottom: 20 }}>
+      <div className="db-meta-label" style={{ marginBottom: 12 }}>New collection program</div>
+      <div className="db-form-field">
+        <label className="db-form-label">Title *</label>
+        <input className="db-form-input" value={title} onChange={e => setTitle(e.target.value)} placeholder="e.g. Kitchen Activity Recording" />
+      </div>
+      <div className="db-form-field">
+        <label className="db-form-label">Description *</label>
+        <textarea className="db-form-input" rows={3} value={description} onChange={e => setDescription(e.target.value)} placeholder="What data are you looking for?" />
+      </div>
+      <div className="db-form-field">
+        <label className="db-form-label">Requirements</label>
+        <input className="db-form-input" value={requirements} onChange={e => setRequirements(e.target.value)} placeholder="e.g. Smartphone with 4K camera" />
+      </div>
+      <div className="db-form-field">
+        <label className="db-form-label">Compensation description</label>
+        <input className="db-form-input" value={compensation} onChange={e => setCompensation(e.target.value)} placeholder="e.g. $20/hr for approved footage" />
+      </div>
+      <div className="db-form-field">
+        <label className="db-form-label">Referral fee ($)</label>
+        <input className="db-form-input" type="number" min="0" step="1" value={referralFee} onChange={e => setReferralFee(e.target.value)} placeholder="50" />
+        <div style={{ fontSize: 9, color: 'var(--text-dim)', marginTop: 4, fontFamily: 'Share Tech Mono, monospace' }}>Fee charged to you per accepted collector</div>
+      </div>
+      {error && <div className="db-form-error">{error}</div>}
+      <button className="db-add-cart-btn" style={{ marginTop: 8 }} onClick={handleSubmit} disabled={submitting}>
+        {submitting ? 'Creating...' : 'Create Program'}
+      </button>
     </div>
   );
 }
