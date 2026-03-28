@@ -1168,6 +1168,44 @@ function MyPurchases() {
 // CHARTS
 // ═══════════════════════════════════════════════════════════
 
+function AreaChart({ data, label }: { data: { label: string; value: number }[]; label: string }) {
+  const w = 640;
+  const h = 150;
+  const padL = 24;
+  const padR = 24;
+  const padB = 28;
+  const padT = 8;
+  const chartW = w - padL - padR;
+  const chartH = h - padB - padT;
+  const max = Math.max(...data.map(d => d.value), 1);
+
+  const getY = (v: number) => padT + chartH - (v / max) * chartH;
+  const getX = (i: number) => padL + (i / Math.max(data.length - 1, 1)) * chartW;
+
+  const points = data.map((d, i) => `${getX(i)},${getY(d.value)}`).join(' ');
+  const areaPoints = `${getX(0)},${h - padB} ${points} ${getX(data.length - 1)},${h - padB}`;
+
+  return (
+    <div className="db-chart-wrap">
+      <div className="db-meta-label" style={{ marginBottom: 16 }}>{label}</div>
+      <svg viewBox={`0 0 ${w} ${h}`} style={{ width: '100%', height: 'auto' }}>
+        {[0, 0.25, 0.5, 0.75, 1].map(pct => (
+          <line key={pct} x1={padL} y1={getY(max * pct)} x2={w - padR} y2={getY(max * pct)} stroke="var(--border)" strokeWidth="0.5" strokeDasharray={pct === 0 ? 'none' : '4 4'} />
+        ))}
+        <polyline points={areaPoints} fill="rgba(26,26,26,0.03)" stroke="none" />
+        <polyline points={points} fill="none" stroke="var(--accent)" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
+        {data.map((d, i) => (
+          <circle key={i} cx={getX(i)} cy={getY(d.value)} r="2" fill="var(--bg-card)" stroke="var(--accent)" strokeWidth="1" />
+        ))}
+        {data.map((d, i) => (
+          <text key={`l${i}`} x={getX(i)} y={h - 8} textAnchor="middle" fill="var(--text-dim)"
+            style={{ fontSize: 10, fontFamily: 'Share Tech Mono, monospace', letterSpacing: '1px' }}>{d.label}</text>
+        ))}
+      </svg>
+    </div>
+  );
+}
+
 function VerticalBarChart({ data, label }: { data: { label: string; value: number }[]; label: string }) {
   const max = Math.max(...data.map(d => d.value), 1);
   const total = data.reduce((s, d) => s + d.value, 0);
@@ -1286,7 +1324,36 @@ function ProviderAnalytics() {
   const collectors = (data?.collector_count as number) ?? 0;
   const topListings = (data?.top_listings as Array<Record<string, unknown>>) ?? [];
 
-  // Build bar chart data from top_listings (real per-listing data, not fake time-series)
+  // Revenue timeline from real transaction dates, padded to fill the chart
+  const rawTimeline = (data?.revenue_timeline as Array<{ date: string; revenue_cents: number }>) ?? [];
+  const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const periodDays: Record<string, number> = { '7d': 7, '30d': 30, '90d': 90, 'all': 90 };
+  const spanDays = periodDays[period] ?? 90;
+  const now = new Date();
+
+  // Build a map of date -> revenue, then fill in missing days with 0
+  const revenueMap = new Map<string, number>();
+  for (const t of rawTimeline) revenueMap.set(t.date, t.revenue_cents);
+
+  const filledTimeline: { label: string; value: number }[] = [];
+  const step = spanDays <= 7 ? 1 : spanDays <= 30 ? 3 : 7;
+  for (let i = spanDays - 1; i >= 0; i -= step) {
+    const d = new Date(now.getTime() - i * 86400000);
+    const key = d.toISOString().slice(0, 10);
+    // Sum revenue for all days in this bucket
+    let bucketRevenue = 0;
+    for (let j = 0; j < step; j++) {
+      const bk = new Date(now.getTime() - (i + j) * 86400000).toISOString().slice(0, 10);
+      bucketRevenue += revenueMap.get(bk) ?? 0;
+    }
+    filledTimeline.push({
+      label: `${monthNames[d.getMonth()]} ${d.getDate()}`,
+      value: Math.round(bucketRevenue / 100),
+    });
+  }
+  const revenueChartData = filledTimeline.length > 1 ? filledTimeline : [{ label: '', value: 0 }, ...filledTimeline, { label: '', value: 0 }];
+
+  // Build bar chart data from top_listings (real per-listing data)
   const listingBarData = topListings.map(l => ({
     label: String(l.title ?? '').slice(0, 20) + (String(l.title ?? '').length > 20 ? '...' : ''),
     value: Math.round((l.revenue_cents as number) / 100),
@@ -1336,11 +1403,14 @@ function ProviderAnalytics() {
         </div>
       </div>
 
-      {listingBarData.length > 0 && (
-        <VerticalBarChart data={listingBarData} label="Revenue by listing ($)" />
-      )}
+      <AreaChart data={revenueChartData} label="Revenue over time" />
 
       <div className="db-chart-row">
+        {listingBarData.length > 0 ? (
+          <VerticalBarChart data={listingBarData} label="Revenue by listing ($)" />
+        ) : (
+          <div className="db-chart-wrap"><div className="db-meta-label">Revenue by listing ($)</div></div>
+        )}
         <DonutChart segments={finalDonut} label="Hours by modality" />
       </div>
 
