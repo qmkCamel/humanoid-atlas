@@ -1439,12 +1439,12 @@ function ProgramSignups({ programId, program, onBack }: { programId: string; pro
             </div>
             {String(s.status) === 'submitted' && (
               <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
-                <button className="db-add-cart-btn" style={{ fontSize: 9, padding: '5px 14px' }}
+                <button className="db-filter-pill" style={{ fontSize: 9, padding: '5px 16px', cursor: 'pointer', background: '#1a1a1a', color: '#f5f2ed', border: '1px solid #1a1a1a' }}
                   disabled={actionLoading === String(s.id)}
                   onClick={() => handleStatusChange(String(s.id), 'accepted')}>
                   {actionLoading === String(s.id) ? '...' : 'Accept'}
                 </button>
-                <button className="db-back-btn" style={{ fontSize: 9, padding: '5px 14px', color: 'var(--red, #c53030)' }}
+                <button className="db-filter-pill" style={{ fontSize: 9, padding: '5px 16px', cursor: 'pointer', color: '#c53030', borderColor: '#c53030' }}
                   disabled={actionLoading === String(s.id)}
                   onClick={() => handleStatusChange(String(s.id), 'rejected')}>
                   Reject
@@ -1463,7 +1463,6 @@ function CreateProgramForm({ onCreated }: { onCreated: () => void }) {
   const [description, setDescription] = useState('');
   const [requirements, setRequirements] = useState('');
   const [compensation, setCompensation] = useState('');
-  const [referralFee, setReferralFee] = useState('50');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
@@ -1477,7 +1476,6 @@ function CreateProgramForm({ onCreated }: { onCreated: () => void }) {
         description,
         requirements: requirements || undefined,
         compensation_description: compensation || undefined,
-        referral_fee_cents: Math.round(parseFloat(referralFee || '0') * 100),
       });
       onCreated();
     } catch (err) {
@@ -1488,30 +1486,27 @@ function CreateProgramForm({ onCreated }: { onCreated: () => void }) {
   };
 
   return (
-    <div className="api-preamble" style={{ marginBottom: 20 }}>
-      <div className="db-meta-label" style={{ marginBottom: 12 }}>New collection program</div>
-      <div className="db-form-field">
-        <label className="db-form-label">Title *</label>
-        <input className="db-form-input" value={title} onChange={e => setTitle(e.target.value)} placeholder="e.g. Kitchen Activity Recording" />
-      </div>
-      <div className="db-form-field">
-        <label className="db-form-label">Description *</label>
-        <textarea className="db-form-input" rows={3} value={description} onChange={e => setDescription(e.target.value)} placeholder="What data are you looking for?" />
-      </div>
-      <div className="db-form-field">
-        <label className="db-form-label">Requirements</label>
-        <input className="db-form-input" value={requirements} onChange={e => setRequirements(e.target.value)} placeholder="e.g. Smartphone with 4K camera" />
-      </div>
-      <div className="db-form-field">
-        <label className="db-form-label">Compensation description</label>
-        <input className="db-form-input" value={compensation} onChange={e => setCompensation(e.target.value)} placeholder="e.g. $20/hr for approved footage" />
-      </div>
-      <div className="db-form-field">
-        <label className="db-form-label">Referral fee ($)</label>
-        <input className="db-form-input" type="number" min="0" step="1" value={referralFee} onChange={e => setReferralFee(e.target.value)} placeholder="50" />
-        <div style={{ fontSize: 9, color: 'var(--text-dim)', marginTop: 4, fontFamily: 'Share Tech Mono, monospace' }}>Fee charged to you per accepted collector</div>
-      </div>
+    <div className="db-create-form" style={{ marginBottom: 20 }}>
       {error && <div className="db-form-error">{error}</div>}
+
+      <div className="db-form-field">
+        <label className="db-meta-label">Title</label>
+        <input className="db-form-input" value={title} onChange={e => setTitle(e.target.value)} placeholder="Kitchen Activity Recording" />
+      </div>
+      <div className="db-form-field">
+        <label className="db-meta-label">Description</label>
+        <textarea className="db-form-textarea" rows={3} value={description} onChange={e => setDescription(e.target.value)} placeholder="What data are you looking for?" />
+      </div>
+      <div className="db-form-row">
+        <div className="db-form-field" style={{ flex: 1 }}>
+          <label className="db-meta-label">Requirements</label>
+          <input className="db-form-input" value={requirements} onChange={e => setRequirements(e.target.value)} placeholder="Smartphone with 4K camera" />
+        </div>
+        <div className="db-form-field" style={{ flex: 1 }}>
+          <label className="db-meta-label">Compensation</label>
+          <input className="db-form-input" value={compensation} onChange={e => setCompensation(e.target.value)} placeholder="$20/hr for approved footage" />
+        </div>
+      </div>
       <button className="db-add-cart-btn" style={{ marginTop: 8 }} onClick={handleSubmit} disabled={submitting}>
         {submitting ? 'Creating...' : 'Create Program'}
       </button>
