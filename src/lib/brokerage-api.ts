@@ -1,4 +1,4 @@
-const API_BASE = 'https://brokerage.humanoids.fyi/v1';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://brokerage.humanoids.fyi/v1';
 
 let tokenGetter: (() => Promise<string | null>) | null = null;
 
