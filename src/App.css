@@ -5406,6 +5406,15 @@ select.db-form-input { appearance: none; -webkit-appearance: none; background-im
   text-transform: uppercase;
 }
 
+.arena-leaderboard__vote-count {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 14px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-left: 12px;
+}
+
 .arena-leaderboard__toggle {
   display: flex;
   gap: 4px;

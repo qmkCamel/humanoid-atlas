@@ -566,7 +566,7 @@ export default function Arena({ activeSubTab }: ArenaProps) {
       const a = cfg.entityMap.get(data.entityA);
       const b = cfg.entityMap.get(data.entityB);
       if (!a || !b) throw new Error('Unknown entity');
-      setMatchup({ entityA: a, entityB: b, alreadyVoted: data.alreadyVoted });
+      setMatchup({ entityA: a, entityB: b, alreadyVoted: !!data.alreadyVoted });
     } catch (err) {
       setMatchupError(err instanceof Error ? err.message : 'Failed to load matchup');
       // Fallback: pick random pair client-side
@@ -848,7 +848,14 @@ export default function Arena({ activeSubTab }: ArenaProps) {
       {/* Leaderboard */}
       <div className="arena-leaderboard">
         <div className="arena-leaderboard__header">
-          <h3 className="arena-leaderboard__title">Leaderboard</h3>
+          <h3 className="arena-leaderboard__title">
+            Leaderboard
+            {leaderboard && leaderboard.rankings.length > 0 && (
+              <span className="arena-leaderboard__vote-count">
+                {leaderboard.rankings.reduce((sum, r) => sum + r.votes, 0)} votes
+              </span>
+            )}
+          </h3>
           <div className="arena-leaderboard__toggle">
             <button
               className={`arena-toggle-btn ${leaderboardView === 'table' ? 'active' : ''}`}
