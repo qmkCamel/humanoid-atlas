@@ -91,8 +91,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       entry.rank = i + 1;
     });
 
-    // Cache for 30 seconds — leaderboard doesn't need to be real-time
-    res.setHeader('Cache-Control', 's-maxage=30, stale-while-revalidate=60');
+    // Short cache — allow near-real-time updates after votes
+    res.setHeader('Cache-Control', 's-maxage=5, stale-while-revalidate=10');
 
     return res.json({
       arena,

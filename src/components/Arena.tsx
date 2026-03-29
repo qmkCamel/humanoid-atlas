@@ -581,7 +581,7 @@ export default function Arena({ activeSubTab }: ArenaProps) {
     }
   }, []);
 
-  const fetchLeaderboard = useCallback(async () => {
+  const fetchLeaderboard = useCallback(async (bustCache = false) => {
     const cfg = configRef.current;
     if (!cfg) return;
     const dim = dimensionRef.current;
@@ -590,7 +590,8 @@ export default function Arena({ activeSubTab }: ArenaProps) {
     setLeaderboardLoading(true);
     try {
       const catParam = hasCat && cat ? `&category=${cat}` : '';
-      const res = await fetch(`${API_BASE}/api/arena/leaderboard?arena=${cfg.type}&dimension=${dim}${catParam}`);
+      const cacheBust = bustCache ? `&_t=${Date.now()}` : '';
+      const res = await fetch(`${API_BASE}/api/arena/leaderboard?arena=${cfg.type}&dimension=${dim}${catParam}${cacheBust}`);
       if (!res.ok) throw new Error('Failed to fetch leaderboard');
       const data: LeaderboardData = await res.json();
       setLeaderboard(data);
@@ -634,7 +635,7 @@ export default function Arena({ activeSubTab }: ArenaProps) {
       if (!res.ok) throw new Error('Vote failed');
       const data: VoteResult = await res.json();
       setVoteResult(data);
-      fetchLeaderboard();
+      fetchLeaderboard(true);
     } catch {
       // API unavailable — compute Elo locally and persist to localStorage
       const dim = dimensionRef.current;
