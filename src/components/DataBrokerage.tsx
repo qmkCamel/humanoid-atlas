@@ -364,7 +364,8 @@ function InlineCart({ cart, formatUsd, autoCheckout, onAutoCheckoutDone, onPurch
         paymentIntents={paymentIntents}
         formatUsd={formatUsd}
         onSuccess={handlePaymentSuccess}
-        onClose={() => { setPaymentIntents(null); setCheckingOut(false); onPurchaseComplete?.(); }}
+        onClose={() => { setPaymentIntents(null); setCheckingOut(false); }}
+        onPurchaseComplete={onPurchaseComplete}
       />
     );
   }
@@ -408,10 +409,11 @@ function InlineCart({ cart, formatUsd, autoCheckout, onAutoCheckoutDone, onPurch
   );
 }
 
-function CheckoutModal({ paymentIntents, formatUsd, onSuccess, onClose }: {
+function CheckoutModal({ paymentIntents, formatUsd, onSuccess, onClose, onPurchaseComplete }: {
   paymentIntents: PaymentIntentData[];
   formatUsd: (c: number) => string;
   onSuccess: (transactionIds: string[]) => void;
+  onPurchaseComplete?: () => void;
   onClose: () => void;
 }) {
   const [currentIdx, setCurrentIdx] = useState(0);
@@ -1125,9 +1127,9 @@ function MyPurchases() {
           <>
             <div className="api-preamble" style={{ marginTop: 12 }}>
               <div className="db-meta-label" style={{ marginBottom: 12 }}>Data access</div>
-              {access?.access_instructions && (
+              {access?.access_instructions ? (
                 <p style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: 16 }}>{String(access.access_instructions)}</p>
-              )}
+              ) : null}
               <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
                 <a href={accessUrl} target="_blank" rel="noopener noreferrer" className="db-regen-btn"
                   style={{ margin: 0, background: 'var(--accent)', color: 'var(--bg-card)', borderColor: 'var(--accent)', textDecoration: 'none' }}>Access dataset</a>
@@ -1465,7 +1467,7 @@ function ProgramSignups({ programId, program, onBack }: { programId: string; pro
             <div><div className="db-meta-label">Referral fee</div><div className="db-meta-value">{formatUsd((program.referral_fee_cents as number) ?? 0)}</div></div>
             <div><div className="db-meta-label">Signup type</div><div className="db-meta-value">{String(program.signup_type ?? 'atlas_form')}</div></div>
           </div>
-          {program.requirements && <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 12 }}><strong>Requirements:</strong> {String(program.requirements)}</div>}
+          {program.requirements ? <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 12 }}><strong>Requirements:</strong> {String(program.requirements)}</div> : null}
         </div>
       )}
 
@@ -1612,7 +1614,6 @@ function ProviderAnalytics() {
   const step = spanDays <= 7 ? 1 : spanDays <= 30 ? 3 : 7;
   for (let i = spanDays - 1; i >= 0; i -= step) {
     const d = new Date(now.getTime() - i * 86400000);
-    const key = d.toISOString().slice(0, 10);
     // Sum revenue for all days in this bucket
     let bucketRevenue = 0;
     for (let j = 0; j < step; j++) {
