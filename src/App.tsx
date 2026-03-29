@@ -19,7 +19,7 @@ type TabGroup = 'overview' | 'industry' | 'data' | 'hardware' | 'software' | 'hr
 const TAB_GROUPS: { id: TabGroup; label: string }[] = [
   { id: 'overview', label: 'Overview' },
   { id: 'industry', label: 'Industry' },
-  { id: 'data', label: 'Data' }, // Hidden until ready — uncomment to enable
+  // { id: 'data', label: 'Data' }, // Hidden until ready — uncomment to enable
   { id: 'hardware', label: 'Hardware' },
   { id: 'software', label: 'Software' },
   { id: 'hri', label: 'HRI' },
@@ -27,7 +27,7 @@ const TAB_GROUPS: { id: TabGroup; label: string }[] = [
   { id: 'api', label: 'API' },
 ];
 
-const TABS: { id: string; label: string; group: TabGroup }[] = [
+const TABS: { id: string; label: string; group: TabGroup; hidden?: boolean }[] = [
   // Overview
   { id: 'skeleton', label: 'Skeleton', group: 'overview' },
   { id: 'all_oems', label: 'All OEMs', group: 'overview' },
@@ -41,6 +41,9 @@ const TABS: { id: string; label: string; group: TabGroup }[] = [
   { id: 'buy_data', label: 'Buy Data', group: 'data' },
   { id: 'sell_data', label: 'Sell Data', group: 'data' },
   { id: 'collect_data', label: 'Collect Data', group: 'data' },
+  { id: 'seller_terms', label: '', group: 'data', hidden: true },
+  { id: 'buyer_terms', label: '', group: 'data', hidden: true },
+  { id: 'collector_terms', label: '', group: 'data', hidden: true },
   { id: 'account', label: 'Sign Out', group: 'data' },
   // Hardware
   { id: 'sensors_general', label: 'Sensors', group: 'hardware' },
@@ -2367,7 +2370,7 @@ export default function App() {
       </div>
 
       <nav className="component-nav">
-        {TABS.filter((t) => t.group === activeTabGroup).filter((t) => t.id !== 'account' || clerkSignedIn).map((t) => {
+        {TABS.filter((t) => t.group === activeTabGroup && !t.hidden).filter((t) => t.id !== 'account' || clerkSignedIn).map((t) => {
           return (
             <button
               key={t.id}
