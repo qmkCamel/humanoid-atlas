@@ -91,8 +91,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       entry.rank = i + 1;
     });
 
-    // Short cache — allow near-real-time updates after votes
-    res.setHeader('Cache-Control', 's-maxage=5, stale-while-revalidate=10');
+    res.setHeader('Cache-Control', 'no-store');
 
     return res.json({
       arena,

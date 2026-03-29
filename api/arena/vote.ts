@@ -150,8 +150,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const pipeline = redis.pipeline();
     pipeline.sadd(dedupKey, ip);
     pipeline.hset(eloKey, { [entityA]: newA, [entityB]: newB });
-    pipeline.hincrby(votesKey, entityA, 1);
-    pipeline.hincrby(votesKey, entityB, 1);
+    // Only increment the winner's vote count (ties increment both)
+    if (winner === 'A') {
+      pipeline.hincrby(votesKey, entityA, 1);
+    } else if (winner === 'B') {
+      pipeline.hincrby(votesKey, entityB, 1);
+    } else {
+      pipeline.hincrby(votesKey, entityA, 1);
+      pipeline.hincrby(votesKey, entityB, 1);
+    }
     pipeline.lpush(historyKey, historyEntry);
     pipeline.ltrim(historyKey, 0, 999); // Keep last 1000 entries
     await pipeline.exec();

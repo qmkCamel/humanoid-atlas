@@ -462,8 +462,15 @@ function recordLocalVote(
 
   bucket.elo[entityAId] = newA;
   bucket.elo[entityBId] = newB;
-  bucket.votes[entityAId] = (bucket.votes[entityAId] ?? 0) + 1;
-  bucket.votes[entityBId] = (bucket.votes[entityBId] ?? 0) + 1;
+  // Only increment the winner's vote count (ties increment both)
+  if (winner === 'A') {
+    bucket.votes[entityAId] = (bucket.votes[entityAId] ?? 0) + 1;
+  } else if (winner === 'B') {
+    bucket.votes[entityBId] = (bucket.votes[entityBId] ?? 0) + 1;
+  } else {
+    bucket.votes[entityAId] = (bucket.votes[entityAId] ?? 0) + 1;
+    bucket.votes[entityBId] = (bucket.votes[entityBId] ?? 0) + 1;
+  }
 
   saveLocalStore(store);
 
@@ -581,7 +588,7 @@ export default function Arena({ activeSubTab }: ArenaProps) {
     }
   }, []);
 
-  const fetchLeaderboard = useCallback(async (bustCache = false) => {
+  const fetchLeaderboard = useCallback(async () => {
     const cfg = configRef.current;
     if (!cfg) return;
     const dim = dimensionRef.current;
@@ -590,17 +597,22 @@ export default function Arena({ activeSubTab }: ArenaProps) {
     setLeaderboardLoading(true);
     try {
       const catParam = hasCat && cat ? `&category=${cat}` : '';
-      const cacheBust = bustCache ? `&_t=${Date.now()}` : '';
-      const res = await fetch(`${API_BASE}/api/arena/leaderboard?arena=${cfg.type}&dimension=${dim}${catParam}${cacheBust}`);
+      const res = await fetch(`${API_BASE}/api/arena/leaderboard?arena=${cfg.type}&dimension=${dim}${catParam}&_t=${Date.now()}`);
       if (!res.ok) throw new Error('Failed to fetch leaderboard');
       const data: LeaderboardData = await res.json();
+      // If server returned empty but we have local data, prefer local
+      if (data.rankings.length === 0) {
+        const localBoard = getLocalLeaderboard(cfg.type, dim, hasCat && cat ? cat : undefined);
+        if (localBoard.rankings.length > 0) {
+          setLeaderboard(localBoard);
+          return;
+        }
+      }
       setLeaderboard(data);
-
     } catch {
       // API unavailable — load from localStorage
       const localBoard = getLocalLeaderboard(cfg.type, dim, hasCat && cat ? cat : undefined);
       setLeaderboard(localBoard);
-
     } finally {
       setLeaderboardLoading(false);
     }
@@ -635,7 +647,7 @@ export default function Arena({ activeSubTab }: ArenaProps) {
       if (!res.ok) throw new Error('Vote failed');
       const data: VoteResult = await res.json();
       setVoteResult(data);
-      fetchLeaderboard(true);
+      fetchLeaderboard();
     } catch {
       // API unavailable — compute Elo locally and persist to localStorage
       const dim = dimensionRef.current;
@@ -853,7 +865,7 @@ export default function Arena({ activeSubTab }: ArenaProps) {
             Leaderboard
             {leaderboard && leaderboard.rankings.length > 0 && (
               <span className="arena-leaderboard__vote-count">
-                {Math.floor(leaderboard.rankings.reduce((sum, r) => sum + r.votes, 0) / 2)} votes
+                {leaderboard.rankings.reduce((sum, r) => sum + r.votes, 0)} votes
               </span>
             )}
           </h3>
