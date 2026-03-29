@@ -372,6 +372,19 @@ export interface VLAModel {
   companyLinks: VLACompanyLink[];
 }
 
+// ── Arena Scenarios ────────────────────────────────────────
+
+export type ScenarioCategory = 'supply_disruption' | 'policy_shift' | 'market_event' | 'tech_breakthrough';
+
+export interface Scenario {
+  id: string;
+  title: string;
+  category: ScenarioCategory;
+  description: string;
+  affectedCategories: string[];   // component category IDs
+  affectedCountries: Country[];
+}
+
 // ── Reward Comparisons ──────────────────────────────────────
 
 export interface RewardModelScores {

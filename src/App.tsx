@@ -9,17 +9,19 @@ import RewardChart from './components/RewardChart';
 import ApiDocs from './components/ApiDocs';
 import CliDocs from './components/CliDocs';
 import DataBrokerage from './components/DataBrokerage';
+import Arena from './components/Arena';
 import './App.css';
 
 // Start fetching the skeleton model immediately on module load
 preloadPLY('/models/skeleton.ply');
 
-type TabGroup = 'overview' | 'industry' | 'data' | 'hardware' | 'software' | 'hri' | 'cli' | 'api';
+type TabGroup = 'overview' | 'industry' | 'data' | 'arena' | 'hardware' | 'software' | 'hri' | 'cli' | 'api';
 
 const TAB_GROUPS: { id: TabGroup; label: string }[] = [
   { id: 'overview', label: 'Overview' },
   { id: 'industry', label: 'Industry' },
   // { id: 'data', label: 'Data' }, // Hidden until ready — uncomment to enable
+  { id: 'arena', label: 'Arena' },
   { id: 'hardware', label: 'Hardware' },
   { id: 'software', label: 'Software' },
   { id: 'hri', label: 'HRI' },
@@ -45,6 +47,13 @@ const TABS: { id: string; label: string; group: TabGroup; hidden?: boolean }[] =
   { id: 'buyer_terms', label: '', group: 'data', hidden: true },
   { id: 'collector_terms', label: '', group: 'data', hidden: true },
   { id: 'account', label: 'Sign Out', group: 'data' },
+  // Arena
+  { id: 'arena_oems', label: 'OEM Arena', group: 'arena' },
+  { id: 'arena_suppliers', label: 'Supplier Arena', group: 'arena' },
+  { id: 'arena_vla', label: 'VLA Arena', group: 'arena' },
+  { id: 'arena_investment', label: 'Investment Arena', group: 'arena' },
+  { id: 'arena_components', label: 'Component Arena', group: 'arena' },
+  { id: 'arena_scenarios', label: 'Scenario Arena', group: 'arena' },
   // Hardware
   { id: 'sensors_general', label: 'Sensors', group: 'hardware' },
   { id: 'compute', label: 'Compute', group: 'hardware' },
@@ -95,6 +104,12 @@ const TAB_TO_PATH: Record<string, string> = {
   buyer_terms: '/data/buyer-terms',
   collector_terms: '/data/collector-terms',
   account: '/data/account',
+  arena_oems: '/arena/oems',
+  arena_suppliers: '/arena/suppliers',
+  arena_vla: '/arena/vla',
+  arena_investment: '/arena/investment',
+  arena_components: '/arena/components',
+  arena_scenarios: '/arena/scenarios',
   sensors_general: '/hardware/sensors',
   compute: '/hardware/compute',
   batteries: '/hardware/battery',
@@ -146,6 +161,12 @@ const TAB_META: Record<string, { title: string; description: string }> = {
   sell_data: { title: 'Sell Training Data | Atlas Data Brokerage', description: 'List your training datasets on Atlas Data Brokerage. Reach OEM buyers, set your own prices, get paid via Stripe.' },
   collect_data: { title: 'Collect Training Data | Atlas Data Brokerage', description: 'Join data collection programs and earn by gathering training data for humanoid robots.' },
   account: { title: 'Account | Atlas Data Brokerage', description: 'Manage your Atlas Data Brokerage account.' },
+  arena_oems: { title: 'OEM Arena - Vote on the Best Humanoid Robot | Atlas Arena', description: 'Head-to-head humanoid robot matchups. Vote on best specs, best value, most production-ready, and best design. Community-driven Elo rankings across 38 OEMs.' },
+  arena_suppliers: { title: 'Supplier Arena - Vote on the Best Robotics Supplier | Atlas Arena', description: 'Head-to-head supplier matchups by component category. Compare motors, reducers, batteries, compute and more. Community-driven Elo rankings.' },
+  arena_vla: { title: 'VLA Arena - Vote on the Best Vision-Language-Action Model | Atlas Arena', description: 'Head-to-head VLA model matchups. Compare Helix, pi0, GR00T, OpenVLA, Gemini Robotics and more. Community-driven Elo rankings across 19 models.' },
+  arena_investment: { title: 'Investment Arena - Vote on the Best Humanoid Robotics Investment | Atlas Arena', description: 'Head-to-head investment matchups. Compare valuations, funding rounds, and growth potential across 26 humanoid robotics companies.' },
+  arena_components: { title: 'Component Arena - Vote on the Most Critical Humanoid Robot Component | Atlas Arena', description: 'Head-to-head component category matchups. Vote on biggest bottleneck, most innovation potential, and cost reduction opportunity across 15 component types.' },
+  arena_scenarios: { title: 'Scenario Arena - Vote on the Most Disruptive Supply Chain Scenario | Atlas Arena', description: 'Head-to-head scenario matchups. Compare geopolitical disruptions, policy shifts, market events, and technology breakthroughs for industry impact and likelihood.' },
   sensors_general: { title: 'Humanoid Robot Sensors - Cameras, LiDAR, IMUs | Humanoid Atlas', description: 'Sensor supply chain for humanoid robots. Intel RealSense, Livox LiDAR, Sony image sensors, and more.' },
   compute: { title: 'Humanoid Robot Compute - NVIDIA Jetson, SoCs | Humanoid Atlas', description: 'Compute platforms powering humanoid robots. NVIDIA Jetson Orin/Thor, Intel, Qualcomm, and custom SoCs.' },
   batteries: { title: 'Humanoid Robot Batteries - Cells & Pack Design | Humanoid Atlas', description: 'Battery supply chain for humanoid robots. Panasonic, CATL, Samsung SDI, Molicel cells and pack designs.' },
@@ -1136,7 +1157,7 @@ export default function App() {
   const [factoryStatusFilter, setFactoryStatusFilter] = useState<'all' | FactoryStatus>('all');
   const [simPlatformFilter, setSimPlatformFilter] = useState<'all' | SimPlatformType>('all');
   const [safetyComplianceFilter, setSafetyComplianceFilter] = useState<'all' | SafetyComplianceLevel>('all');
-  const [countryFilter, setCountryFilter] = useState<CountryGroup>(null);
+  const [countryFilter] = useState<CountryGroup>(null);
   const [cutCountries, setCutCountries] = useState<Set<string>>(new Set());
   const [cutCompanies, setCutCompanies] = useState<Set<string>>(new Set());
   const [activeScenarios, setActiveScenarios] = useState<Set<string>>(new Set());
@@ -2324,35 +2345,6 @@ export default function App() {
       </header>
 
       <div className="filter-bar">
-        <div className="country-filter">
-          <button
-            className={`country-pill ${countryFilter === null ? 'country-pill--active' : ''}`}
-            onClick={() => setCountryFilter(null)}
-          >All</button>
-          <button
-            className={`country-pill ${countryFilter === 'US' ? 'country-pill--active' : ''}`}
-            onClick={() => setCountryFilter(countryFilter === 'US' ? null : 'US')}
-          >US</button>
-          <button
-            className={`country-pill ${countryFilter === 'CN' ? 'country-pill--active' : ''}`}
-            onClick={() => setCountryFilter(countryFilter === 'CN' ? null : 'CN')}
-          >China</button>
-          <button
-            className={`country-pill ${countryFilter === 'JP' ? 'country-pill--active' : ''}`}
-            onClick={() => setCountryFilter(countryFilter === 'JP' ? null : 'JP')}
-          >Japan</button>
-          <button
-            className={`country-pill ${countryFilter === 'KR' ? 'country-pill--active' : ''}`}
-            onClick={() => setCountryFilter(countryFilter === 'KR' ? null : 'KR')}
-          >S. Korea</button>
-          <button
-            className={`country-pill ${countryFilter === 'OTHER' ? 'country-pill--active' : ''}`}
-            onClick={() => setCountryFilter(countryFilter === 'OTHER' ? null : 'OTHER')}
-          >Other</button>
-        </div>
-
-        <div className="filter-bar__separator"></div>
-
         <div className="tab-group-nav">
           {TAB_GROUPS.map((g) => (
             <Fragment key={g.id}>
@@ -2383,7 +2375,7 @@ export default function App() {
         })}
       </nav>
 
-      <main className={activeTabGroup === 'data' ? 'component-view' : activeTabGroup === 'cli' ? 'component-view' : activeTabGroup === 'api' ? 'component-view' : activeTab === 'skeleton' ? 'skeleton-view' : activeTab === 'network' ? 'skeleton-view' : activeTab === 'timeline' ? 'geo-view' : activeTab === 'geopolitics' ? 'geo-view' : activeTab === 'funding' ? 'geo-view' : activeTab === 'factories' ? 'geo-view' : 'component-view'}>
+      <main className={activeTabGroup === 'data' ? 'component-view' : activeTabGroup === 'cli' ? 'component-view' : activeTabGroup === 'api' ? 'component-view' : activeTabGroup === 'arena' ? 'component-view' : activeTab === 'skeleton' ? 'skeleton-view' : activeTab === 'network' ? 'skeleton-view' : activeTab === 'timeline' ? 'geo-view' : activeTab === 'geopolitics' ? 'geo-view' : activeTab === 'funding' ? 'geo-view' : activeTab === 'factories' ? 'geo-view' : 'component-view'}>
         {/* Skeleton tab */}
         {activeTab === 'skeleton' && (
           <div className={`skeleton-interactive${skeletonRegion && skeletonSidebarOpen && !isMobile ? ' skeleton-interactive--sidebar-open' : ''}`}>
@@ -4346,6 +4338,10 @@ export default function App() {
             )}
 
           </>
+        )}
+
+        {activeTabGroup === 'arena' && (
+          <Arena activeSubTab={activeTab} />
         )}
 
         {activeTabGroup === 'data' && (

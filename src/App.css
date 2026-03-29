@@ -5063,3 +5063,645 @@ select.db-form-input { appearance: none; -webkit-appearance: none; background-im
 .db-inline-cart__item-right { display: flex; align-items: flex-start; flex-shrink: 0; }
 .db-inline-cart__item-price-row { display: flex; align-items: baseline; gap: 12px; }
 .db-inline-cart__item { align-items: flex-end; }
+
+/* ========== ARENA ========== */
+.arena-view {
+  padding: 24px 32px;
+}
+
+.arena-header {
+  margin-bottom: 16px;
+}
+
+.arena-title {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 18px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.arena-subtitle {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.arena-vote-count {
+  margin-left: 12px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  color: var(--text-dim);
+  letter-spacing: 0.5px;
+}
+
+/* Dimension selector */
+.arena-dimensions {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.arena-dim-btn {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  padding: 6px 14px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.arena-dim-btn:hover {
+  border-color: var(--border-hover);
+  color: var(--text);
+}
+
+.arena-dim-btn.active {
+  background: var(--accent);
+  color: var(--bg);
+  border-color: var(--accent);
+}
+
+/* Matchup container */
+.arena-matchup-container {
+  margin-bottom: 24px;
+}
+
+.arena-matchup {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 12px;
+  align-items: stretch;
+}
+
+.arena-loading, .arena-error, .arena-empty {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 12px;
+  color: var(--text-dim);
+  text-align: center;
+  padding: 40px 0;
+}
+
+.arena-error {
+  color: var(--red);
+}
+
+/* Arena card */
+.arena-card {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  border: none;
+  overflow: visible;
+  transition: border-color 0.3s;
+  position: relative;
+}
+
+.arena-card__inner {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  transition: border-color 0.3s;
+}
+
+.arena-card--winner .arena-card__inner {
+  border-color: var(--green);
+}
+
+.arena-card--loser .arena-card__inner {
+  border-color: var(--red);
+}
+
+.arena-card--loser {
+  opacity: 0.7;
+}
+
+.arena-card__label {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1px;
+  background: var(--accent);
+  color: var(--bg);
+  padding: 2px 8px;
+  border-radius: 3px;
+  z-index: 1;
+}
+
+.arena-card__img {
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.arena-card__img img {
+  max-width: 90%;
+  max-height: 180px;
+  object-fit: contain;
+}
+
+.arena-card__placeholder {
+  width: 100%;
+  height: 100%;
+  background: var(--bg-muted);
+}
+
+.arena-card__body {
+  padding: 12px 14px;
+  flex: 1;
+  min-height: 0;
+}
+
+.arena-card__name {
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 4px;
+  letter-spacing: 0.2px;
+}
+
+.arena-card__country {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  color: var(--text-secondary);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.arena-card__specs {
+  display: flex;
+  flex-direction: column;
+}
+
+.arena-spec {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.arena-spec__label {
+  font-size: 10px;
+  color: var(--text-dim);
+  font-family: 'Share Tech Mono', monospace;
+  letter-spacing: 0.3px;
+  flex-shrink: 0;
+}
+
+.arena-spec__value {
+  font-size: 11px;
+  color: var(--text);
+  text-align: right;
+  word-break: break-word;
+}
+
+/* Vote button */
+.arena-vote-btn {
+  width: 100%;
+  padding: 10px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  background: var(--accent);
+  color: var(--bg);
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  margin-top: auto;
+}
+
+.arena-vote-btn:hover {
+  opacity: 0.85;
+}
+
+.arena-vote-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Elo delta display */
+.arena-delta {
+  text-align: center;
+  padding: 10px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 12px;
+  color: var(--text-dim);
+  border-top: 1px solid var(--border);
+}
+
+.arena-delta.positive {
+  color: var(--green);
+}
+
+.arena-delta.negative {
+  color: var(--red);
+}
+
+/* VS column */
+.arena-vs {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 6px;
+  align-self: stretch;
+}
+
+.arena-vs__text {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 16px;
+  letter-spacing: 3px;
+  color: var(--text-dim);
+}
+
+.arena-tie-btn {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 10px 20px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s;
+  margin-bottom: 0;
+}
+
+.arena-tie-btn:hover {
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+.arena-tie-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.arena-next-btn {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 8px 20px;
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  background: var(--accent);
+  color: var(--bg);
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.arena-next-btn:hover {
+  opacity: 0.85;
+}
+
+.arena-already-voted {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  color: var(--text-dim);
+}
+
+/* ========== ARENA LEADERBOARD ========== */
+.arena-leaderboard {
+  border-top: 1px solid var(--border);
+  padding-top: 24px;
+}
+
+.arena-leaderboard__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.arena-leaderboard__title {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 14px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.arena-leaderboard__toggle {
+  display: flex;
+  gap: 4px;
+}
+
+.arena-toggle-btn {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  padding: 4px 12px;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.arena-toggle-btn.active {
+  background: var(--accent);
+  color: var(--bg);
+  border-color: var(--accent);
+}
+
+/* Table */
+.arena-table-wrap {
+  overflow-x: auto;
+}
+
+.arena-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.arena-table th {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  text-align: left;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.arena-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--bg-muted);
+}
+
+.arena-table__rank {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 12px;
+  color: var(--text-dim);
+  width: 40px;
+}
+
+.arena-table__name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+}
+
+.arena-table__thumb {
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  object-fit: cover;
+}
+
+.arena-table__country {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  color: var(--text-dim);
+}
+
+.arena-table__elo {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.arena-table__votes {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+/* Chart view */
+.arena-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.arena-chart__row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.arena-chart__label {
+  width: 140px;
+  font-size: 11px;
+  text-align: right;
+  flex-shrink: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.arena-chart__bar-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.arena-chart__bar {
+  height: 20px;
+  background: var(--accent);
+  border-radius: 2px;
+  transition: width 0.4s ease;
+  min-width: 4px;
+}
+
+.arena-chart__elo {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  color: var(--text-dim);
+  flex-shrink: 0;
+}
+
+.arena-leaderboard__footer {
+  margin-top: 12px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  color: var(--text-dim);
+  text-align: right;
+}
+
+/* ========== ARENA BLIND MODE ========== */
+.arena-card__blind {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-muted);
+}
+
+.arena-card__blind-label {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 48px;
+  color: var(--border-hover);
+  letter-spacing: 2px;
+  user-select: none;
+}
+
+.arena-card__blind-name {
+  color: var(--text-dim);
+  font-style: italic;
+}
+
+.arena-card--revealed {
+  animation: arena-reveal 0.4s ease-out;
+}
+
+@keyframes arena-reveal {
+  from { opacity: 0.6; transform: scale(0.98); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* ========== ARENA SUPPLIER SPECIFICS ========== */
+.arena-categories {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.arena-cat-btn {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  padding: 5px 12px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.arena-cat-btn:hover {
+  border-color: var(--border-hover);
+  color: var(--text);
+}
+
+.arena-cat-btn.active {
+  background: var(--text);
+  color: var(--bg);
+  border-color: var(--text);
+}
+
+.arena-card__supplier-badge {
+  padding: 16px 14px 8px;
+  text-align: center;
+}
+
+.arena-card__supplier-type {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  background: var(--bg-muted);
+  padding: 4px 10px;
+  border-radius: 3px;
+}
+
+.arena-card__desc {
+  font-size: 10px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+  margin-bottom: 6px;
+}
+
+/* ========== ARENA VLA BADGES ========== */
+.arena-badge--proprietary {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.arena-badge--partner {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.arena-badge--open {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+/* ========== ARENA SCENARIO BADGES ========== */
+.arena-badge--scenario-disruption {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.arena-badge--scenario-policy {
+  background: #e0e7ff;
+  color: #3730a3;
+}
+
+.arena-badge--scenario-market {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.arena-badge--scenario-tech {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+/* ========== ARENA MOBILE ========== */
+@media (max-width: 768px) {
+  .arena-view {
+    padding: 16px;
+  }
+
+  .arena-matchup {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .arena-vs {
+    flex-direction: row;
+    padding: 8px 0;
+  }
+
+  .arena-card__img {
+    height: 160px;
+  }
+
+  .arena-chart__label {
+    width: 80px;
+    font-size: 9px;
+  }
+
+  .arena-dimensions {
+    gap: 4px;
+  }
+
+  .arena-dim-btn {
+    font-size: 9px;
+    padding: 5px 10px;
+  }
+}
