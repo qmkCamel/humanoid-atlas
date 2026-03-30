@@ -1867,27 +1867,66 @@ function CopyableCodeBlock({ code, label }: { code: string; label: string }) {
 function generateProviderDocsMd(callbackUrl: string): string {
   const cbUrl = callbackUrl || 'https://your-api.com/atlas/provisioning';
   const activityUrl = cbUrl.replace('/provisioning', '/collector-activity');
-  return `# Atlas Data Brokerage — Provider Webhook Docs
+  return `# Atlas Data Brokerage — Provider Onboarding & Integration Guide
 
-## Overview
+## What is Atlas Data Brokerage?
 
-Atlas sends webhook events to your API endpoint when key actions occur.
-Configure your endpoint URL and API key in the Settings tab, then implement the handlers below.
+Atlas Data Brokerage is a vertical marketplace for embodied AI training data, built into [Humanoid Atlas](https://humanoids.fyi). As a data provider, you list datasets (egocentric video, teleoperation, tactile, motion capture, etc.) and OEM buyers purchase hours of data directly through the platform. Atlas handles discovery, payments (via Stripe), and buyer management. You handle data delivery via a webhook integration.
 
-**Your callback URL:** \`${cbUrl}\`
+**How it works:**
+1. You create listings describing your datasets (modality, hours available, price per hour, license type)
+2. OEM buyers browse your listings, add to cart, and pay via Stripe
+3. Atlas sends a webhook to your API with purchase details
+4. Your API responds with an access URL (or processes asynchronously and calls back)
+5. The buyer receives access instructions
+
+**Economics:** Atlas retains a 15% platform fee. You receive 85% of each sale, deposited directly to your connected Stripe account.
 
 ---
 
-## 1. Data Purchase Events
+## Step 1 — Create Your Account
 
-When a buyer completes a purchase, Atlas sends a POST request to your API endpoint.
-You can respond synchronously with access details, or asynchronously via the callback URL.
+1. You will receive a Clerk sign-in link from the Atlas team. Use it to create your account with your work email.
+2. Once signed in, navigate to **Sell Data**. You will be prompted to complete your provider profile (name, email, company).
+3. Click **Continue to Stripe Setup** to connect your Stripe account via Stripe Express. This takes about 2 minutes. You'll need your bank details for payouts.
 
-### Request format (sent by Atlas)
+**API base URL:** \`https://brokerage.humanoids.fyi/v1\`
+
+All authenticated API calls require a Clerk JWT token in the Authorization header:
+\`\`\`
+Authorization: Bearer <your-clerk-jwt>
+\`\`\`
+
+---
+
+## Step 2 — Configure Your Webhook Endpoint
+
+Atlas sends webhook events to your API endpoint when purchases and collector events occur. You need to build and host an HTTP endpoint that accepts POST requests.
+
+1. Go to **Sell Data → Settings**
+2. Set your **Provisioning API URL** — this is the endpoint Atlas will POST to (e.g. \`https://api.yourcompany.com/atlas/webhooks\`)
+3. Set your **API Key** — a secret string (min 32 characters) that Atlas includes as a Bearer token so you can verify requests are from Atlas
+4. Save
+
+**Your callback URL:** \`${cbUrl}\`
+
+This is the URL your system uses to call back to Atlas for async provisioning and collector activity reporting.
+
+---
+
+## Step 3 — Implement Webhook Handlers
+
+Your endpoint needs to handle the following event types:
+
+### 3a. Data Purchase Events
+
+When a buyer completes a purchase, Atlas POSTs to your endpoint. You can respond synchronously (instant access) or asynchronously (processing needed).
+
+**Request (sent by Atlas to your endpoint):**
 
 \`\`\`http
-POST your-api-endpoint
-Authorization: Bearer your-api-key
+POST <your-provisioning-api-url>
+Authorization: Bearer <your-api-key>
 Content-Type: application/json
 
 {
@@ -1906,17 +1945,21 @@ Content-Type: application/json
 }
 \`\`\`
 
-### Response — Synchronous (instant access)
+**Response option A — Synchronous (instant access):**
+
+Return this if the data is ready to download immediately.
 
 \`\`\`json
 {
   "status": "ready",
   "access_url": "https://your-storage.com/download/xyz",
-  "instructions": "Download all files from the link above"
+  "instructions": "Download all files from the link above. Link expires in 7 days."
 }
 \`\`\`
 
-### Response — Asynchronous (processing needed)
+**Response option B — Asynchronous (processing needed):**
+
+Return this if you need time to prepare the data (e.g. generating a custom export).
 
 \`\`\`json
 {
@@ -1924,7 +1967,7 @@ Content-Type: application/json
 }
 \`\`\`
 
-### Callback (when async processing is done)
+Then, when processing is complete, POST back to the callback URL:
 
 \`\`\`http
 POST ${cbUrl}
@@ -1938,17 +1981,13 @@ Content-Type: application/json
 }
 \`\`\`
 
----
+### 3b. Collector Signup Events
 
-## 2. Collector Signup Events
-
-When you accept a collector from the Programs tab, Atlas sends a notification to the same endpoint so you can sync them to your own database.
-
-### Event: collector_accepted
+If you use Atlas collection programs (optional), Atlas notifies your endpoint when you accept a collector so you can sync them to your own system.
 
 \`\`\`http
-POST your-api-endpoint
-Authorization: Bearer your-api-key
+POST <your-provisioning-api-url>
+Authorization: Bearer <your-api-key>
 Content-Type: application/json
 
 {
@@ -1965,7 +2004,7 @@ Content-Type: application/json
 }
 \`\`\`
 
-### Expected response
+**Expected response:**
 
 \`\`\`json
 {
@@ -1973,17 +2012,13 @@ Content-Type: application/json
 }
 \`\`\`
 
----
+### 3c. Collector Activity Postback (you call Atlas)
 
-## 3. Collector Activity Postback
-
-Report collector hours and earnings back to Atlas. Call this endpoint from your system when a collector completes work.
-
-### POST to Atlas (your system calls this)
+Report collector hours and earnings back to Atlas. Your system calls this endpoint when a collector completes work.
 
 \`\`\`http
 POST ${activityUrl}
-Authorization: Bearer your-api-key
+Authorization: Bearer <your-api-key>
 Content-Type: application/json
 
 {
@@ -1993,7 +2028,7 @@ Content-Type: application/json
 }
 \`\`\`
 
-### Expected response
+**Expected response:**
 
 \`\`\`json
 {
@@ -2003,36 +2038,45 @@ Content-Type: application/json
 
 ---
 
-## 4. Test Your Integration
+## Step 4 — Test Your Integration
 
-Use the Atlas test webhook endpoint to verify your API handles each event type correctly.
+Before going live, use the Atlas test webhook endpoint to verify your endpoint handles each event correctly.
 
-### Endpoint
+### Option A: Use the Sell Data dashboard
 
-\`\`\`
-POST /v1/provider/test-webhook
-Authorization: Bearer <your-clerk-token>
-Content-Type: application/json
+Go to **Sell Data → Docs → Test Your Integration** and click Send for each event type. Results show PASS/WARN/FAIL inline.
+
+### Option B: Use curl
+
+\`\`\`bash
+# Test ping (basic connectivity)
+curl -X POST https://brokerage.humanoids.fyi/v1/provider/test-webhook \\
+  -H "Authorization: Bearer <your-clerk-jwt>" \\
+  -H "Content-Type: application/json" \\
+  -d '{"event": "ping"}'
+
+# Test purchase event
+curl -X POST https://brokerage.humanoids.fyi/v1/provider/test-webhook \\
+  -H "Authorization: Bearer <your-clerk-jwt>" \\
+  -H "Content-Type: application/json" \\
+  -d '{"event": "purchase"}'
+
+# Test collector accepted event
+curl -X POST https://brokerage.humanoids.fyi/v1/provider/test-webhook \\
+  -H "Authorization: Bearer <your-clerk-jwt>" \\
+  -H "Content-Type: application/json" \\
+  -d '{"event": "collector_accepted"}'
 \`\`\`
 
 ### Test events
 
-| Event | Payload | What it tests |
-|-------|---------|---------------|
-| \`ping\` | \`{ "test": true }\` | Basic connectivity — your endpoint should return 200 |
-| \`purchase\` | Full purchase payload with test data | Your endpoint should return \`{ "status": "ready", "access_url": "...", "instructions": "..." }\` or \`{ "status": "processing" }\` |
-| \`collector_accepted\` | Full collector payload with test data | Your endpoint should return \`{ "status": "ok" }\` |
+| Event | What Atlas sends to your endpoint | Your endpoint should return |
+|-------|-----------------------------------|---------------------------|
+| \`ping\` | \`{ "test": true }\` | Any 200 response |
+| \`purchase\` | Full purchase payload with test transaction, buyer, and items | \`{ "status": "ready", "access_url": "...", "instructions": "..." }\` or \`{ "status": "processing" }\` |
+| \`collector_accepted\` | Full collector payload with test name, email, and referral code | \`{ "status": "ok" }\` |
 
-### Example: test a purchase event
-
-\`\`\`bash
-curl -X POST https://brokerage.humanoids.fyi/v1/provider/test-webhook \\
-  -H "Authorization: Bearer <your-token>" \\
-  -H "Content-Type: application/json" \\
-  -d '{"event": "purchase"}'
-\`\`\`
-
-### Response format
+### Response format from test endpoint
 
 \`\`\`json
 {
@@ -2046,6 +2090,57 @@ curl -X POST https://brokerage.humanoids.fyi/v1/provider/test-webhook \\
   }
 }
 \`\`\`
+
+All 3 tests returning PASS means your integration is production-ready.
+
+---
+
+## Step 5 — Create Your First Listing
+
+Once your webhook is verified, go to **Sell Data → Create Listing** and add your first dataset:
+
+- **Title** — descriptive name (e.g. "Kitchen Activity Egocentric Video")
+- **Modality** — egocentric_video, teleoperation, tactile, motion_capture, etc.
+- **Environment** — indoor, outdoor, mixed, simulation
+- **Total hours** — how much data is available
+- **Price per hour** — in USD
+- **Minimum hours** — smallest purchase allowed
+- **License type** — commercial, research, or custom
+- **Description** — what the data contains, how it was collected, quality notes
+
+You can upload sample clips so buyers can preview before purchasing.
+
+---
+
+## Architecture Overview
+
+\`\`\`
+Buyer browses catalog ──→ Adds to cart ──→ Pays via Stripe
+                                                │
+                                    Stripe webhook fires
+                                                │
+                                                ▼
+                              Atlas calls YOUR provisioning API
+                                    (purchase event POST)
+                                                │
+                              ┌─────────────────┴─────────────────┐
+                              │                                   │
+                      Sync response                     Async response
+                   { status: "ready" }              { status: "processing" }
+                   Buyer gets access                        │
+                      immediately                    You process data
+                                                            │
+                                                    POST callback to Atlas
+                                                    { status: "ready" }
+                                                            │
+                                                    Buyer gets access
+\`\`\`
+
+---
+
+## Support
+
+Contact the Atlas team at **juliansaks@utexas.edu** for onboarding help, API questions, or issues.
 `;
 }
 
