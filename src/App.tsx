@@ -17,10 +17,12 @@ preloadPLY('/models/skeleton.ply');
 
 type TabGroup = 'overview' | 'industry' | 'data' | 'arena' | 'hardware' | 'software' | 'hri' | 'cli' | 'api';
 
+const IS_LOCAL = typeof window !== 'undefined' && /^localhost(:\d+)?$/.test(window.location.hostname);
+
 const TAB_GROUPS: { id: TabGroup; label: string }[] = [
   { id: 'overview', label: 'Overview' },
   { id: 'industry', label: 'Industry' },
-  // { id: 'data', label: 'Data' }, // Hidden until ready — uncomment to enable
+  ...(IS_LOCAL ? [{ id: 'data' as TabGroup, label: 'Data' }] : []),
   { id: 'arena', label: 'Arena' },
   { id: 'hardware', label: 'Hardware' },
   { id: 'software', label: 'Software' },

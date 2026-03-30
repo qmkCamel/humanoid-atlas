@@ -14,7 +14,11 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 
   if (tokenGetter) {
     const token = await tokenGetter();
-    if (token) headers['Authorization'] = `Bearer ${token}`;
+    if (token) {
+      // Use dev bypass token for local brokerage API
+      const isLocal = API_BASE.includes('localhost');
+      headers['Authorization'] = `Bearer ${isLocal ? 'dev-test-token' : token}`;
+    }
   }
 
   // Add anonymous cart ID

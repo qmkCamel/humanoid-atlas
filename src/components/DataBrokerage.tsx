@@ -1864,8 +1864,205 @@ function CopyableCodeBlock({ code, label }: { code: string; label: string }) {
   );
 }
 
+function generateProviderDocsMd(callbackUrl: string): string {
+  const cbUrl = callbackUrl || 'https://your-api.com/atlas/provisioning';
+  const activityUrl = cbUrl.replace('/provisioning', '/collector-activity');
+  return `# Atlas Data Brokerage — Provider Webhook Docs
+
+## Overview
+
+Atlas sends webhook events to your API endpoint when key actions occur.
+Configure your endpoint URL and API key in the Settings tab, then implement the handlers below.
+
+**Your callback URL:** \`${cbUrl}\`
+
+---
+
+## 1. Data Purchase Events
+
+When a buyer completes a purchase, Atlas sends a POST request to your API endpoint.
+You can respond synchronously with access details, or asynchronously via the callback URL.
+
+### Request format (sent by Atlas)
+
+\`\`\`http
+POST your-api-endpoint
+Authorization: Bearer your-api-key
+Content-Type: application/json
+
+{
+  "atlas_transaction_id": "txn_abc123",
+  "buyer_email": "buyer@company.com",
+  "buyer_company": "Acme Robotics",
+  "items": [
+    {
+      "listing_id": "lst_xyz",
+      "listing_title": "Indoor Navigation Dataset",
+      "hours": 50,
+      "license_type": "commercial"
+    }
+  ],
+  "callback_url": "${cbUrl}"
+}
+\`\`\`
+
+### Response — Synchronous (instant access)
+
+\`\`\`json
+{
+  "status": "ready",
+  "access_url": "https://your-storage.com/download/xyz",
+  "instructions": "Download all files from the link above"
+}
+\`\`\`
+
+### Response — Asynchronous (processing needed)
+
+\`\`\`json
+{
+  "status": "processing"
+}
+\`\`\`
+
+### Callback (when async processing is done)
+
+\`\`\`http
+POST ${cbUrl}
+Content-Type: application/json
+
+{
+  "transaction_id": "txn_abc123",
+  "status": "ready",
+  "access_url": "https://your-storage.com/download/xyz",
+  "instructions": "Download all files from the link above"
+}
+\`\`\`
+
+---
+
+## 2. Collector Signup Events
+
+When you accept a collector from the Programs tab, Atlas sends a notification to the same endpoint so you can sync them to your own database.
+
+### Event: collector_accepted
+
+\`\`\`http
+POST your-api-endpoint
+Authorization: Bearer your-api-key
+Content-Type: application/json
+
+{
+  "event": "collector_accepted",
+  "collector": {
+    "name": "Eve Torres",
+    "email": "eve@example.com",
+    "referral_code": "ATL-377DKM"
+  },
+  "program": {
+    "id": "program-uuid",
+    "title": "Kitchen Activity Capture"
+  }
+}
+\`\`\`
+
+### Expected response
+
+\`\`\`json
+{
+  "status": "ok"
+}
+\`\`\`
+
+---
+
+## 3. Collector Activity Postback
+
+Report collector hours and earnings back to Atlas. Call this endpoint from your system when a collector completes work.
+
+### POST to Atlas (your system calls this)
+
+\`\`\`http
+POST ${activityUrl}
+Authorization: Bearer your-api-key
+Content-Type: application/json
+
+{
+  "referral_code": "ATL-377DKM",
+  "hours_delta": 5.5,
+  "earnings_delta_cents": 8250
+}
+\`\`\`
+
+### Expected response
+
+\`\`\`json
+{
+  "received": true
+}
+\`\`\`
+
+---
+
+## 4. Test Your Integration
+
+Use the Atlas test webhook endpoint to verify your API handles each event type correctly.
+
+### Endpoint
+
+\`\`\`
+POST /v1/provider/test-webhook
+Authorization: Bearer <your-clerk-token>
+Content-Type: application/json
+\`\`\`
+
+### Test events
+
+| Event | Payload | What it tests |
+|-------|---------|---------------|
+| \`ping\` | \`{ "test": true }\` | Basic connectivity — your endpoint should return 200 |
+| \`purchase\` | Full purchase payload with test data | Your endpoint should return \`{ "status": "ready", "access_url": "...", "instructions": "..." }\` or \`{ "status": "processing" }\` |
+| \`collector_accepted\` | Full collector payload with test data | Your endpoint should return \`{ "status": "ok" }\` |
+
+### Example: test a purchase event
+
+\`\`\`bash
+curl -X POST https://brokerage.humanoids.fyi/v1/provider/test-webhook \\
+  -H "Authorization: Bearer <your-token>" \\
+  -H "Content-Type: application/json" \\
+  -d '{"event": "purchase"}'
+\`\`\`
+
+### Response format
+
+\`\`\`json
+{
+  "data": {
+    "success": true,
+    "valid": true,
+    "status": 200,
+    "event": "purchase",
+    "response": { "status": "ready", "access_url": "..." },
+    "message": "purchase webhook delivered and response format is correct"
+  }
+}
+\`\`\`
+`;
+}
+
+function downloadProviderDocsMd(callbackUrl: string) {
+  const md = generateProviderDocsMd(callbackUrl);
+  const blob = new Blob([md], { type: 'text/markdown' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'PROVIDER-WEBHOOKS.md';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 function ProviderDocs() {
   const [callbackUrl, setCallbackUrl] = useState('');
+  const [mdDownloaded, setMdDownloaded] = useState(false);
 
   useEffect(() => {
     api.get<{ data: { callback_url: string } }>('/provider/settings')
@@ -1875,8 +2072,17 @@ function ProviderDocs() {
 
   return (
     <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+        <div className="db-meta-label">Overview</div>
+        <button className="api-md-btn" onClick={() => {
+          downloadProviderDocsMd(callbackUrl);
+          setMdDownloaded(true);
+          setTimeout(() => setMdDownloaded(false), 3000);
+        }}>
+          {mdDownloaded ? 'Downloaded!' : '.md file for agents'}
+        </button>
+      </div>
       <div className="api-preamble" style={{ marginBottom: 20 }}>
-        <div className="db-meta-label" style={{ marginBottom: 12 }}>Overview</div>
         <p style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.8 }}>
           Atlas sends webhook events to your API endpoint when key actions occur. Configure your endpoint URL and API key in the <strong>Settings</strong> tab, then implement the handlers below.
         </p>
@@ -1945,6 +2151,74 @@ Content-Type: application/json
   "received": true
 }`}</pre>
       </div>
+
+      <div className="api-preamble" style={{ marginBottom: 20 }}>
+        <div className="db-meta-label" style={{ marginBottom: 16 }}>4. Test your integration</div>
+        <p style={{ fontSize: 11, color: 'var(--text-secondary)', lineHeight: 1.7, marginBottom: 16 }}>
+          Send a test webhook to verify your endpoint handles each event type correctly. Configure your API URL and key in <strong>Settings</strong> first.
+        </p>
+        <TestWebhookPanel />
+      </div>
+    </div>
+  );
+}
+
+function TestWebhookPanel() {
+  const [results, setResults] = useState<Record<string, { loading: boolean; result?: { success: boolean; valid: boolean; status: number; message: string; response: unknown } }>>({});
+
+  const sendTest = async (event: 'ping' | 'purchase' | 'collector_accepted') => {
+    setResults(r => ({ ...r, [event]: { loading: true } }));
+    try {
+      const res = await api.post<{ data: { success: boolean; valid: boolean; status: number; message: string; response: unknown } }>('/provider/test-webhook', { event });
+      setResults(r => ({ ...r, [event]: { loading: false, result: res.data } }));
+    } catch (err) {
+      setResults(r => ({ ...r, [event]: { loading: false, result: { success: false, valid: false, status: 0, message: err instanceof Error ? err.message : 'Request failed', response: null } } }));
+    }
+  };
+
+  const events = [
+    { id: 'ping' as const, label: 'Ping', desc: 'Basic connectivity check' },
+    { id: 'purchase' as const, label: 'Purchase', desc: 'Simulates a data purchase event' },
+    { id: 'collector_accepted' as const, label: 'Collector Accepted', desc: 'Simulates a collector signup event' },
+  ];
+
+  return (
+    <div>
+      {events.map((ev, i) => {
+        const state = results[ev.id];
+        const isLast = i === events.length - 1;
+        return (
+          <div key={ev.id} style={{ borderBottom: isLast ? 'none' : '1px solid var(--border)', paddingBottom: isLast ? 0 : 12, marginBottom: isLast ? 0 : 12 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ fontSize: 11, color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+                <strong style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{ev.label}</strong> - {ev.desc}
+              </span>
+              <button
+                className="db-add-cart-btn"
+                style={{ padding: '4px 14px', fontSize: 10, width: 'auto', marginTop: 0, marginLeft: 16, flexShrink: 0 }}
+                onClick={() => sendTest(ev.id)}
+                disabled={state?.loading}
+              >
+                {state?.loading ? '...' : 'Send'}
+              </button>
+            </div>
+            {state?.result && (
+              <div style={{
+                marginTop: 8,
+                padding: '6px 10px',
+                borderRadius: 3,
+                fontSize: 10,
+                lineHeight: 1.5,
+                backgroundColor: state.result.success && state.result.valid ? 'rgba(0,128,0,0.05)' : state.result.success ? 'rgba(200,150,0,0.05)' : 'rgba(200,0,0,0.05)',
+                color: state.result.success && state.result.valid ? '#2a7a2a' : state.result.success ? '#8a6d00' : '#a00',
+                fontFamily: 'var(--font-mono)',
+              }}>
+                {state.result.success && state.result.valid ? 'PASS' : state.result.success ? 'WARN' : 'FAIL'} — {state.result.message}
+              </div>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }
