@@ -2324,7 +2324,7 @@ Provider creates program ──→ Collector applies ──→ Provider accepts
 
 ## Support
 
-Contact the Atlas team at **juliansaks@utexas.edu** for onboarding help, API questions, or issues.
+Contact the Atlas team at **juliansaks@gmail.com** for onboarding help, API questions, or issues.
 `;
 }
 
