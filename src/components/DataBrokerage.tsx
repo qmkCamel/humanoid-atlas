@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, Suspense } from 'react';
 import { useAuth, useClerk, SignInButton, SignUpButton } from '@clerk/clerk-react';
 import { loadStripe, type Stripe, type StripeElements } from '@stripe/stripe-js';
 import { api, setTokenGetter } from '../lib/brokerage-api';
@@ -124,15 +124,20 @@ interface Sample {
   content_type?: string;
 }
 
-type SampleCategory = 'video' | 'image' | 'audio' | 'json' | 'download';
+type SampleCategory = 'video' | 'image' | 'audio' | 'json' | 'rerun' | 'download';
 
-function getSampleCategory(contentType?: string, filename?: string): SampleCategory {
+// Phase 3: will be used for modality-dependent chart rendering of .parquet/.hdf5
+// const SPATIAL_MODALITIES = ['lidar', 'radar', 'point_cloud', 'motion_capture', 'event_camera', 'rgbd', 'depth'];
+
+function getSampleCategory(contentType?: string, filename?: string, _modalities?: string[]): SampleCategory {
   const ct = (contentType ?? '').toLowerCase();
   const ext = (filename ?? '').split('.').pop()?.toLowerCase() ?? '';
   if (ct.startsWith('video/') || ['mp4', 'webm', 'mov', 'avi', 'mkv'].includes(ext)) return 'video';
   if (ct.startsWith('image/') || ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg', 'bmp', 'tiff'].includes(ext)) return 'image';
   if (ct.startsWith('audio/') || ['mp3', 'wav', 'ogg', 'flac', 'aac', 'm4a'].includes(ext)) return 'audio';
   if (ct === 'application/json' || ext === 'json') return 'json';
+  if (['rrd', 'rosbag', 'mcap'].includes(ext)) return 'rerun';
+  // .parquet/.hdf5 cannot be loaded by Rerun web viewer — providers should convert to .rrd
   return 'download';
 }
 
@@ -181,8 +186,22 @@ function JsonPreview({ url, filename }: { url: string; filename: string }) {
   );
 }
 
-function SampleRenderer({ sample }: { sample: Sample }) {
-  const category = getSampleCategory(sample.content_type, sample.filename);
+const LazyRerunViewer = React.lazy(() =>
+  import('@rerun-io/web-viewer-react').then(mod => ({ default: mod.default }))
+);
+
+function RerunSampleViewer({ url }: { url: string }) {
+  return (
+    <Suspense fallback={<div className="db-rerun-loading">Loading 3D viewer...</div>}>
+      <div className="db-rerun-container">
+        <LazyRerunViewer rrd={url} width="100%" height="100%" hide_welcome_screen />
+      </div>
+    </Suspense>
+  );
+}
+
+function SampleRenderer({ sample, modalities = [] }: { sample: Sample; modalities?: string[] }) {
+  const category = getSampleCategory(sample.content_type, sample.filename, modalities);
   switch (category) {
     case 'video':
       return <video className="db-video-player" controls src={sample.url} />;
@@ -197,6 +216,8 @@ function SampleRenderer({ sample }: { sample: Sample }) {
       );
     case 'json':
       return <JsonPreview url={sample.url} filename={sample.filename} />;
+    case 'rerun':
+      return <RerunSampleViewer url={sample.url} />;
     case 'download':
       return (
         <div className="db-download-card">
@@ -210,13 +231,13 @@ function SampleRenderer({ sample }: { sample: Sample }) {
   }
 }
 
-function SampleGallery({ samples }: { samples: Sample[] }) {
+function SampleGallery({ samples, modalities = [] }: { samples: Sample[]; modalities?: string[] }) {
   const [activeIdx, setActiveIdx] = useState(0);
   const active = samples[activeIdx];
 
   return (
     <div className="db-sample-section">
-      <SampleRenderer sample={active} key={active.id + activeIdx} />
+      <SampleRenderer sample={active} modalities={modalities} key={active.id + activeIdx} />
       <div className="db-thumb-strip">
         {samples.map((s, i) => (
           <div key={s.id} className={`db-thumb${i === activeIdx ? ' db-thumb--active' : ''}`} onClick={() => setActiveIdx(i)} title={s.filename}>
@@ -347,7 +368,7 @@ function BuyData() {
         </div>
 
         {l.samples && l.samples.length > 0 && (
-          <SampleGallery samples={l.samples} />
+          <SampleGallery samples={l.samples} modalities={Array.isArray(l.modality) ? l.modality : [l.modality]} />
         )}
 
         <div className="api-preamble" style={{ marginTop: 16 }}>
@@ -1105,7 +1126,7 @@ function SampleUploader({ listingId, modalities = [] }: { listingId: string; mod
   return (
     <div className="api-preamble" style={{ marginTop: 12 }}>
       <div className="db-meta-label" style={{ marginBottom: 12 }}>Samples</div>
-      {samples.length > 0 && <SampleGallery samples={samples} />}
+      {samples.length > 0 && <SampleGallery samples={samples} modalities={modalities} />}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8 }}>
         <input
           ref={fileRef}
@@ -2531,7 +2552,36 @@ Once your webhook is verified, go to **Sell Data → Create Listing** and add yo
 - **License type** — standard, commercial, research, or custom
 - **Description** — what the data contains, how it was collected, quality notes
 
-You can upload sample clips so buyers can preview before purchasing.
+You can upload sample files so buyers can preview before purchasing. Video and image samples render natively. For 3D and spatial data, upload **.rrd preview files** for an interactive viewer experience.
+
+### Generating .rrd Preview Files
+
+For modalities like point clouds, depth maps, IMU, or motion capture, we recommend generating a \`.rrd\` preview using the [Rerun Python SDK](https://www.rerun.io/docs):
+
+\`\`\`bash
+pip install rerun-sdk
+\`\`\`
+
+\`\`\`python
+import rerun as rr
+
+rr.init("my_dataset_preview")
+
+# Point cloud example
+rr.log("point_cloud", rr.Points3D(positions=points, colors=colors))
+
+# Camera image example
+rr.log("camera/rgb", rr.Image(image_array))
+
+# IMU time-series example
+for t, (ax, ay, az) in enumerate(imu_data):
+    rr.set_time_sequence("frame", t)
+    rr.log("imu/accel_x", rr.Scalar(ax))
+
+rr.save("preview.rrd")
+\`\`\`
+
+Keep preview files **under 50MB** for fast loading. Trim to the first 10–30 seconds of your recording for a representative sample. The .rrd file renders as an interactive 3D viewer in the catalog.
 
 After submitting, your listing enters a review queue. The Atlas team will review and approve it (typically within 24 hours). Once approved and published, it appears in the **Buy Data** catalog for OEM buyers.
 

@@ -17,6 +17,9 @@ importers:
       '@react-three/fiber':
         specifier: ^9.5.0
         version: 9.5.0(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(three@0.183.2)
+      '@rerun-io/web-viewer-react':
+        specifier: ^0.31.1
+        version: 0.31.1(@types/react@19.2.14)(react@19.2.4)
       '@stripe/react-stripe-js':
         specifier: ^5.6.1
         version: 5.6.1(@stripe/stripe-js@8.11.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -544,6 +547,15 @@ packages:
   '@renovatebot/pep440@4.2.1':
     resolution: {integrity: sha512-2FK1hF93Fuf1laSdfiEmJvSJPVIDHEUTz68D3Fi9s0IZrrpaEcj6pTFBTbYvsgC5du4ogrtf5re7yMMvrKNgkw==}
     engines: {node: ^20.9.0 || ^22.11.0 || ^24, pnpm: ^10.0.0}
+
+  '@rerun-io/web-viewer-react@0.31.1':
+    resolution: {integrity: sha512-fNe2AFw69+e2KgM4fz3K6JXYihY4SJdHfbA/YG0nuAJxThp2fNgItnc//gUBP7nqy0Z2iMkhOX30NG0mB5zlXw==}
+    peerDependencies:
+      '@types/react': ^18.2.33 || ^19.0.0
+      react: ^18.2.0 || ^19.0.0
+
+  '@rerun-io/web-viewer@0.31.1':
+    resolution: {integrity: sha512-alHdsnyIeRlWIhBz70BeoDQfNnUZUD8j3OHgQPnMkWCw9iIRtPvenezuH40mnBv0p9+osFaGXQ5uztopJMMzFw==}
 
   '@rolldown/binding-android-arm64@1.0.0-rc.9':
     resolution: {integrity: sha512-lcJL0bN5hpgJfSIz/8PIf02irmyL43P+j1pTCfbD1DbLkmGRuFIA4DD3B3ZOvGqG0XiVvRznbKtN0COQVaKUTg==}
@@ -2773,6 +2785,14 @@ snapshots:
       - immer
 
   '@renovatebot/pep440@4.2.1': {}
+
+  '@rerun-io/web-viewer-react@0.31.1(@types/react@19.2.14)(react@19.2.4)':
+    dependencies:
+      '@rerun-io/web-viewer': 0.31.1
+      '@types/react': 19.2.14
+      react: 19.2.4
+
+  '@rerun-io/web-viewer@0.31.1': {}
 
   '@rolldown/binding-android-arm64@1.0.0-rc.9':
     optional: true

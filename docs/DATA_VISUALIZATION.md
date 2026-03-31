@@ -26,13 +26,11 @@ Sample file arrives → check content_type / extension
   ├── .rrd                 → Rerun web viewer (native format)
   ├── .json                → JSON / text viewer
   ├── .parquet / .hdf5     → Layer 2: check listing modality
-  │     ├── 3D-spatial modalities
-  │     │   (lidar, radar, point_cloud, motion_capture,
-  │     │    event_camera, rgbd, depth)
-  │     │                  → Rerun web viewer
+  │     │   NOTE: Rerun web viewer cannot load raw .parquet/.hdf5.
+  │     │   Providers must convert to .rrd for 3D preview.
   │     ├── time-series modalities
   │     │   (imu, force_torque, proprioception, tactile)
-  │     │                  → Time-series chart
+  │     │                  → Time-series chart (Phase 3)
   │     ├── text modalities
   │     │   (language_annotations)
   │     │                  → JSON / text viewer
@@ -120,53 +118,179 @@ When a listing has **multiple modalities**, the accept filter is the union of al
 
 **Goal**: Embed Rerun's WASM viewer for 3D/spatial data and robotics container formats.
 
-### Changes
+**Status**: Phase 1 complete — `.rrd`, `.rosbag`, `.mcap` currently render as download cards. Phase 2 replaces those with an embedded Rerun viewer.
 
-1. **Install `@rerun-io/web-viewer-react`** (v0.31.1+)
-   ```
-   pnpm add @rerun-io/web-viewer-react
-   ```
+### Step 2.1: Install dependency
 
-2. **Add `.rrd` to accepted upload formats** in SampleUploader
+```bash
+pnpm add @rerun-io/web-viewer-react
+```
 
-3. **Create `RerunViewer` wrapper component**
-   ```
-   import WebViewer from "@rerun-io/web-viewer-react";
+This pulls in `@rerun-io/web-viewer` (core WASM bundle) as a transitive dependency. The WASM binary is ~16MB unpacked — must be lazy-loaded (Step 2.3).
 
-   function RerunViewer({ url }: { url: string }) {
-     return (
-       <div style={{ width: '100%', height: 500 }}>
-         <WebViewer rrd={url} width="100%" height="100%" hide_welcome_screen />
-       </div>
-     );
-   }
-   ```
+### Step 2.2: Add `rerun` category to dispatcher
 
-4. **Wire into `SampleRenderer` dispatcher**
-   - `.rrd` files → RerunViewer (always)
-   - `.rosbag` / `.mcap` files → RerunViewer (always)
-   - `.parquet` / `.hdf5` with 3D-spatial modalities → RerunViewer
+**File**: `src/components/DataBrokerage.tsx`
 
-5. **Add provider guidance in SampleUploader**
-   - For non-video modalities, show tip: "For best preview quality, upload a .rrd file generated with the Rerun Python SDK"
-   - Link to Rerun docs for generating .rrd files
+Update `getSampleCategory()` to return a new `'rerun'` category:
 
-6. **Update ProviderDocs** with instructions for generating .rrd preview files:
-   ```python
-   import rerun as rr
-   rr.init("my_dataset_preview")
-   rr.save("preview.rrd")
-   # Log your data (point clouds, images, IMU, etc.)
-   ```
+```typescript
+type SampleCategory = 'video' | 'image' | 'audio' | 'json' | 'rerun' | 'download';
+
+function getSampleCategory(contentType?: string, filename?: string): SampleCategory {
+  // ... existing video/image/audio/json checks ...
+  if (['rrd', 'rosbag', 'mcap'].includes(ext)) return 'rerun';
+  return 'download';
+}
+```
+
+This must be inserted **before** the final `return 'download'` fallback so `.rrd`, `.rosbag`, and `.mcap` are caught.
+
+### Step 2.3: Create lazy-loaded RerunViewer component
+
+**File**: `src/components/DataBrokerage.tsx`
+
+Use React.lazy + dynamic import so the ~16MB WASM bundle only loads when a Rerun sample is actually viewed:
+
+```typescript
+const RerunViewer = React.lazy(() =>
+  import('@rerun-io/web-viewer-react').then(mod => ({ default: mod.default }))
+);
+
+function RerunSampleViewer({ url }: { url: string }) {
+  return (
+    <Suspense fallback={
+      <div className="db-rerun-loading">Loading 3D viewer...</div>
+    }>
+      <div className="db-rerun-container">
+        <RerunViewer rrd={url} width="100%" height="100%" hide_welcome_screen />
+      </div>
+    </Suspense>
+  );
+}
+```
+
+Key decisions:
+- `React.lazy` ensures the WASM is not in the main bundle — only fetched when a Rerun sample is active
+- `Suspense` shows a loading state while the ~16MB viewer downloads
+- `hide_welcome_screen` suppresses Rerun's default splash
+
+### Step 2.4: Wire into SampleRenderer
+
+**File**: `src/components/DataBrokerage.tsx`
+
+Add the `'rerun'` case to the `SampleRenderer` switch:
+
+```typescript
+case 'rerun':
+  return <RerunSampleViewer url={sample.url} />;
+```
+
+This goes between `'json'` and `'download'` cases.
+
+### Step 2.5: Thread modalities through for future Phase 3 use
+
+`SampleRenderer` and `SampleGallery` accept a `modalities` prop (plumbed through from both call sites). This is currently used only for the `getUploadHint` in SampleUploader, but Phase 3 will use it for modality-dependent chart rendering of `.parquet`/`.hdf5` files.
+
+**Important**: The Rerun web viewer **cannot load raw `.parquet` or `.hdf5` files**. It only loads `.rrd`, `.rosbag`, and `.mcap`. Providers with spatial data in parquet/hdf5 should convert to `.rrd` using the Rerun Python SDK (documented in ProviderDocs). Do NOT route `.parquet`/`.hdf5` to the Rerun viewer.
+
+Both call sites pass modalities:
+- Buyer detail: `<SampleGallery samples={l.samples} modalities={...} />`
+- Provider SampleUploader: `<SampleGallery samples={samples} modalities={modalities} />`
+
+### Step 2.6: Add CSS for Rerun viewer
+
+**File**: `src/App.css`
+
+```css
+.db-rerun-container { width: 100%; height: 500px; border-radius: 6px; border: 1px solid var(--border); overflow: hidden; }
+.db-rerun-loading { width: 100%; height: 500px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border); border-radius: 6px; background: var(--bg-muted); font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--text-dim); }
+```
+
+### Step 2.7: Update SampleUploader accepted formats
+
+**File**: `src/components/DataBrokerage.tsx`
+
+`.rrd` is already in `MODALITY_ACCEPT_MAP` for most modalities. Verify the fallback accept filter (line ~1046) includes `.rrd`:
+
+```
+'video/*,image/*,audio/*,.parquet,.hdf5,.rosbag,.mcap,.rrd,.json'
+```
+
+This is already the case — no change needed.
+
+### Step 2.8: Update ProviderDocs with .rrd generation guide
+
+**File**: `src/components/DataBrokerage.tsx` (ProviderDocs markdown section)
+
+Add a section to the provider documentation explaining how to generate `.rrd` preview files:
+
+```markdown
+## Generating Preview Files (.rrd)
+
+For 3D and spatial data (point clouds, depth maps, IMU, motion capture), we recommend
+uploading `.rrd` preview files for the best buyer experience. These render as interactive
+3D viewers in the catalog.
+
+Install the Rerun SDK:
+\`\`\`bash
+pip install rerun-sdk
+\`\`\`
+
+Generate a preview from your data:
+\`\`\`python
+import rerun as rr
+
+rr.init("my_dataset_preview")
+
+# Example: log point cloud data
+rr.log("point_cloud", rr.Points3D(positions=points, colors=colors))
+
+# Example: log camera images
+rr.log("camera/rgb", rr.Image(image_array))
+
+# Example: log IMU as time series
+for t, (ax, ay, az) in enumerate(imu_data):
+    rr.set_time_sequence("frame", t)
+    rr.log("imu/accel_x", rr.Scalar(ax))
+
+rr.save("preview.rrd")
+\`\`\`
+
+Keep preview files under 50MB for fast loading. Trim to the first 10-30 seconds of your
+recording for a representative sample.
+```
+
+### Step 2.9: Test with representative files
+
+Before merging, test with:
+- A real `.rrd` file from Rerun examples (https://app.rerun.io)
+- A `.mcap` file from a ROS2 recording (experimental support — may need v0.25+)
+- A `.rosbag` file from ROS1 (verify Rerun can load standard sensor_msgs)
+- Fallback: if Rerun fails to load a file, verify it degrades gracefully (no crash, shows error)
 
 ### Dependencies
-- `@rerun-io/web-viewer-react` npm package (~16MB WASM bundle)
-- Browser WebGL/WebGPU support (fallback handled by Rerun)
+- `@rerun-io/web-viewer-react` (v0.31.1+) — npm package
+- Browser WebGL/WebGPU support (fallback handled by Rerun internally)
 
-### Considerations
-- WASM bundle size: lazy-load the Rerun viewer (dynamic import) so it doesn't bloat initial page load
-- Large .rrd files: recommend providers keep preview files under 50MB for fast web loading
-- MCAP support is experimental in Rerun — test with representative files
+### Risks & Mitigations
+| Risk | Mitigation |
+|---|---|
+| WASM bundle (~16MB) bloats page load | React.lazy + dynamic import — only loads when viewer is active |
+| Large .rrd files (>100MB) slow to load | Provider guidance: keep previews <50MB; Rerun v0.30+ has on-demand streaming |
+| MCAP support is experimental | Test before launch; fall back to download card if Rerun throws |
+| WebGL not available (rare) | Rerun handles fallback internally; worst case shows error message |
+
+### Verification
+1. `npx tsc -b` — zero errors
+2. Upload a `.rrd` file → renders in embedded Rerun viewer
+3. Upload a `.rosbag` → renders in Rerun viewer (or graceful fallback)
+4. Upload a `.mcap` → renders in Rerun viewer (or graceful fallback)
+5. Upload a `.parquet` for a `lidar` listing → renders in Rerun viewer
+6. Upload a `.parquet` for an `imu` listing → still shows download card (Phase 3)
+7. Non-Rerun samples (video, image, audio) → unchanged behavior
+8. Initial page load does NOT include WASM bundle (verify with network tab)
+9. Deploy to Vercel — build succeeds
 
 ## Phase 3: Time-Series Charts
 
