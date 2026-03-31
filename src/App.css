@@ -4514,12 +4514,31 @@ input[type="number"] { -moz-appearance: textfield; }
 .db-detail-description { font-size: 13px; line-height: 1.6; color: var(--text-secondary); margin: 16px 0; }
 .db-license-terms { font-size: 12px; color: var(--text-dim); margin-bottom: 16px; }
 
-/* ─── VIDEO ──────────────────────────────────────────── */
+/* ─── SAMPLES ────────────────────────────────────────── */
+.db-sample-section { margin: 16px 0; }
 .db-video-section { margin: 16px 0; }
 .db-video-player { width: 100%; border-radius: 6px; border: 1px solid var(--border); background: #000; }
+.db-image-player { width: 100%; border-radius: 6px; border: 1px solid var(--border); background: var(--bg-muted); object-fit: contain; max-height: 500px; }
+.db-audio-player-wrap { border: 1px solid var(--border); border-radius: 6px; padding: 20px; background: var(--bg-muted); display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.db-audio-filename { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--text-secondary); text-align: center; word-break: break-all; }
+.db-audio-player { width: 100%; max-width: 400px; }
+.db-json-viewer { border: 1px solid var(--border); border-radius: 6px; overflow: hidden; background: var(--bg-muted); }
+.db-json-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border-bottom: 1px solid var(--border); background: var(--bg-card); }
+.db-json-filename { font-family: 'Share Tech Mono', monospace; font-size: 10px; color: var(--text-secondary); }
+.db-json-lines { font-family: 'Share Tech Mono', monospace; font-size: 9px; color: var(--text-dim); }
+.db-json-content { padding: 12px; font-family: 'Share Tech Mono', monospace; font-size: 11px; line-height: 1.5; color: var(--text); overflow-x: auto; max-height: 400px; overflow-y: auto; margin: 0; white-space: pre; }
+.db-json-expand { display: block; width: 100%; padding: 8px; border: none; border-top: 1px solid var(--border); background: var(--bg-card); font-family: 'Share Tech Mono', monospace; font-size: 10px; color: var(--accent); cursor: pointer; text-transform: uppercase; letter-spacing: 1px; }
+.db-json-expand:hover { background: var(--bg-muted); }
+.db-json-error, .db-json-loading { padding: 20px; text-align: center; font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--text-dim); border: 1px solid var(--border); border-radius: 6px; background: var(--bg-muted); }
+.db-download-card { display: flex; align-items: center; gap: 12px; padding: 20px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg-muted); }
+.db-download-info { flex: 1; min-width: 0; }
+.db-download-filename { font-family: 'Share Tech Mono', monospace; font-size: 12px; color: var(--text); word-break: break-all; }
+.db-download-ext { font-family: 'Share Tech Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-dim); margin-top: 2px; }
+.db-download-link { font-family: 'Share Tech Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; padding: 6px 14px; border: 1px solid var(--accent); border-radius: 4px; color: var(--accent); text-decoration: none; flex-shrink: 0; transition: all 0.15s; }
+.db-download-link:hover { background: var(--accent); color: var(--bg-card); }
 .db-thumb-strip { display: flex; gap: 6px; margin-top: 8px; overflow-x: auto; padding-bottom: 4px; }
 .db-thumb-strip::-webkit-scrollbar { display: none; }
-.db-thumb { width: 48px; height: 32px; border-radius: 3px; border: 1px solid var(--border); background: var(--bg-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; font-family: 'Share Tech Mono', monospace; font-size: 9px; color: var(--text-dim); flex-shrink: 0; transition: border-color 0.15s; }
+.db-thumb { min-width: 48px; padding: 0 6px; height: 32px; border-radius: 3px; border: 1px solid var(--border); background: var(--bg-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; font-family: 'Share Tech Mono', monospace; font-size: 9px; color: var(--text-dim); flex-shrink: 0; transition: border-color 0.15s; }
 .db-thumb:hover { border-color: var(--accent); }
 
 /* ─── CART ────────────────────────────────────────────── */

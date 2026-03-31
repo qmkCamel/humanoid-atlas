@@ -114,24 +114,123 @@ function formatTags(value: string | string[]): string {
 }
 
 // ═══════════════════════════════════════════════════════════
-// BUY DATA
+// SAMPLE DISPLAY
 // ═══════════════════════════════════════════════════════════
 
-function SampleGallery({ samples }: { samples: Array<{ id: string; url: string; filename: string }> }) {
+interface Sample {
+  id: string;
+  url: string;
+  filename: string;
+  content_type?: string;
+}
+
+type SampleCategory = 'video' | 'image' | 'audio' | 'json' | 'download';
+
+function getSampleCategory(contentType?: string, filename?: string): SampleCategory {
+  const ct = (contentType ?? '').toLowerCase();
+  const ext = (filename ?? '').split('.').pop()?.toLowerCase() ?? '';
+  if (ct.startsWith('video/') || ['mp4', 'webm', 'mov', 'avi', 'mkv'].includes(ext)) return 'video';
+  if (ct.startsWith('image/') || ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg', 'bmp', 'tiff'].includes(ext)) return 'image';
+  if (ct.startsWith('audio/') || ['mp3', 'wav', 'ogg', 'flac', 'aac', 'm4a'].includes(ext)) return 'audio';
+  if (ct === 'application/json' || ext === 'json') return 'json';
+  return 'download';
+}
+
+function getSampleTypeLabel(filename: string): string {
+  const ext = filename.split('.').pop()?.toLowerCase() ?? '';
+  const labels: Record<string, string> = {
+    mp4: 'MP4', webm: 'WEBM', mov: 'MOV', avi: 'AVI',
+    png: 'PNG', jpg: 'JPG', jpeg: 'JPG', gif: 'GIF', webp: 'WEBP', svg: 'SVG',
+    mp3: 'MP3', wav: 'WAV', ogg: 'OGG', flac: 'FLAC',
+    json: 'JSON', parquet: 'PQT', hdf5: 'HDF5', rosbag: 'BAG', mcap: 'MCAP', rrd: 'RRD',
+  };
+  return labels[ext] ?? (ext.toUpperCase().slice(0, 4) || '?');
+}
+
+function JsonPreview({ url, filename }: { url: string; filename: string }) {
+  const [content, setContent] = useState<string | null>(null);
+  const [error, setError] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+
+  useEffect(() => {
+    fetch(url)
+      .then(r => r.text())
+      .then(text => {
+        try { setContent(JSON.stringify(JSON.parse(text), null, 2)); }
+        catch { setContent(text); }
+      })
+      .catch(() => setError(true));
+  }, [url]);
+
+  if (error) return <div className="db-json-error">Failed to load {filename}</div>;
+  if (content === null) return <div className="db-json-loading">Loading...</div>;
+
+  const lines = content.split('\n');
+  const preview = expanded ? content : lines.slice(0, 20).join('\n');
+  const truncated = !expanded && lines.length > 20;
+
+  return (
+    <div className="db-json-viewer">
+      <div className="db-json-header">
+        <span className="db-json-filename">{filename}</span>
+        <span className="db-json-lines">{lines.length} lines</span>
+      </div>
+      <pre className="db-json-content">{preview}</pre>
+      {truncated && <button className="db-json-expand" onClick={() => setExpanded(true)}>Show all ({lines.length} lines)</button>}
+    </div>
+  );
+}
+
+function SampleRenderer({ sample }: { sample: Sample }) {
+  const category = getSampleCategory(sample.content_type, sample.filename);
+  switch (category) {
+    case 'video':
+      return <video className="db-video-player" controls src={sample.url} />;
+    case 'image':
+      return <img className="db-image-player" src={sample.url} alt={sample.filename} />;
+    case 'audio':
+      return (
+        <div className="db-audio-player-wrap">
+          <div className="db-audio-filename">{sample.filename}</div>
+          <audio className="db-audio-player" controls src={sample.url} />
+        </div>
+      );
+    case 'json':
+      return <JsonPreview url={sample.url} filename={sample.filename} />;
+    case 'download':
+      return (
+        <div className="db-download-card">
+          <div className="db-download-info">
+            <div className="db-download-filename">{sample.filename}</div>
+            <div className="db-download-ext">{sample.filename.split('.').pop()?.toUpperCase()} file</div>
+          </div>
+          <a href={sample.url} download={sample.filename} className="db-download-link" target="_blank" rel="noopener noreferrer">Download</a>
+        </div>
+      );
+  }
+}
+
+function SampleGallery({ samples }: { samples: Sample[] }) {
   const [activeIdx, setActiveIdx] = useState(0);
   const active = samples[activeIdx];
 
   return (
-    <div className="db-video-section">
-      <video className="db-video-player" controls src={active.url} key={active.id + activeIdx} />
+    <div className="db-sample-section">
+      <SampleRenderer sample={active} key={active.id + activeIdx} />
       <div className="db-thumb-strip">
         {samples.map((s, i) => (
-          <div key={s.id} className={`db-thumb${i === activeIdx ? ' db-thumb--active' : ''}`} onClick={() => setActiveIdx(i)}>{i + 1}</div>
+          <div key={s.id} className={`db-thumb${i === activeIdx ? ' db-thumb--active' : ''}`} onClick={() => setActiveIdx(i)} title={s.filename}>
+            {getSampleTypeLabel(s.filename)}
+          </div>
         ))}
       </div>
     </div>
   );
 }
+
+// ═══════════════════════════════════════════════════════════
+// BUY DATA
+// ═══════════════════════════════════════════════════════════
 
 function PurchaseSection({ listing, cart, onCartOpen }: { listing: Listing; cart: ReturnType<typeof useCart>; onCartOpen: () => void }) {
   const [hoursStr, setHoursStr] = useState(String(listing.minimum_hours));
@@ -924,14 +1023,54 @@ function SellData({ viewCount }: { viewCount: number | null }) {
   );
 }
 
-function SampleUploader({ listingId }: { listingId: string }) {
-  const [samples, setSamples] = useState<Array<{ id: string; url: string; filename: string }>>([]);
+// Maps modality tags to recommended file accept filters
+const MODALITY_ACCEPT_MAP: Record<string, string> = {
+  rgb: 'video/*,image/*',
+  rgbd: 'video/*,.rosbag,.mcap,.rrd,.hdf5',
+  depth: 'image/*,.hdf5,.rosbag,.mcap,.rrd',
+  lidar: '.rosbag,.mcap,.rrd,.parquet,.hdf5',
+  radar: '.rosbag,.mcap,.rrd,.parquet,.hdf5',
+  point_cloud: '.rosbag,.mcap,.rrd,.parquet,.hdf5',
+  motion_capture: '.rrd,.parquet,.hdf5,.mcap',
+  tactile: 'video/*,image/*,.parquet,.hdf5,.rrd',
+  force_torque: '.parquet,.hdf5,.rosbag,.rrd',
+  proprioception: '.parquet,.hdf5,.rosbag,.rrd',
+  imu: '.parquet,.hdf5,.rosbag,.rrd',
+  audio: 'audio/*',
+  language_annotations: '.json,.parquet,application/json',
+  thermal: 'video/*,image/*,.hdf5,.rrd',
+  event_camera: '.hdf5,.rosbag,.mcap,.rrd',
+};
+
+function getAcceptFilter(modalities: string[]): string {
+  if (modalities.length === 0) return 'video/*,image/*,audio/*,.parquet,.hdf5,.rosbag,.mcap,.rrd,.json';
+  const parts = new Set<string>();
+  for (const mod of modalities) {
+    const filter = MODALITY_ACCEPT_MAP[mod];
+    if (filter) filter.split(',').forEach(f => parts.add(f));
+    else 'video/*,image/*,audio/*,.parquet,.hdf5,.rosbag,.mcap,.rrd,.json'.split(',').forEach(f => parts.add(f));
+  }
+  return [...parts].join(',');
+}
+
+function getUploadHint(modalities: string[]): string | null {
+  const spatial = ['lidar', 'radar', 'point_cloud', 'motion_capture', 'event_camera', 'rgbd', 'depth'];
+  const timeSeries = ['imu', 'force_torque', 'proprioception', 'tactile'];
+  if (modalities.some(m => spatial.includes(m))) return 'For 3D/spatial data, upload .rrd preview files (generated with the Rerun Python SDK) for the best buyer experience.';
+  if (modalities.some(m => timeSeries.includes(m))) return 'For sensor time-series data, upload .rrd preview files or .parquet samples for interactive charts.';
+  return null;
+}
+
+function SampleUploader({ listingId, modalities = [] }: { listingId: string; modalities?: string[] }) {
+  const [samples, setSamples] = useState<Sample[]>([]);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
   const fileRef = useRef<HTMLInputElement>(null);
+  const acceptFilter = getAcceptFilter(modalities);
+  const uploadHint = getUploadHint(modalities);
 
   useEffect(() => {
-    api.get<{ data: { samples?: Array<{ id: string; url: string; filename: string }> } }>(`/provider/listings/${listingId}`)
+    api.get<{ data: { samples?: Sample[] } }>(`/provider/listings/${listingId}`)
       .then(r => setSamples(r.data.samples ?? []))
       .catch(() => {});
   }, [listingId]);
@@ -955,7 +1094,7 @@ function SampleUploader({ listingId }: { listingId: string }) {
       // 3. Confirm upload
       await api.post(`/provider/listings/${listingId}/samples/confirm`, { sample_id: data.sample_id });
       // 4. Refresh samples list
-      setSamples(prev => [...prev, { id: data.sample_id, url: data.public_url, filename: file.name }]);
+      setSamples(prev => [...prev, { id: data.sample_id, url: data.public_url, filename: file.name, content_type: file.type }]);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Upload failed');
     }
@@ -971,7 +1110,7 @@ function SampleUploader({ listingId }: { listingId: string }) {
         <input
           ref={fileRef}
           type="file"
-          accept="video/*,image/*,.parquet,.hdf5,.rosbag,.mcap"
+          accept={acceptFilter}
           style={{ display: 'none' }}
           onChange={e => { const f = e.target.files?.[0]; if (f) handleUpload(f); }}
         />
@@ -988,6 +1127,11 @@ function SampleUploader({ listingId }: { listingId: string }) {
       <p style={{ fontSize: 10, color: 'var(--text-dim)', marginTop: 6 }}>
         Upload preview clips or sample files. Max 500MB per file. Visible to buyers in the catalog.
       </p>
+      {uploadHint && (
+        <p style={{ fontSize: 10, color: 'var(--text-secondary)', marginTop: 4, fontStyle: 'italic' }}>
+          {uploadHint}
+        </p>
+      )}
     </div>
   );
 }
@@ -1058,7 +1202,7 @@ function ProviderDashboard() {
                       <div><div className="db-meta-label">Min hours</div><div className="db-meta-value">{String(l.minimum_hours)}</div></div>
                     </div>
                   </div>
-                  <SampleUploader listingId={String(l.id)} />
+                  <SampleUploader listingId={String(l.id)} modalities={Array.isArray(l.modality) ? l.modality.map(String) : [String(l.modality ?? '')].filter(Boolean)} />
                 </div>
               );
             })()}
