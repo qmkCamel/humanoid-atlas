@@ -345,14 +345,38 @@ function BuyData() {
   const [loading, setLoading] = useState(true);
   useEffect(() => { api.post('/page-views', { page: 'buy_data' }).catch(() => {}); }, []);
   const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
-  const [filters, setFilters] = useState({ modality: '', environment: '', collection_method: '', embodiment_type: '', task_type: '', q: '', min_price: '', max_price: '' });
+  const [filters, setFilters] = useState({ modality: '' as string, environment: '' as string, collection_method: '' as string, embodiment_type: '' as string, task_type: '' as string, q: '', min_price: '', max_price: '', sort: 'newest' });
   const [facets, setFacets] = useState<{ modalities: string[]; environments: string[]; collection_methods?: string[]; embodiment_types?: string[]; task_types?: string[] }>({ modalities: [], environments: [] });
+  const [compareIds, setCompareIds] = useState<Set<string>>(new Set());
+  const [showCompare, setShowCompare] = useState(false);
+  const [watchlist, setWatchlist] = useState<Set<string>>(() => {
+    try { return new Set(JSON.parse(localStorage.getItem('db_watchlist') ?? '[]')); } catch { return new Set(); }
+  });
   const [showCustomRequest, setShowCustomRequest] = useState(false);
   const [showPurchases, setShowPurchases] = useState(false);
   const [showCart, setShowCart] = useState(false);
   const [pendingCheckout, setPendingCheckout] = useState(false);
   const { isSignedIn } = useClerkAuth();
   const cart = useCart();
+
+  const toggleWatchlist = useCallback((id: string) => {
+    setWatchlist(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      localStorage.setItem('db_watchlist', JSON.stringify([...next]));
+      return next;
+    });
+  }, []);
+
+  const toggleCompare = useCallback((id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCompareIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else if (next.size < 3) next.add(id);
+      return next;
+    });
+  }, []);
 
   // Auto-open cart and trigger checkout after sign-in
   useEffect(() => {
@@ -382,8 +406,9 @@ function BuyData() {
     if (debouncedQ) params.set('q', debouncedQ);
     if (filters.min_price) params.set('min_price', filters.min_price);
     if (filters.max_price) params.set('max_price', filters.max_price);
+    if (filters.sort && filters.sort !== 'newest') params.set('sort', filters.sort);
     api.get<{ data: Listing[] }>(`/catalog?${params}`).then(r => setListings(r.data)).catch(console.error).finally(() => setLoading(false));
-  }, [filters.modality, filters.environment, filters.collection_method, filters.embodiment_type, filters.task_type, filters.min_price, filters.max_price, debouncedQ]);
+  }, [filters.modality, filters.environment, filters.collection_method, filters.embodiment_type, filters.task_type, filters.min_price, filters.max_price, filters.sort, debouncedQ]);
 
   useEffect(() => { fetchListings(); }, [fetchListings]);
   useEffect(() => { api.get<{ data: typeof facets }>('/catalog/facets').then(r => setFacets(r.data)).catch(console.error); }, []);
@@ -436,7 +461,44 @@ function BuyData() {
         <div className="db-detail-description">{l.description}</div>
         {l.license_terms && <div className="db-license-terms"><strong>License terms:</strong> {l.license_terms}</div>}
 
-        <PurchaseSection listing={l} cart={cart} onCartOpen={() => {}} />
+        <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+          <PurchaseSection listing={l} cart={cart} onCartOpen={() => {}} />
+          <button className={`db-watchlist-btn${watchlist.has(l.id) ? ' db-watchlist-btn--active' : ''}`} onClick={() => toggleWatchlist(l.id)}>
+            {watchlist.has(l.id) ? '★ Saved' : '☆ Save'}
+          </button>
+        </div>
+
+        {/* Similar datasets */}
+        {listings.filter(o => o.id !== l.id && (
+          (Array.isArray(l.modality) ? l.modality : [l.modality]).some(m =>
+            (Array.isArray(o.modality) ? o.modality : [o.modality]).includes(m)
+          )
+        )).length > 0 && (
+          <div style={{ marginTop: 24 }}>
+            <div className="db-meta-label" style={{ marginBottom: 8 }}>Similar Datasets</div>
+            <div className="db-catalog-list">
+              {listings.filter(o => o.id !== l.id && (
+                (Array.isArray(l.modality) ? l.modality : [l.modality]).some(m =>
+                  (Array.isArray(o.modality) ? o.modality : [o.modality]).includes(m)
+                )
+              )).slice(0, 5).map(o => (
+                <div key={o.id} className="db-catalog-row" onClick={() => selectListing(o.slug)}>
+                  {o.thumbnail_url && <img className="db-catalog-row__thumb" src={o.thumbnail_url} alt="" />}
+                  <div className="db-catalog-row__content">
+                    <div className="db-catalog-row__line1">
+                      <span className="db-catalog-row__title">{o.title}</span>
+                      <span className="db-catalog-row__view">View →</span>
+                    </div>
+                    <div className="db-catalog-row__line2">
+                      <span className="db-catalog-row__details">{formatTags(o.modality)}</span>
+                      <span className="db-catalog-row__price">${o.price_per_hour}/hr</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {cart.totalItems > 0 && <InlineCart cart={cart} formatUsd={formatUsd} autoCheckout={pendingCheckout} onAutoCheckoutDone={() => setPendingCheckout(false)} onPurchaseComplete={() => setShowPurchases(true)} />}
       </div>
@@ -523,7 +585,45 @@ function BuyData() {
               </select>
               <svg style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1L5 5L9 1" stroke="#8a8580" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
             </div>
+            <div style={{ position: 'relative', flex: '0 0 auto' }}>
+              <select className="db-form-select" style={{ width: 130, fontSize: 10, paddingRight: 28, appearance: 'none' }} value={filters.sort}
+                onChange={e => setFilters(f => ({ ...f, sort: e.target.value }))}>
+                <option value="newest">Newest</option>
+                <option value="price_asc">Price: Low→High</option>
+                <option value="price_desc">Price: High→Low</option>
+                <option value="hours_desc">Most Data</option>
+              </select>
+              <svg style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1L5 5L9 1" stroke="#8a8580" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            </div>
           </div>
+
+          {/* Active filter chips */}
+          {(() => {
+            const chips: { key: string; label: string; clear: () => void }[] = [];
+            if (filters.modality) chips.push({ key: 'mod', label: `Modality: ${filters.modality.replace(/_/g, ' ')}`, clear: () => setFilters(f => ({ ...f, modality: '' })) });
+            if (filters.environment) chips.push({ key: 'env', label: `Env: ${filters.environment.replace(/_/g, ' ')}`, clear: () => setFilters(f => ({ ...f, environment: '' })) });
+            if (filters.collection_method) chips.push({ key: 'col', label: `Collection: ${filters.collection_method.replace(/_/g, ' ')}`, clear: () => setFilters(f => ({ ...f, collection_method: '' })) });
+            if (filters.embodiment_type) chips.push({ key: 'emb', label: `Embodiment: ${filters.embodiment_type.replace(/_/g, ' ')}`, clear: () => setFilters(f => ({ ...f, embodiment_type: '' })) });
+            if (filters.task_type) chips.push({ key: 'task', label: `Task: ${filters.task_type.replace(/_/g, ' ')}`, clear: () => setFilters(f => ({ ...f, task_type: '' })) });
+            if (chips.length === 0) return null;
+            return (
+              <div className="db-active-filters">
+                {chips.map(c => (
+                  <span key={c.key} className="db-active-filter" onClick={c.clear}>{c.label} ×</span>
+                ))}
+                <span className="db-active-filter db-active-filter--clear" onClick={() => setFilters(f => ({ ...f, modality: '', environment: '', collection_method: '', embodiment_type: '', task_type: '' }))}>Clear all</span>
+              </div>
+            );
+          })()}
+
+          {/* Compare bar */}
+          {compareIds.size >= 2 && (
+            <div className="db-compare-bar">
+              <span className="db-compare-bar__count">{compareIds.size} datasets selected</span>
+              <button className="db-compare-bar__btn" onClick={() => setShowCompare(true)}>Compare</button>
+              <button className="db-compare-bar__clear" onClick={() => setCompareIds(new Set())}>Clear</button>
+            </div>
+          )}
 
           {loading ? (
             <div className="db-loading">Loading datasets...</div>
@@ -533,11 +633,17 @@ function BuyData() {
             <div className="db-catalog-list">
               {listings.map(l => (
                 <div key={l.id} className="db-catalog-row" onClick={() => selectListing(l.slug)}>
+                  <input type="checkbox" className="db-compare-check" checked={compareIds.has(l.id)} onClick={e => toggleCompare(l.id, e)} onChange={() => {}} title="Compare" />
                   {l.thumbnail_url && <img className="db-catalog-row__thumb" src={l.thumbnail_url} alt="" />}
                   <div className="db-catalog-row__content">
                     <div className="db-catalog-row__line1">
                       <span className="db-catalog-row__title">{l.title}</span>
-                      <span className="db-catalog-row__view">View →</span>
+                      <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                        <button className={`db-watchlist-btn-sm${watchlist.has(l.id) ? ' db-watchlist-btn-sm--active' : ''}`} onClick={e => { e.stopPropagation(); toggleWatchlist(l.id); }} title={watchlist.has(l.id) ? 'Remove from saved' : 'Save'}>
+                          {watchlist.has(l.id) ? '★' : '☆'}
+                        </button>
+                        <span className="db-catalog-row__view">View →</span>
+                      </div>
                     </div>
                     <div className="db-catalog-row__line2">
                       <div className="db-catalog-row__meta">
@@ -559,6 +665,42 @@ function BuyData() {
         </>
       )}
 
+      {showCompare && compareIds.size >= 2 && (() => {
+        const compareListings = listings.filter(l => compareIds.has(l.id));
+        return (
+          <div className="db-modal-overlay" onClick={() => setShowCompare(false)}>
+            <div className="db-modal db-modal--wide" onClick={e => e.stopPropagation()} style={{ maxWidth: 900 }}>
+              <div className="db-modal-header">
+                <div className="db-modal-title">Compare Datasets</div>
+                <button className="db-modal-close" onClick={() => setShowCompare(false)}>&times;</button>
+              </div>
+              <div style={{ overflowX: 'auto' }}>
+                <table className="db-compare-table">
+                  <thead>
+                    <tr>
+                      <th></th>
+                      {compareListings.map(l => <th key={l.id}>{l.title}</th>)}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr><td>Provider</td>{compareListings.map(l => <td key={l.id}>{l.providers?.name ?? '—'}</td>)}</tr>
+                    <tr><td>Modality</td>{compareListings.map(l => <td key={l.id}>{formatTags(l.modality)}</td>)}</tr>
+                    <tr><td>Environment</td>{compareListings.map(l => <td key={l.id}>{formatTags(l.environment)}</td>)}</tr>
+                    {compareListings.some(l => l.collection_method) && <tr><td>Collection</td>{compareListings.map(l => <td key={l.id}>{l.collection_method ? formatTags(l.collection_method) : '—'}</td>)}</tr>}
+                    {compareListings.some(l => l.embodiment_type) && <tr><td>Embodiment</td>{compareListings.map(l => <td key={l.id}>{l.embodiment_type ? formatTags(l.embodiment_type) : '—'}</td>)}</tr>}
+                    {compareListings.some(l => l.task_type) && <tr><td>Task Type</td>{compareListings.map(l => <td key={l.id}>{l.task_type ? formatTags(l.task_type) : '—'}</td>)}</tr>}
+                    <tr><td>Format</td>{compareListings.map(l => <td key={l.id}>{l.format ?? '—'}</td>)}</tr>
+                    <tr><td>Hours</td>{compareListings.map(l => <td key={l.id}>{l.total_hours?.toLocaleString() ?? '—'}</td>)}</tr>
+                    <tr><td>Price</td>{compareListings.map(l => <td key={l.id}>${l.price_per_hour}/hr</td>)}</tr>
+                    <tr><td>Min Purchase</td>{compareListings.map(l => <td key={l.id}>{l.minimum_hours} hrs</td>)}</tr>
+                    <tr><td>License</td>{compareListings.map(l => <td key={l.id}>{l.license_type.replace(/_/g, ' ')}</td>)}</tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
       {showCustomRequest && <CustomRequestModal onClose={() => setShowCustomRequest(false)} />}
     </div>
   );

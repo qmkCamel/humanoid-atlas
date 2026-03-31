@@ -800,12 +800,99 @@ Render as a small badge + expandable suggestions list on each listing card in My
 | `.hdf5` (time-series) | Extract first N rows → JSON | Chart-ready summary |
 | `.parquet` / `.hdf5` (3D) | Convert to `.rrd` | Rerun-ready preview |
 
+## Phase 6: Search, Discovery & Comparison
+
+**Goal**: Help buyers find the right datasets faster and compare options before purchasing.
+
+**Status**: Phases 1-5 complete — the marketplace has modality-aware rendering, 3D viewers, time-series charts, fullscreen browsing, metadata display, and provider tooling. Phase 6 focuses on the buyer journey: finding, filtering, and comparing datasets.
+
+### Step 6.1: Enhanced catalog search with tag-based filtering
+
+**File**: `src/components/DataBrokerage.tsx` (BuyData filter bar)
+
+The current filter bar has single-select dropdowns for modality, environment, collection_method, embodiment_type, task_type. Enhance with:
+
+- **Multi-select filters**: Allow buyers to select multiple values per dimension (e.g., "show me datasets that are both `lidar` AND `rgb`"). Use the same pill-toggle pattern from the listing form.
+- **Active filter chips**: Show selected filters as dismissible chips below the search bar for visibility.
+- **Filter count badges**: Show the number of matching results next to each filter option (requires facet counts from `/catalog/facets` API).
+
+### Step 6.2: Dataset comparison view
+
+**File**: `src/components/DataBrokerage.tsx` (new component)
+
+Allow buyers to select 2-3 listings and compare them side-by-side:
+
+- Add a "Compare" checkbox on each catalog row
+- When 2+ listings are selected, show a "Compare (N)" button
+- Comparison view shows a table with rows for: modality, environment, collection method, embodiment, task type, format, hours available, price/hr, license, preview quality score
+- Side-by-side sample previews (first sample from each listing)
+- "Add to Cart" buttons on each column
+
+### Step 6.3: Similar datasets recommendations
+
+**File**: `src/components/DataBrokerage.tsx` (listing detail view)
+
+On the listing detail page, show "Similar Datasets" below the purchase section:
+
+- Query `/catalog` with the same modality + environment as the current listing
+- Exclude the current listing
+- Show top 3-5 results as compact cards
+- Helps buyers discover alternatives and drives more browsing
+
+### Step 6.4: Sort options for catalog
+
+**File**: `src/components/DataBrokerage.tsx` (BuyData filter bar)
+
+Add a sort dropdown:
+- **Newest** (default) — by created_at desc
+- **Price: Low to High** — by price_per_hour asc
+- **Price: High to Low** — by price_per_hour desc
+- **Most Data** — by total_hours desc
+- **Provider** — alphabetical by provider name
+
+Requires adding `sort` query parameter to the `/catalog` API call.
+
+### Step 6.5: Saved searches / watchlist
+
+**File**: `src/components/DataBrokerage.tsx` (BuyData)
+
+Allow signed-in buyers to:
+- Save the current filter combination as a named search
+- Get notified (via email) when new listings match their saved search
+- Bookmark individual listings to a watchlist
+
+This requires backend support for storing saved searches and sending notifications. Frontend stores watchlist in localStorage as a fallback.
+
+### Dependencies
+- **Steps 6.1, 6.4**: Frontend-only (may need `/catalog` API to support multi-value filters and sort params)
+- **Step 6.2**: Frontend-only
+- **Step 6.3**: Needs `/catalog` API to support filtering by modality+environment
+- **Step 6.5**: Needs backend for saved searches / notifications; localStorage for watchlist
+
+### Risks & Mitigations
+| Risk | Mitigation |
+|---|---|
+| Multi-select filters increase API query complexity | Backend already supports array query params for taxonomy fields |
+| Comparison view may be complex for mobile | Limit to 2 listings on mobile, 3 on desktop |
+| Similar datasets may return 0 results for niche modalities | Show "No similar datasets yet" gracefully; fall back to same-provider listings |
+| Sort by total_hours may not be indexed | Backend should add index; frontend falls back to client-side sort |
+
+### Verification
+1. Multi-select filter: select "lidar" + "rgb" → shows only listings with both tags
+2. Comparison view: select 2 listings → side-by-side table renders correctly
+3. Similar datasets: listing detail shows 3-5 related listings below purchase section
+4. Sort: switch to "Price: Low to High" → catalog re-orders
+5. Watchlist: bookmark a listing → persists across page reloads (localStorage)
+6. `npx tsc -b` — zero errors
+7. Deploy to Vercel — build succeeds
+
 ## Implementation Priority
 
-| Phase | Effort | Impact | Dependencies |
+| Phase | Effort | Impact | Status |
 |---|---|---|---|
-| **Phase 1**: Content-type dispatcher | Small | High — fixes broken display for images, audio | None |
-| **Phase 2**: Rerun integration | Medium | High — enables 3D/spatial data preview | `@rerun-io/web-viewer-react` |
-| **Phase 3**: Time-series charts | Medium | Medium — covers IMU/F-T/proprioception | Chart library + backend or parquet-wasm |
-| **Phase 4**: Enhanced gallery UX | Medium | Medium — improves browsing experience | Phases 1-2 |
-| **Phase 5**: Provider tooling | Large | High long-term — improves data quality | Phases 1-3, Rerun Python SDK |
+| **Phase 1**: Content-type dispatcher | Small | High | Complete |
+| **Phase 2**: Rerun integration | Medium | High | Complete |
+| **Phase 3**: Time-series charts | Medium | Medium | Complete |
+| **Phase 4**: Enhanced gallery UX | Medium | Medium | Complete |
+| **Phase 5**: Provider tooling | Large | High | Complete |
+| **Phase 6**: Search, discovery & comparison | Medium | High | Proposed |
