@@ -1051,9 +1051,9 @@ function ProviderDashboard() {
                     <div className="db-meta-grid">
                       <div><div className="db-meta-label">Modality</div><div className="db-meta-value">{formatTags(l.modality as string | string[])}</div></div>
                       <div><div className="db-meta-label">Environment</div><div className="db-meta-value">{formatTags(l.environment as string | string[])}</div></div>
-                      {l.collection_method && <div><div className="db-meta-label">Collection Method</div><div className="db-meta-value">{formatTags(l.collection_method as string | string[])}</div></div>}
-                      {l.embodiment_type && <div><div className="db-meta-label">Embodiment</div><div className="db-meta-value">{formatTags(l.embodiment_type as string | string[])}</div></div>}
-                      {l.task_type && <div><div className="db-meta-label">Task Type</div><div className="db-meta-value">{formatTags(l.task_type as string | string[])}</div></div>}
+                      {l.collection_method ? <div><div className="db-meta-label">Collection Method</div><div className="db-meta-value">{formatTags(l.collection_method as string | string[])}</div></div> : null}
+                      {l.embodiment_type ? <div><div className="db-meta-label">Embodiment</div><div className="db-meta-value">{formatTags(l.embodiment_type as string | string[])}</div></div> : null}
+                      {l.task_type ? <div><div className="db-meta-label">Task Type</div><div className="db-meta-value">{formatTags(l.task_type as string | string[])}</div></div> : null}
                       <div><div className="db-meta-label">Price</div><div className="db-meta-value">${String(l.price_per_hour)}/hr</div></div>
                       <div><div className="db-meta-label">Min hours</div><div className="db-meta-value">{String(l.minimum_hours)}</div></div>
                     </div>
