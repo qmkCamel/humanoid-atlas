@@ -449,28 +449,163 @@ Best practices:
 
 ## Phase 4: Enhanced Gallery UX
 
-**Goal**: Improve the overall sample browsing experience.
+**Goal**: Improve the overall sample browsing experience with thumbnail previews, expanded views, and richer metadata display.
 
-### Changes
+**Status**: Phases 1-3 complete — samples render correctly by type with format labels in the thumbnail strip. Phase 4 enhances the browsing and discovery experience.
 
-1. **Thumbnail previews in catalog browse view**
-   - Show `thumbnail_url` (already on Listing interface) in catalog rows
-   - For video samples, generate poster frame server-side at upload time
-   - For image samples, use the image itself as thumbnail
+### Step 4.1: Catalog row thumbnail previews
 
-2. **Multi-format sample strip**
-   - Replace numbered buttons (1, 2, 3) with format-aware thumbnails
-   - Show file type icon + filename snippet for each sample
-   - Group samples by type (video samples, data samples, etc.)
+**File**: `src/components/DataBrokerage.tsx` (BuyData catalog list, ~line 495)
 
-3. **Fullscreen / expanded view**
-   - Click-to-expand for Rerun viewer (needs more space for 3D data)
-   - Lightbox for images
-   - Theater mode for video
+Currently catalog rows are text-only (title, provider, modality, price). Add a small thumbnail preview:
 
-4. **Sample metadata display**
-   - Show file size, duration (for video/audio), row count (for parquet)
-   - Show content type badge next to each sample
+- The `Listing` interface already has `thumbnail_url?: string | null` (line 65)
+- If `thumbnail_url` is set, render a small `<img>` (48x32px) at the left of the catalog row
+- If no `thumbnail_url`, show a format-based icon placeholder using the first sample's type label
+- Add CSS: `db-catalog-row__thumb` with `width: 48px; height: 32px; object-fit: cover; border-radius: 3px; border: 1px solid var(--border); flex-shrink: 0;`
+
+This is a frontend-only change — `thumbnail_url` is populated by the backend (or could be derived from the first image sample's URL).
+
+### Step 4.2: Rich thumbnail strip with visual previews
+
+**File**: `src/components/DataBrokerage.tsx` (SampleGallery, ~line 240)
+
+Currently thumbnails show format labels (MP4, PNG, BAG). Enhance with visual thumbnails where possible:
+
+- **Video samples**: Use the video URL with a `<video>` element as poster (muted, no controls, first frame)
+- **Image samples**: Show a mini `<img>` as the thumbnail
+- **Other formats**: Keep the text label (RRD, PQT, BAG, etc.)
+
+Update SampleGallery:
+```typescript
+function SampleThumb({ sample, active, onClick }: { sample: Sample; active: boolean; onClick: () => void }) {
+  const category = getSampleCategory(sample.content_type, sample.filename);
+  const isVisual = category === 'image' || category === 'video';
+
+  return (
+    <div className={`db-thumb${active ? ' db-thumb--active' : ''}${isVisual ? ' db-thumb--visual' : ''}`}
+      onClick={onClick} title={sample.filename}>
+      {isVisual ? (
+        <img className="db-thumb-img" src={sample.url} alt="" />
+      ) : (
+        getSampleTypeLabel(sample.filename)
+      )}
+    </div>
+  );
+}
+```
+
+CSS additions:
+```css
+.db-thumb--visual { padding: 0; overflow: hidden; }
+.db-thumb-img { width: 100%; height: 100%; object-fit: cover; }
+```
+
+### Step 4.3: Expanded / fullscreen view
+
+**File**: `src/components/DataBrokerage.tsx`
+
+Add a fullscreen toggle for sample viewers that benefit from more space:
+
+- **Rerun viewer**: Add an "Expand" button that toggles `db-rerun-container` height from 500px to `calc(100vh - 100px)` with a close button overlay
+- **Images**: Click-to-expand into a centered lightbox overlay (`db-lightbox`) with a dim background
+- **Video**: Theater mode — expand to full-width with dark background padding
+- **Charts**: Expand height from 350px to 600px
+
+Implementation:
+```typescript
+function SampleGallery({ samples, modalities = [] }: { samples: Sample[]; modalities?: string[] }) {
+  const [activeIdx, setActiveIdx] = useState(0);
+  const [expanded, setExpanded] = useState(false);
+  // ...
+}
+```
+
+CSS:
+```css
+.db-sample-section--expanded { position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,0.9); display: flex; flex-direction: column; padding: 20px; }
+.db-sample-section--expanded .db-rerun-container { height: calc(100vh - 100px); }
+.db-sample-section--expanded .db-chart-body { height: 600px; }
+.db-sample-expand-btn { position: absolute; top: 8px; right: 8px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 4px; padding: 4px 8px; font-family: 'Share Tech Mono', monospace; font-size: 9px; cursor: pointer; color: var(--text-dim); z-index: 10; }
+.db-sample-expand-btn:hover { color: var(--text); border-color: var(--accent); }
+```
+
+### Step 4.4: Sample metadata display
+
+**File**: `src/components/DataBrokerage.tsx`
+
+Add a metadata bar below the active sample showing relevant info:
+
+```typescript
+function SampleMetadata({ sample }: { sample: Sample & { duration_seconds?: number | null } }) {
+  const ext = sample.filename.split('.').pop()?.toUpperCase();
+  return (
+    <div className="db-sample-meta">
+      <span className="db-sample-meta-item">{ext}</span>
+      {sample.content_type && <span className="db-sample-meta-item">{sample.content_type}</span>}
+      {sample.duration_seconds && <span className="db-sample-meta-item">{sample.duration_seconds}s</span>}
+    </div>
+  );
+}
+```
+
+This requires threading `duration_seconds` through the `Sample` interface (currently optional on Listing but not on Sample). Update:
+```typescript
+interface Sample {
+  id: string;
+  url: string;
+  filename: string;
+  content_type?: string;
+  duration_seconds?: number | null;
+}
+```
+
+CSS:
+```css
+.db-sample-meta { display: flex; gap: 8px; margin-top: 6px; }
+.db-sample-meta-item { font-family: 'Share Tech Mono', monospace; font-size: 9px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; padding: 2px 6px; border: 1px solid var(--border); border-radius: 3px; }
+```
+
+### Step 4.5: Keyboard navigation for samples
+
+Add keyboard controls when the sample gallery is focused:
+- Left/Right arrows to switch between samples
+- `F` key to toggle fullscreen
+- `Escape` to exit fullscreen
+
+```typescript
+useEffect(() => {
+  if (!expanded) return;
+  const handler = (e: KeyboardEvent) => {
+    if (e.key === 'Escape') setExpanded(false);
+    if (e.key === 'ArrowLeft') setActiveIdx(i => Math.max(0, i - 1));
+    if (e.key === 'ArrowRight') setActiveIdx(i => Math.min(samples.length - 1, i + 1));
+  };
+  window.addEventListener('keydown', handler);
+  return () => window.removeEventListener('keydown', handler);
+}, [expanded, samples.length]);
+```
+
+### Dependencies
+- None — all native HTML/CSS/React
+
+### Risks & Mitigations
+| Risk | Mitigation |
+|---|---|
+| Visual thumbnails for video could be slow (loading video for poster) | Use image samples for visual thumbs; video shows format label unless `thumbnail_url` exists |
+| Lightbox/fullscreen z-index conflicts | Use z-index: 1000 with portal or fixed positioning |
+| Keyboard events capturing when not focused | Only attach keyboard listeners when expanded |
+| `duration_seconds` not always available | Conditionally render, graceful null handling |
+
+### Verification
+1. `npx tsc -b` — zero errors
+2. Catalog browse: listings with `thumbnail_url` show a small image preview
+3. Image samples show visual thumbnails in the strip
+4. Click expand button → sample fills screen; Escape to close
+5. Left/Right arrow keys navigate between samples in expanded mode
+6. Sample metadata bar shows file extension and duration where available
+7. All Phase 1-3 renderers still work — no regressions
+8. Deploy to Vercel — build succeeds
 
 ## Phase 5: Provider Tooling
 

@@ -122,6 +122,7 @@ interface Sample {
   url: string;
   filename: string;
   content_type?: string;
+  duration_seconds?: number | null;
 }
 
 type SampleCategory = 'video' | 'image' | 'audio' | 'json' | 'rerun' | 'timeseries' | 'download';
@@ -238,18 +239,57 @@ function SampleRenderer({ sample, modalities = [] }: { sample: Sample; modalitie
   }
 }
 
+function SampleThumb({ sample, active, onClick }: { sample: Sample; active: boolean; onClick: () => void }) {
+  const category = getSampleCategory(sample.content_type, sample.filename);
+  const isVisual = category === 'image';
+  return (
+    <div className={`db-thumb${active ? ' db-thumb--active' : ''}${isVisual ? ' db-thumb--visual' : ''}`}
+      onClick={onClick} title={sample.filename}>
+      {isVisual ? <img className="db-thumb-img" src={sample.url} alt="" /> : getSampleTypeLabel(sample.filename)}
+    </div>
+  );
+}
+
+function SampleMetadata({ sample }: { sample: Sample }) {
+  const ext = sample.filename.split('.').pop()?.toUpperCase();
+  return (
+    <div className="db-sample-meta">
+      {ext && <span className="db-sample-meta-item">{ext}</span>}
+      {sample.content_type && <span className="db-sample-meta-item">{sample.content_type.split('/').pop()}</span>}
+      {sample.duration_seconds != null && sample.duration_seconds > 0 && <span className="db-sample-meta-item">{sample.duration_seconds}s</span>}
+    </div>
+  );
+}
+
 function SampleGallery({ samples, modalities = [] }: { samples: Sample[]; modalities?: string[] }) {
   const [activeIdx, setActiveIdx] = useState(0);
+  const [expanded, setExpanded] = useState(false);
   const active = samples[activeIdx];
 
+  useEffect(() => {
+    if (!expanded) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setExpanded(false);
+      if (e.key === 'ArrowLeft') setActiveIdx(i => Math.max(0, i - 1));
+      if (e.key === 'ArrowRight') setActiveIdx(i => Math.min(samples.length - 1, i + 1));
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [expanded, samples.length]);
+
   return (
-    <div className="db-sample-section">
-      <SampleRenderer sample={active} modalities={modalities} key={active.id + activeIdx} />
+    <div className={`db-sample-section${expanded ? ' db-sample-section--expanded' : ''}`}>
+      {expanded && <button className="db-sample-close-btn" onClick={() => setExpanded(false)}>&times;</button>}
+      <div style={{ position: 'relative' }}>
+        <SampleRenderer sample={active} modalities={modalities} key={active.id + activeIdx} />
+        {!expanded && (
+          <button className="db-sample-expand-btn" onClick={e => { e.stopPropagation(); setExpanded(true); }} title="Expand">&#x26F6;</button>
+        )}
+      </div>
+      <SampleMetadata sample={active} />
       <div className="db-thumb-strip">
         {samples.map((s, i) => (
-          <div key={s.id} className={`db-thumb${i === activeIdx ? ' db-thumb--active' : ''}`} onClick={() => setActiveIdx(i)} title={s.filename}>
-            {getSampleTypeLabel(s.filename)}
-          </div>
+          <SampleThumb key={s.id} sample={s} active={i === activeIdx} onClick={() => setActiveIdx(i)} />
         ))}
       </div>
     </div>
@@ -493,18 +533,21 @@ function BuyData() {
             <div className="db-catalog-list">
               {listings.map(l => (
                 <div key={l.id} className="db-catalog-row" onClick={() => selectListing(l.slug)}>
-                  <div className="db-catalog-row__line1">
-                    <span className="db-catalog-row__title">{l.title}</span>
-                    <span className="db-catalog-row__view">View →</span>
-                  </div>
-                  <div className="db-catalog-row__line2">
-                    <div className="db-catalog-row__meta">
-                      <span className="db-catalog-row__provider">{l.providers?.name ?? ''}</span>
-                      <span className="db-catalog-row__details">
-                        {formatTags(l.modality)} · {formatTags(l.environment)}{l.total_hours ? ` · ${l.total_hours.toLocaleString()} hrs` : ''}
-                      </span>
+                  {l.thumbnail_url && <img className="db-catalog-row__thumb" src={l.thumbnail_url} alt="" />}
+                  <div className="db-catalog-row__content">
+                    <div className="db-catalog-row__line1">
+                      <span className="db-catalog-row__title">{l.title}</span>
+                      <span className="db-catalog-row__view">View →</span>
                     </div>
-                    <span className="db-catalog-row__price">${l.price_per_hour}/hr</span>
+                    <div className="db-catalog-row__line2">
+                      <div className="db-catalog-row__meta">
+                        <span className="db-catalog-row__provider">{l.providers?.name ?? ''}</span>
+                        <span className="db-catalog-row__details">
+                          {formatTags(l.modality)} · {formatTags(l.environment)}{l.total_hours ? ` · ${l.total_hours.toLocaleString()} hrs` : ''}
+                        </span>
+                      </div>
+                      <span className="db-catalog-row__price">${l.price_per_hour}/hr</span>
+                    </div>
                   </div>
                 </div>
               ))}
