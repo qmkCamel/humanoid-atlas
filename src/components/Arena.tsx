@@ -601,8 +601,8 @@ function buildConfig(activeSubTab: string): ArenaConfig | null {
   if (activeSubTab === 'arena_oems') {
     return {
       type: 'oems',
-      title: 'OEM Arena',
-      subtitle: 'Vote head-to-head: which humanoid robot wins?',
+      title: 'Atlas Arena',
+      subtitle: 'Vote head-to-head: which humanoid wins?',
       entityLabel: 'Humanoid',
       dimensions: OEM_DIMENSIONS,
       entityMap: oemEntityMap,

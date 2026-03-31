@@ -50,7 +50,7 @@ const TABS: { id: string; label: string; group: TabGroup; hidden?: boolean }[] =
   { id: 'collector_terms', label: '', group: 'data', hidden: true },
   { id: 'account', label: 'Sign Out', group: 'data' },
   // Arena
-  { id: 'arena_oems', label: 'OEM Arena', group: 'arena' },
+  { id: 'arena_oems', label: 'Atlas Arena', group: 'arena' },
   { id: 'arena_suppliers', label: 'Supplier Arena', group: 'arena', hidden: true },
   { id: 'arena_vla', label: 'VLA Arena', group: 'arena', hidden: true },
   { id: 'arena_investment', label: 'Investment Arena', group: 'arena', hidden: true },
@@ -163,7 +163,7 @@ const TAB_META: Record<string, { title: string; description: string }> = {
   sell_data: { title: 'Sell Training Data | Atlas Data Brokerage', description: 'List your training datasets on Atlas Data Brokerage. Reach OEM buyers, set your own prices, get paid via Stripe.' },
   collect_data: { title: 'Collect Training Data | Atlas Data Brokerage', description: 'Join data collection programs and earn by gathering training data for humanoid robots.' },
   account: { title: 'Account | Atlas Data Brokerage', description: 'Manage your Atlas Data Brokerage account.' },
-  arena_oems: { title: 'OEM Arena - Vote on the Best Humanoid Robot | Atlas Arena', description: 'Head-to-head humanoid robot matchups. Vote on best specs, best value, most production-ready, and best design. Community-driven Elo rankings across 38 OEMs.' },
+  arena_oems: { title: 'Atlas Arena - Vote on the Best Humanoid | Atlas Arena', description: 'Head-to-head humanoid matchups. Vote on best specs, best value, most production-ready, and best design. Community-driven Elo rankings across 38 OEMs.' },
   arena_suppliers: { title: 'Supplier Arena - Vote on the Best Robotics Supplier | Atlas Arena', description: 'Head-to-head supplier matchups by component category. Compare motors, reducers, batteries, compute and more. Community-driven Elo rankings.' },
   arena_vla: { title: 'VLA Arena - Vote on the Best Vision-Language-Action Model | Atlas Arena', description: 'Head-to-head VLA model matchups. Compare Helix, pi0, GR00T, OpenVLA, Gemini Robotics and more. Community-driven Elo rankings across 19 models.' },
   arena_investment: { title: 'Investment Arena - Vote on the Best Humanoid Robotics Investment | Atlas Arena', description: 'Head-to-head investment matchups. Compare valuations, funding rounds, and growth potential across 26 humanoid robotics companies.' },
