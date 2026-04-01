@@ -79,9 +79,9 @@ interface CollectionProgram {
 // ═══════════════════════════════════════════════════════════
 
 const MODALITIES = [
-  'rgb', 'rgbd', 'depth', 'lidar', 'radar', 'point_cloud', 'motion_capture',
+  'rgb', 'rgbd', 'depth', 'lidar', 'point_cloud', 'motion_capture',
   'tactile', 'force_torque', 'proprioception', 'imu', 'audio',
-  'language_annotations', 'thermal', 'event_camera', 'other',
+  'language_annotations', 'thermal', 'other',
 ];
 
 const ENVIRONMENTS = [
@@ -461,12 +461,7 @@ function BuyData() {
         <div className="db-detail-description">{l.description}</div>
         {l.license_terms && <div className="db-license-terms"><strong>License terms:</strong> {l.license_terms}</div>}
 
-        <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
-          <PurchaseSection listing={l} cart={cart} onCartOpen={() => {}} />
-          <button className={`db-watchlist-btn${watchlist.has(l.id) ? ' db-watchlist-btn--active' : ''}`} onClick={() => toggleWatchlist(l.id)}>
-            {watchlist.has(l.id) ? '★ Saved' : '☆ Save'}
-          </button>
-        </div>
+        <PurchaseSection listing={l} cart={cart} onCartOpen={() => {}} />
 
         {/* Similar datasets */}
         {listings.filter(o => o.id !== l.id && (
@@ -1242,7 +1237,6 @@ const MODALITY_ACCEPT_MAP: Record<string, string> = {
   rgbd: 'video/*,.rosbag,.mcap,.rrd,.hdf5',
   depth: 'image/*,.hdf5,.rosbag,.mcap,.rrd',
   lidar: '.rosbag,.mcap,.rrd,.parquet,.hdf5',
-  radar: '.rosbag,.mcap,.rrd,.parquet,.hdf5',
   point_cloud: '.rosbag,.mcap,.rrd,.parquet,.hdf5',
   motion_capture: '.rrd,.parquet,.hdf5,.mcap',
   tactile: 'video/*,image/*,.parquet,.hdf5,.rrd',
@@ -1252,7 +1246,6 @@ const MODALITY_ACCEPT_MAP: Record<string, string> = {
   audio: 'audio/*',
   language_annotations: '.json,.parquet,application/json',
   thermal: 'video/*,image/*,.hdf5,.rrd',
-  event_camera: '.hdf5,.rosbag,.mcap,.rrd',
 };
 
 function getAcceptFilter(modalities: string[]): string {
@@ -1267,7 +1260,7 @@ function getAcceptFilter(modalities: string[]): string {
 }
 
 function getUploadHint(modalities: string[]): string | null {
-  const spatial = ['lidar', 'radar', 'point_cloud', 'motion_capture', 'event_camera', 'rgbd', 'depth'];
+  const spatial = ['lidar', 'point_cloud', 'motion_capture', 'rgbd', 'depth'];
   const timeSeries = ['imu', 'force_torque', 'proprioception', 'tactile'];
   if (modalities.some(m => spatial.includes(m))) return 'For 3D/spatial data, upload .rrd preview files for interactive viewer. Generate with: pip install atlas-preview-generator';
   if (modalities.some(m => timeSeries.includes(m))) return 'Upload .parquet for interactive charts, or .rrd for 3D preview. Generate with: pip install atlas-preview-generator';
@@ -1287,7 +1280,7 @@ function getPreviewScore(samples: Sample[], modalities: string[]): { score: numb
   if (hasVideo || hasImage) score += 1;
   else suggestions.push('Add a video or image sample for visual preview');
 
-  const spatial = ['lidar', 'radar', 'point_cloud', 'motion_capture', 'event_camera', 'rgbd', 'depth'];
+  const spatial = ['lidar', 'point_cloud', 'motion_capture', 'rgbd', 'depth'];
   const timeSeries = ['imu', 'force_torque', 'proprioception', 'tactile'];
   const hasSpatialMod = modalities.some(m => spatial.includes(m));
   const hasTimeSeriesMod = modalities.some(m => timeSeries.includes(m));
@@ -1306,13 +1299,24 @@ function getPreviewScore(samples: Sample[], modalities: string[]): { score: numb
   return { score, label: labels[score] ?? 'Outstanding', level, suggestions };
 }
 
-function SampleUploader({ listingId, modalities = [] }: { listingId: string; modalities?: string[] }) {
+function SampleUploader({ listingId, modalities = [], reviewStatus }: { listingId: string; modalities?: string[]; reviewStatus?: string }) {
   const [samples, setSamples] = useState<Sample[]>([]);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
+  const [submitStatus, setSubmitStatus] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const acceptFilter = getAcceptFilter(modalities);
   const uploadHint = getUploadHint(modalities);
+  const canSubmitForReview = samples.length > 0 && (!reviewStatus || reviewStatus === 'draft' || reviewStatus === 'pending_review');
+
+  const handleSubmitForReview = async () => {
+    try {
+      await api.post(`/provider/listings/${listingId}/submit-for-review`);
+      setSubmitStatus('Listing submitted for review');
+    } catch (err) {
+      setSubmitStatus(err instanceof Error ? err.message : 'Failed to submit');
+    }
+  };
 
   useEffect(() => {
     api.get<{ data: { samples?: Sample[] } }>(`/provider/listings/${listingId}`)
@@ -1390,6 +1394,21 @@ function SampleUploader({ listingId, modalities = [] }: { listingId: string; mod
           {uploadHint}
         </p>
       )}
+      {samples.length === 0 && (
+        <p style={{ fontSize: 11, color: 'var(--red, #c53030)', marginTop: 12, fontWeight: 500 }}>
+          Upload at least one sample before submitting for review.
+        </p>
+      )}
+      {canSubmitForReview && !submitStatus && (
+        <button className="db-add-cart-btn" style={{ marginTop: 12 }} onClick={handleSubmitForReview}>
+          Submit for Review
+        </button>
+      )}
+      {submitStatus && (
+        <p style={{ fontSize: 11, color: 'var(--green, #276749)', marginTop: 12, fontWeight: 500 }}>
+          {submitStatus}
+        </p>
+      )}
     </div>
   );
 }
@@ -1400,22 +1419,36 @@ function ProviderDashboard() {
   const [loading, setLoading] = useState(true);
   const [selectedListingId, setSelectedListingId] = useState<string | null>(null);
 
-  useEffect(() => {
+  const fetchListingsProvider = useCallback(() => {
     api.get<{ data: Record<string, unknown>[] }>('/provider/listings')
       .then(r => setListings(r.data))
       .catch(console.error)
       .finally(() => setLoading(false));
   }, []);
 
-  // Listen for tab change events from child components
+  useEffect(() => { fetchListingsProvider(); }, [fetchListingsProvider]);
+
+  // Listen for tab change events and listing-created events from child components
   useEffect(() => {
-    const handler = (e: Event) => {
+    const tabHandler = (e: Event) => {
       const tab = (e as CustomEvent).detail?.tab;
       if (tab) setActiveTab(tab);
     };
-    window.addEventListener('provider-tab-change', handler);
-    return () => window.removeEventListener('provider-tab-change', handler);
-  }, []);
+    const listingCreatedHandler = (e: Event) => {
+      const listingId = (e as CustomEvent).detail?.listingId;
+      fetchListingsProvider();
+      if (listingId) {
+        setActiveTab('listings');
+        setSelectedListingId(String(listingId));
+      }
+    };
+    window.addEventListener('provider-tab-change', tabHandler);
+    window.addEventListener('provider-listing-created', listingCreatedHandler);
+    return () => {
+      window.removeEventListener('provider-tab-change', tabHandler);
+      window.removeEventListener('provider-listing-created', listingCreatedHandler);
+    };
+  }, [fetchListingsProvider]);
 
   const tabs = [
     { id: 'listings', label: 'My Listings' },
@@ -1460,7 +1493,7 @@ function ProviderDashboard() {
                       <div><div className="db-meta-label">Min hours</div><div className="db-meta-value">{String(l.minimum_hours)}</div></div>
                     </div>
                   </div>
-                  <SampleUploader listingId={String(l.id)} modalities={Array.isArray(l.modality) ? l.modality.map(String) : [String(l.modality ?? '')].filter(Boolean)} />
+                  <SampleUploader listingId={String(l.id)} modalities={Array.isArray(l.modality) ? l.modality.map(String) : [String(l.modality ?? '')].filter(Boolean)} reviewStatus={String(l.review_status ?? '')} />
                 </div>
               );
             })()}
@@ -1535,7 +1568,7 @@ function CreateListingForm() {
     setSubmitting(true);
     setError('');
     try {
-      await api.post('/provider/listings', {
+      const res = await api.post<{ data: { id: string } }>('/provider/listings', {
         title: form.title,
         description: form.description,
         modality: form.modalities,
@@ -1550,8 +1583,14 @@ function CreateListingForm() {
         license_type: form.license_type,
         license_terms: form.license_terms || undefined,
       });
-      setResult('Listing submitted for review');
       setForm({ title: '', description: '', modalities: [], environments: [], collection_methods: [], embodiment_types: [], task_types: [], price_per_hour: '', minimum_hours: '1', total_hours: '', format: 'parquet', license_type: 'commercial', license_terms: '' });
+      // Navigate to listing detail for sample upload
+      const newId = res?.data?.id;
+      if (newId) {
+        window.dispatchEvent(new CustomEvent('provider-listing-created', { detail: { listingId: newId } }));
+      } else {
+        setResult('Listing saved — go to My Listings to upload samples');
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create listing');
     } finally {
@@ -1563,7 +1602,7 @@ function CreateListingForm() {
     return (
       <div className="api-preamble" style={{ marginTop: 16, textAlign: 'center', padding: 32 }}>
         <div className="db-sell-headline" style={{ fontSize: 14, marginBottom: 8 }}>{result}</div>
-        <p style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 16 }}>Your listing is pending review and will be published once approved</p>
+        <p style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 16 }}>Upload at least one sample from My Listings, then submit for review.</p>
         <button className="db-add-cart-btn" style={{ maxWidth: 200, margin: '0 auto' }} onClick={() => setResult(null)}>Create Another</button>
       </div>
     );
@@ -1674,7 +1713,7 @@ function CreateListingForm() {
       </div>
 
       <p style={{ fontSize: 10, color: 'var(--text-dim)', marginTop: 12, lineHeight: 1.5 }}>
-        After submitting, you can upload sample preview files from My Listings page.
+        After saving, you'll be taken to upload sample files. At least one sample is required before submitting for review.
       </p>
 
       <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, marginTop: 12, fontSize: 11, color: 'var(--text-secondary)', cursor: 'pointer', lineHeight: 1.4 }}>
