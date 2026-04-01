@@ -264,7 +264,7 @@ function SampleGallery({ samples, modalities = [] }: { samples: Sample[]; modali
   };
   const catOrder = ['timeseries', 'download', 'rerun', 'json', 'audio'];
   // Categories that should use thumb strip (one at a time) instead of stacked
-  const stripCats = new Set(['timeseries', 'rerun']);
+  const stripCats = new Set(['timeseries', 'rerun', 'download']);
   for (const cat of catOrder) {
     const items = others.filter(o => o.category === cat);
     if (items.length > 0) {
