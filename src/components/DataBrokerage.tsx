@@ -197,8 +197,10 @@ function SampleRenderer({ sample, modalities = [] }: { sample: Sample; modalitie
   switch (category) {
     case 'video':
       return <video className="db-video-player" controls src={sample.url} />;
-    case 'image':
-      return <img className="db-image-player" src={sample.url} alt={sample.filename} />;
+    case 'image': {
+      const isDepth = sample.filename.toLowerCase().includes('depth') || sample.filename.toLowerCase().includes('disparity');
+      return <img className={`db-image-player${isDepth ? ' db-image-player--depth' : ''}`} src={sample.url} alt={sample.filename} />;
+    }
     case 'audio':
       return (
         <div className="db-audio-player-wrap">
@@ -231,34 +233,46 @@ function SampleRenderer({ sample, modalities = [] }: { sample: Sample; modalitie
 
 function SampleGallery({ samples, modalities = [] }: { samples: Sample[]; modalities?: string[] }) {
   // Group samples by category
-  const groups: { label: string; type: 'video-strip' | 'inline'; samples: Sample[] }[] = [];
+  const groups: { label: string; type: 'video-strip' | 'inline'; samples: Sample[]; stateKey: string }[] = [];
   const videos: Sample[] = [];
+  const depthImages: Sample[] = [];
+  const rgbImages: Sample[] = [];
+  const otherImages: Sample[] = [];
   const others: { sample: Sample; category: SampleCategory }[] = [];
 
   for (const s of samples) {
     const cat = getSampleCategory(s.content_type, s.filename, modalities);
     if (cat === 'video') videos.push(s);
+    else if (cat === 'image') {
+      const fn = s.filename.toLowerCase();
+      if (fn.includes('depth') || fn.includes('disparity')) depthImages.push(s);
+      else if (fn.includes('rgb') || fn.includes('color')) rgbImages.push(s);
+      else otherImages.push(s);
+    }
     else others.push({ sample: s, category: cat });
   }
 
-  if (videos.length > 0) groups.push({ label: 'Videos', type: 'video-strip', samples: videos });
+  if (videos.length > 0) groups.push({ label: 'Videos', type: 'video-strip' as const, samples: videos, stateKey: 'video' });
+  if (rgbImages.length > 0) groups.push({ label: 'RGB Images', type: 'video-strip' as const, samples: rgbImages, stateKey: 'rgb-img' });
+  if (depthImages.length > 0) groups.push({ label: 'Depth Maps', type: 'video-strip' as const, samples: depthImages, stateKey: 'depth-img' });
+  if (otherImages.length > 0) groups.push({ label: 'Images', type: 'video-strip' as const, samples: otherImages, stateKey: 'other-img' });
 
   // Group remaining by category with readable labels
   const catLabels: Record<string, string> = {
-    image: 'Images', audio: 'Audio', json: 'Language Annotations',
+    audio: 'Audio', json: 'Language Annotations',
     rerun: '3D Visualization', timeseries: 'Sensor Data', download: 'Data Files',
   };
-  const catOrder = ['timeseries', 'download', 'rerun', 'json', 'image', 'audio'];
+  const catOrder = ['timeseries', 'download', 'rerun', 'json', 'audio'];
   for (const cat of catOrder) {
     const items = others.filter(o => o.category === cat);
     if (items.length > 0) {
       const ext = items[0].sample.filename.split('.').pop()?.toUpperCase() ?? '';
       const label = cat === 'download' ? `Data Files (${ext})` : cat === 'json' ? `Language Annotations (JSON)` : cat === 'timeseries' ? `Teleoperation Data (PARQUET)` : catLabels[cat] ?? ext;
-      groups.push({ label, type: 'inline', samples: items.map(o => o.sample) });
+      groups.push({ label, type: 'inline' as const, samples: items.map(o => o.sample), stateKey: cat });
     }
   }
 
-  const [activeVideoIdx, setActiveVideoIdx] = useState(0);
+  const [activeStripIdx, setActiveStripIdx] = useState<Record<string, number>>({});
 
   if (groups.length === 0) return null;
 
@@ -268,7 +282,9 @@ function SampleGallery({ samples, modalities = [] }: { samples: Sample[]; modali
         <div key={group.label} className="db-sample-group">
           <div className="db-sample-group__label">{group.label}</div>
           {group.type === 'video-strip' ? (() => {
-            const safeIdx = Math.min(activeVideoIdx, group.samples.length - 1);
+            const key = group.stateKey;
+            const idx = activeStripIdx[key] ?? 0;
+            const safeIdx = Math.min(idx, group.samples.length - 1);
             const active = group.samples[safeIdx];
             return (
               <>
@@ -276,7 +292,7 @@ function SampleGallery({ samples, modalities = [] }: { samples: Sample[]; modali
                 {group.samples.length > 1 && (
                   <div className="db-thumb-strip">
                     {group.samples.map((s, i) => (
-                      <div key={s.id} className={`db-thumb${i === safeIdx ? ' db-thumb--active' : ''}`} onClick={() => setActiveVideoIdx(i)} title={s.filename}>
+                      <div key={s.id} className={`db-thumb${i === safeIdx ? ' db-thumb--active' : ''}`} onClick={() => setActiveStripIdx(prev => ({ ...prev, [key]: i }))} title={s.filename}>
                         {i + 1}
                       </div>
                     ))}
@@ -1383,9 +1399,7 @@ function SampleUploader({ listingId, modalities = [], reviewStatus }: { listingI
         // Endpoint not yet implemented — provisioning test passed so listing is ready for review
       }
       setSubmitStatus('Listing submitted for review');
-      setTimeout(() => {
-        window.dispatchEvent(new CustomEvent('provider-tab-change', { detail: { tab: 'listings' } }));
-      }, 1500);
+      window.dispatchEvent(new CustomEvent('provider-tab-change', { detail: { tab: 'listings' } }));
     } catch (err) {
       const raw = err instanceof Error ? err.message : 'Unknown error';
       if (raw.includes('404')) setSubmitStatus('Provisioning test endpoint not found. Check Settings.');
@@ -1683,7 +1697,7 @@ function CreateListingForm() {
   const [error, setError] = useState('');
   const [agreedToTerms, setAgreedToTerms] = useState(false);
 
-  const formats = ['parquet', 'rosbag', 'mp4', 'hdf5', 'csv', 'json', 'mcap', 'zarr', 'tfrecord', 'other'];
+  const formats = ['parquet', 'rosbag', 'mp4', 'hdf5', 'csv', 'json', 'mcap', 'zarr', 'tfrecord', 'png', 'wav', 'other'];
 
   const update = (field: string, value: string) => setForm(f => ({ ...f, [field]: value }));
 
