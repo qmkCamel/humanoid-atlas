@@ -261,10 +261,11 @@ function SampleMetadata({ sample }: { sample: Sample }) {
   );
 }
 
-function SampleGallery({ samples, modalities = [] }: { samples: Sample[]; modalities?: string[] }) {
+function SampleGallery({ samples, modalities = [], onRemove }: { samples: Sample[]; modalities?: string[]; onRemove?: (sampleId: string) => void }) {
   const [activeIdx, setActiveIdx] = useState(0);
   const [expanded, setExpanded] = useState(false);
-  const active = samples[activeIdx];
+  const safeIdx = Math.min(activeIdx, samples.length - 1);
+  const active = samples[safeIdx];
 
   useEffect(() => {
     if (!expanded) return;
@@ -277,21 +278,56 @@ function SampleGallery({ samples, modalities = [] }: { samples: Sample[]; modali
     return () => window.removeEventListener('keydown', handler);
   }, [expanded, samples.length]);
 
+  if (!active) return null;
+
   return (
     <div className={`db-sample-section${expanded ? ' db-sample-section--expanded' : ''}`}>
       {expanded && <button className="db-sample-close-btn" onClick={() => setExpanded(false)}>&times;</button>}
       <div style={{ position: 'relative' }}>
-        <SampleRenderer sample={active} modalities={modalities} key={active.id + activeIdx} />
+        <SampleRenderer sample={active} modalities={modalities} key={active.id + safeIdx} />
         {!expanded && (
           <button className="db-sample-expand-btn" onClick={e => { e.stopPropagation(); setExpanded(true); }} title="Expand">&#x26F6;</button>
         )}
       </div>
-      <SampleMetadata sample={active} />
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 4 }}>
+        <SampleMetadata sample={active} />
+        {onRemove && <button className="db-sample-remove-btn" onClick={() => onRemove(active.id)} title="Remove sample">&times;</button>}
+      </div>
       <div className="db-thumb-strip">
         {samples.map((s, i) => (
-          <SampleThumb key={s.id} sample={s} active={i === activeIdx} onClick={() => setActiveIdx(i)} />
+          <SampleThumb key={s.id} sample={s} active={i === safeIdx} onClick={() => setActiveIdx(i)} />
         ))}
       </div>
+    </div>
+  );
+}
+
+function SampleList({ samples, modalities = [], onRemove }: { samples: Sample[]; modalities?: string[]; onRemove?: (sampleId: string) => void }) {
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  return (
+    <div className="db-sample-list">
+      {samples.map(s => {
+        const isOpen = expandedId === s.id;
+        return (
+          <div key={s.id} className="db-sample-list__item">
+            <div className="db-sample-list__row" onClick={() => setExpandedId(isOpen ? null : s.id)}>
+              <span className="db-sample-list__name">{s.filename}</span>
+              <div className="db-sample-list__actions">
+                {onRemove && (
+                  <button className="db-sample-remove-btn" onClick={e => { e.stopPropagation(); onRemove(s.id); }} title="Remove">&times;</button>
+                )}
+                <span className="db-sample-list__arrow">{isOpen ? '−' : '+'}</span>
+              </div>
+            </div>
+            {isOpen && (
+              <div className="db-sample-list__preview">
+                <SampleRenderer sample={s} modalities={modalities} />
+              </div>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -454,13 +490,10 @@ function BuyData() {
             <div><div className="db-meta-label">Hours Available</div><div className="db-meta-value">{l.total_hours?.toLocaleString() ?? '—'}</div></div>
             <div><div className="db-meta-label">Price</div><div className="db-meta-value">${l.price_per_hour}/hr</div></div>
             <div><div className="db-meta-label">Min Purchase</div><div className="db-meta-value">{l.minimum_hours} hrs</div></div>
-            <div><div className="db-meta-label">License</div><div className="db-meta-value">{l.license_type.replace(/_/g, ' ')}</div></div>
           </div>
         </div>
 
         <div className="db-detail-description">{l.description}</div>
-        {l.license_terms && <div className="db-license-terms"><strong>License terms:</strong> {l.license_terms}</div>}
-
         <PurchaseSection listing={l} cart={cart} onCartOpen={() => {}} />
 
         {/* Similar datasets */}
@@ -688,7 +721,6 @@ function BuyData() {
                     <tr><td>Hours</td>{compareListings.map(l => <td key={l.id}>{l.total_hours?.toLocaleString() ?? '—'}</td>)}</tr>
                     <tr><td>Price</td>{compareListings.map(l => <td key={l.id}>${l.price_per_hour}/hr</td>)}</tr>
                     <tr><td>Min Purchase</td>{compareListings.map(l => <td key={l.id}>{l.minimum_hours} hrs</td>)}</tr>
-                    <tr><td>License</td>{compareListings.map(l => <td key={l.id}>{l.license_type.replace(/_/g, ' ')}</td>)}</tr>
                   </tbody>
                 </table>
               </div>
@@ -1268,7 +1300,7 @@ function getUploadHint(modalities: string[]): string | null {
 }
 
 function getPreviewScore(samples: Sample[], modalities: string[]): { score: number; label: string; level: string; suggestions: string[] } {
-  if (!samples || samples.length === 0) return { score: 0, label: 'None', level: 'low', suggestions: ['Upload at least one sample for buyers to preview'] };
+  if (!samples || samples.length === 0) return { score: 0, label: 'None', level: 'low', suggestions: ['Upload at least 5 samples for buyers to preview'] };
   const suggestions: string[] = [];
   let score = 1;
 
@@ -1291,8 +1323,8 @@ function getPreviewScore(samples: Sample[], modalities: string[]): { score: numb
   if (hasChart) score += 1;
   else if (hasTimeSeriesMod) suggestions.push('Upload a .parquet sample for chart preview');
 
-  if (samples.length >= 3) score += 1;
-  else suggestions.push(`Add more samples (${samples.length}/3 recommended)`);
+  if (samples.length >= 5) score += 1;
+  else suggestions.push(`Add more samples (${samples.length}/5 required)`);
 
   const labels = ['None', 'Basic', 'Good', 'Great', 'Excellent', 'Outstanding'];
   const level = score >= 4 ? 'high' : score >= 2 ? 'mid' : 'low';
@@ -1307,14 +1339,48 @@ function SampleUploader({ listingId, modalities = [], reviewStatus }: { listingI
   const fileRef = useRef<HTMLInputElement>(null);
   const acceptFilter = getAcceptFilter(modalities);
   const uploadHint = getUploadHint(modalities);
-  const canSubmitForReview = samples.length > 0 && (!reviewStatus || reviewStatus === 'draft' || reviewStatus === 'pending_review');
+  const minSamples = 5;
+  const canSubmitForReview = samples.length >= minSamples && (!reviewStatus || reviewStatus === 'draft' || reviewStatus === 'pending' || reviewStatus === 'pending_review');
+
+  const [submittingForReview, setSubmittingForReview] = useState(false);
+  const [importUrl, setImportUrl] = useState('');
+  const [importing, setImporting] = useState(false);
+
+  const handleImportUrl = async () => {
+    if (!importUrl.trim()) return;
+    setImporting(true);
+    setError('');
+    try {
+      await api.post(`/provider/listings/${listingId}/samples/import-url`, { url: importUrl.trim() });
+      const refreshed = await api.get<{ data: { samples?: Sample[] } }>(`/provider/listings/${listingId}`);
+      setSamples(refreshed.data.samples ?? []);
+      setImportUrl('');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to import from URL');
+    }
+    setImporting(false);
+  };
 
   const handleSubmitForReview = async () => {
+    setSubmittingForReview(true);
+    setSubmitStatus(null);
     try {
+      // 1. Test provisioning endpoint first
+      setSubmitStatus('Testing provisioning API...');
+      const testResult = await api.post<{ data: { success: boolean; message: string } }>('/test-provision');
+      if (!testResult.data?.success) {
+        setSubmitStatus(`Provisioning test failed: ${testResult.data?.message ?? 'Unknown error'}. Check Settings tab.`);
+        setSubmittingForReview(false);
+        return;
+      }
+      // 2. Submit for review
+      setSubmitStatus('Submitting for review...');
       await api.post(`/provider/listings/${listingId}/submit-for-review`);
       setSubmitStatus('Listing submitted for review');
     } catch (err) {
-      setSubmitStatus(err instanceof Error ? err.message : 'Failed to submit');
+      setSubmitStatus(err instanceof Error ? err.message : 'Failed to submit. Check your provisioning API in Settings.');
+    } finally {
+      setSubmittingForReview(false);
     }
   };
 
@@ -1332,7 +1398,7 @@ function SampleUploader({ listingId, modalities = [], reviewStatus }: { listingI
       const { data } = await api.post<{ data: { upload_url: string; sample_id: string; public_url: string } }>(`/provider/listings/${listingId}/samples/upload-url`, {
         filename: file.name,
         content_type: file.type,
-        size: file.size,
+        size_bytes: file.size,
       });
       // 2. Upload directly to R2
       await fetch(data.upload_url, {
@@ -1342,8 +1408,9 @@ function SampleUploader({ listingId, modalities = [], reviewStatus }: { listingI
       });
       // 3. Confirm upload
       await api.post(`/provider/listings/${listingId}/samples/confirm`, { sample_id: data.sample_id });
-      // 4. Refresh samples list
-      setSamples(prev => [...prev, { id: data.sample_id, url: data.public_url, filename: file.name, content_type: file.type }]);
+      // 4. Refetch samples from API to avoid duplicates
+      const refreshed = await api.get<{ data: { samples?: Sample[] } }>(`/provider/listings/${listingId}`);
+      setSamples(refreshed.data.samples ?? []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Upload failed');
     }
@@ -1351,65 +1418,70 @@ function SampleUploader({ listingId, modalities = [], reviewStatus }: { listingI
     if (fileRef.current) fileRef.current.value = '';
   };
 
+  const ps = getPreviewScore(samples, modalities);
+
   return (
+    <>
     <div className="api-preamble" style={{ marginTop: 12 }}>
-      <div className="db-meta-label" style={{ marginBottom: 12 }}>Samples</div>
-      {samples.length > 0 && <SampleGallery samples={samples} modalities={modalities} />}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8 }}>
-        <input
-          ref={fileRef}
-          type="file"
-          accept={acceptFilter}
-          style={{ display: 'none' }}
-          onChange={e => { const f = e.target.files?.[0]; if (f) handleUpload(f); }}
-        />
-        <button
-          className="db-add-cart-btn"
-          style={{ padding: '6px 16px', fontSize: 10, width: 'auto', marginTop: 0 }}
-          onClick={() => fileRef.current?.click()}
-          disabled={uploading}
-        >
-          {uploading ? 'Uploading...' : 'Upload Sample'}
+      <div className="db-meta-label" style={{ marginBottom: 10 }}>Samples ({samples.length}/{minSamples})</div>
+
+      {samples.length > 0 && <SampleList samples={samples} modalities={modalities} onRemove={async (sampleId) => {
+        try {
+          await api.delete(`/provider/listings/${listingId}/samples/${sampleId}`);
+          setSamples(prev => prev.filter(s => s.id !== sampleId));
+        } catch { /* ignore — sample may already be removed */ }
+      }} />}
+
+      <input ref={fileRef} type="file" accept={acceptFilter} style={{ display: 'none' }}
+        onChange={e => { const f = e.target.files?.[0]; if (f) handleUpload(f); }} />
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10 }}>
+        <input className="db-form-input" style={{ flex: 1, fontSize: 11, padding: '8px 12px' }}
+          placeholder="Import from URL (S3, R2, GCS presigned link)"
+          value={importUrl} onChange={e => setImportUrl(e.target.value)}
+          onKeyDown={e => { if (e.key === 'Enter') handleImportUrl(); }}
+          disabled={importing || uploading} />
+        <button className="db-add-cart-btn" style={{ padding: '8px 20px', fontSize: 10, width: 'auto', marginTop: 0 }}
+          onClick={handleImportUrl} disabled={importing || uploading || !importUrl.trim()}>
+          {importing ? 'Importing...' : 'Import'}
         </button>
-        {error && <span style={{ fontSize: 10, color: 'var(--red)' }}>{error}</span>}
       </div>
-      <p style={{ fontSize: 10, color: 'var(--text-dim)', marginTop: 6 }}>
-        Upload preview clips or sample files. Max 500MB per file. Visible to buyers in the catalog.
-      </p>
-      {(() => {
-        const ps = getPreviewScore(samples, modalities);
-        return (
-          <div className="db-preview-score">
-            <span className={`db-preview-score__badge db-preview-score--${ps.level}`}>Preview: {ps.label}</span>
-            {ps.suggestions.length > 0 && (
-              <div className="db-preview-score__tips">
-                {ps.suggestions.map((s, i) => <div key={i} className="db-preview-score__tip">{s}</div>)}
-              </div>
-            )}
-          </div>
-        );
-      })()}
-      {uploadHint && (
-        <p style={{ fontSize: 10, color: 'var(--text-secondary)', marginTop: 4, fontStyle: 'italic' }}>
-          {uploadHint}
-        </p>
-      )}
-      {samples.length === 0 && (
-        <p style={{ fontSize: 11, color: 'var(--red, #c53030)', marginTop: 12, fontWeight: 500 }}>
-          Upload at least one sample before submitting for review.
-        </p>
-      )}
-      {canSubmitForReview && !submitStatus && (
-        <button className="db-add-cart-btn" style={{ marginTop: 12 }} onClick={handleSubmitForReview}>
-          Submit for Review
+
+      <div style={{ marginTop: 8 }}>
+        <button className="db-sample-upload-alt" onClick={() => fileRef.current?.click()} disabled={uploading || importing}>
+          {uploading ? 'Uploading...' : 'or upload from local file'}
         </button>
+      </div>
+
+      {error && <p style={{ fontSize: 10, color: 'var(--red)', marginTop: 6 }}>{error}</p>}
+      {uploadHint && <p style={{ fontSize: 9, color: 'var(--text-dim)', fontStyle: 'italic', marginTop: 4 }}>{uploadHint}</p>}
+
+      {ps.suggestions.length > 0 && (
+        <div className="db-preview-score__tips" style={{ marginTop: 8 }}>
+          {ps.suggestions.map((s, i) => <div key={i} className="db-preview-score__tip">{s}</div>)}
+        </div>
       )}
-      {submitStatus && (
-        <p style={{ fontSize: 11, color: 'var(--green, #276749)', marginTop: 12, fontWeight: 500 }}>
+
+    </div>
+    {submitStatus !== 'Listing submitted for review' && (
+      <div className="api-preamble" style={{ marginTop: 12, textAlign: 'center', padding: '20px 24px', opacity: canSubmitForReview ? 1 : 0.4 }}>
+        <button className="db-add-cart-btn" onClick={handleSubmitForReview} disabled={!canSubmitForReview || submittingForReview}
+          style={{ cursor: canSubmitForReview ? 'pointer' : 'not-allowed' }}>
+          {submittingForReview ? 'Verifying...' : 'Submit for Review'}
+        </button>
+        <p style={{ fontSize: 10, color: 'var(--text-dim)', marginTop: 8 }}>
+          {canSubmitForReview ? 'Verifies your provisioning API before submitting' : `Upload ${minSamples - samples.length} more sample${minSamples - samples.length !== 1 ? 's' : ''} to submit`}
+        </p>
+      </div>
+    )}
+    {submitStatus && (
+      <div className="api-preamble" style={{ marginTop: 12, textAlign: 'center', padding: '20px 24px' }}>
+        <p style={{ fontSize: 12, color: submitStatus.includes('failed') || submitStatus.includes('Failed') || submitStatus.includes('Check') ? 'var(--red, #c53030)' : 'var(--green, #276749)', fontWeight: 500 }}>
           {submitStatus}
         </p>
-      )}
-    </div>
+      </div>
+    )}
+    </>
   );
 }
 
@@ -1476,24 +1548,39 @@ function ProviderDashboard() {
             {(() => {
               const l = listings.find(x => String(x.id) === selectedListingId);
               if (!l) return <div className="db-empty">Listing not found</div>;
+              const tags = Array.isArray(l.tags) ? (l.tags as string[]) : [];
+              const collectionTags = tags.filter(t => String(t).startsWith('collection:')).map(t => String(t).replace('collection:', ''));
+              const embodimentTags = tags.filter(t => String(t).startsWith('embodiment:')).map(t => String(t).replace('embodiment:', ''));
+              const taskTags = tags.filter(t => String(t).startsWith('task:')).map(t => String(t).replace('task:', ''));
+              const allModalities = Array.isArray(l.modality) ? l.modality.map(String) : [String(l.modality ?? '')].filter(Boolean);
+
               return (
                 <div>
-                  <div className="api-preamble" style={{ marginTop: 12 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                      <div className="db-catalog-row__title" style={{ fontSize: 16 }}>{String(l.title)}</div>
-                      <span className={`db-status-badge db-status-badge--${String(l.review_status)}`}>{String(l.review_status).replace(/_/g, ' ')}</span>
+                  <div className="api-preamble" style={{ marginTop: 12, padding: '24px 28px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 }}>
+                      <div>
+                        <div style={{ fontFamily: "'Share Tech Mono', monospace", fontSize: 15, fontWeight: 500, color: 'var(--text)', letterSpacing: '0.5px' }}>{String(l.title)}</div>
+                        {l.description ? <div style={{ fontSize: 11, color: 'var(--text-dim)', lineHeight: 1.5, marginTop: 4 }}>{String(l.description).slice(0, 120)}{String(l.description).length > 120 ? '...' : ''}</div> : null}
+                      </div>
+                      <span className={`db-status-badge db-status-badge--${String(l.review_status)}`} style={{ flexShrink: 0, marginLeft: 16 }}>{String(l.review_status).replace(/_/g, ' ')}</span>
                     </div>
+
+                    <div className="db-badges" style={{ marginBottom: 20 }}>
+                      {allModalities.map(m => <span key={m} className="db-badge">{String(m).replace(/_/g, ' ')}</span>)}
+                      <span className="db-badge">{String(l.environment).replace(/_/g, ' ')}</span>
+                      {collectionTags.map(t => <span key={`c-${t}`} className="db-badge">{t.replace(/_/g, ' ')}</span>)}
+                      {embodimentTags.map(t => <span key={`e-${t}`} className="db-badge">{t.replace(/_/g, ' ')}</span>)}
+                      {taskTags.map(t => <span key={`t-${t}`} className="db-badge">{t.replace(/_/g, ' ')}</span>)}
+                      {l.format ? <span className="db-badge">{String(l.format)}</span> : null}
+                    </div>
+
                     <div className="db-meta-grid">
-                      <div><div className="db-meta-label">Modality</div><div className="db-meta-value">{formatTags(l.modality as string | string[])}</div></div>
-                      <div><div className="db-meta-label">Environment</div><div className="db-meta-value">{formatTags(l.environment as string | string[])}</div></div>
-                      {l.collection_method ? <div><div className="db-meta-label">Collection Method</div><div className="db-meta-value">{formatTags(l.collection_method as string | string[])}</div></div> : null}
-                      {l.embodiment_type ? <div><div className="db-meta-label">Embodiment</div><div className="db-meta-value">{formatTags(l.embodiment_type as string | string[])}</div></div> : null}
-                      {l.task_type ? <div><div className="db-meta-label">Task Type</div><div className="db-meta-value">{formatTags(l.task_type as string | string[])}</div></div> : null}
                       <div><div className="db-meta-label">Price</div><div className="db-meta-value">${String(l.price_per_hour)}/hr</div></div>
-                      <div><div className="db-meta-label">Min hours</div><div className="db-meta-value">{String(l.minimum_hours)}</div></div>
+                      <div><div className="db-meta-label">Min Purchase</div><div className="db-meta-value">{String(l.minimum_hours)} hrs</div></div>
+                      {l.total_hours ? <div><div className="db-meta-label">Total Hours</div><div className="db-meta-value">{Number(l.total_hours).toLocaleString()}</div></div> : null}
                     </div>
                   </div>
-                  <SampleUploader listingId={String(l.id)} modalities={Array.isArray(l.modality) ? l.modality.map(String) : [String(l.modality ?? '')].filter(Boolean)} reviewStatus={String(l.review_status ?? '')} />
+                  <SampleUploader listingId={String(l.id)} modalities={allModalities} reviewStatus={String(l.review_status ?? '')} />
                 </div>
               );
             })()}
@@ -1528,6 +1615,36 @@ function ProviderDashboard() {
 }
 
 
+function TagSection({ label, required, selected, options, onToggle, defaultOpen }: {
+  label: string; required?: boolean; selected: string[]; options: string[];
+  onToggle: (value: string) => void; defaultOpen?: boolean;
+}) {
+  const [open, setOpen] = useState(defaultOpen ?? false);
+  const count = selected.length;
+
+  return (
+    <div className="db-tag-section">
+      <button type="button" className="db-tag-section__header" onClick={() => setOpen(!open)}>
+        <span className="db-tag-section__label">
+          {label}{required ? ' *' : ' (optional)'}
+          {count > 0 && <span className="db-tag-section__count">{count} selected</span>}
+        </span>
+        <span className="db-tag-section__arrow">{open ? '−' : '+'}</span>
+      </button>
+      {open && (
+        <div className="db-tag-section__pills">
+          {options.map(v => (
+            <button key={v} type="button" className={`db-filter-pill${selected.includes(v) ? ' db-filter-pill--active' : ''}`}
+              style={{ fontSize: 9 }} onClick={() => onToggle(v)}>
+              {v.replace(/_/g, ' ')}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function CreateListingForm() {
   const [form, setForm] = useState({
     title: '', description: '', modalities: [] as string[], environments: [] as string[],
@@ -1540,7 +1657,6 @@ function CreateListingForm() {
   const [error, setError] = useState('');
   const [agreedToTerms, setAgreedToTerms] = useState(false);
 
-  const licenses = ['standard', 'exclusive', 'research_only', 'commercial', 'custom'];
   const formats = ['parquet', 'rosbag', 'mp4', 'hdf5', 'csv', 'json', 'mcap', 'zarr', 'tfrecord', 'other'];
 
   const update = (field: string, value: string) => setForm(f => ({ ...f, [field]: value }));
@@ -1568,20 +1684,25 @@ function CreateListingForm() {
     setSubmitting(true);
     setError('');
     try {
+      // Backend expects modality/environment as single strings; pack extras into tags
       const res = await api.post<{ data: { id: string } }>('/provider/listings', {
         title: form.title,
         description: form.description,
-        modality: form.modalities,
-        environment: form.environments,
-        collection_method: form.collection_methods.length > 0 ? form.collection_methods : undefined,
-        embodiment_type: form.embodiment_types.length > 0 ? form.embodiment_types : undefined,
-        task_type: form.task_types.length > 0 ? form.task_types : undefined,
+        modality: form.modalities[0],
+        environment: form.environments[0],
         price_per_hour: parseFloat(form.price_per_hour),
         minimum_hours: parseFloat(form.minimum_hours) || 1,
-        total_hours: form.total_hours ? parseFloat(form.total_hours) : undefined,
+        total_hours: form.total_hours ? parseFloat(form.total_hours.replace(/,/g, '')) : undefined,
         format: form.format || undefined,
         license_type: form.license_type,
         license_terms: form.license_terms || undefined,
+        tags: [
+          ...form.modalities.slice(1).map(v => `modality:${v}`),
+          ...form.environments.slice(1).map(v => `environment:${v}`),
+          ...form.collection_methods.map(v => `collection:${v}`),
+          ...form.embodiment_types.map(v => `embodiment:${v}`),
+          ...form.task_types.map(v => `task:${v}`),
+        ].filter(Boolean),
       });
       setForm({ title: '', description: '', modalities: [], environments: [], collection_methods: [], embodiment_types: [], task_types: [], price_per_hour: '', minimum_hours: '1', total_hours: '', format: 'parquet', license_type: 'commercial', license_terms: '' });
       // Navigate to listing detail for sample upload
@@ -1602,7 +1723,7 @@ function CreateListingForm() {
     return (
       <div className="api-preamble" style={{ marginTop: 16, textAlign: 'center', padding: 32 }}>
         <div className="db-sell-headline" style={{ fontSize: 14, marginBottom: 8 }}>{result}</div>
-        <p style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 16 }}>Upload at least one sample from My Listings, then submit for review.</p>
+        <p style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 16 }}>Upload at least 3 samples from My Listings, then submit for review.</p>
         <button className="db-add-cart-btn" style={{ maxWidth: 200, margin: '0 auto' }} onClick={() => setResult(null)}>Create Another</button>
       </div>
     );
@@ -1614,68 +1735,23 @@ function CreateListingForm() {
 
       <div className="db-form-field">
         <label className="db-meta-label">Title</label>
-        <input className="db-form-input" placeholder="e.g. Household Cooking - Egocentric Video" value={form.title} onChange={e => update('title', e.target.value)} />
+        <input className="db-form-input" placeholder="Household Cooking - Egocentric Video" value={form.title} onChange={e => update('title', e.target.value)} />
       </div>
 
-      <div className="db-form-field">
-        <label className="db-meta-label">Modalities (select all that apply)</label>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 4 }}>
-          {MODALITIES.map(m => (
-            <button key={m} type="button" className={`db-filter-pill${form.modalities.includes(m) ? ' db-filter-pill--active' : ''}`}
-              style={{ fontSize: 9 }} onClick={() => toggleTag('modalities', m)}>
-              {m.replace(/_/g, ' ')}
-            </button>
-          ))}
-        </div>
-      </div>
+      <TagSection label="Modalities" required selected={form.modalities} options={MODALITIES}
+        onToggle={v => toggleTag('modalities', v)} />
 
-      <div className="db-form-field">
-        <label className="db-meta-label">Environments (select all that apply)</label>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 4 }}>
-          {ENVIRONMENTS.map(e => (
-            <button key={e} type="button" className={`db-filter-pill${form.environments.includes(e) ? ' db-filter-pill--active' : ''}`}
-              style={{ fontSize: 9 }} onClick={() => toggleTag('environments', e)}>
-              {e.replace(/_/g, ' ')}
-            </button>
-          ))}
-        </div>
-      </div>
+      <TagSection label="Environments" required selected={form.environments} options={ENVIRONMENTS}
+        onToggle={v => toggleTag('environments', v)} />
 
-      <div className="db-form-field">
-        <label className="db-meta-label">Collection Method</label>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 4 }}>
-          {COLLECTION_METHODS.map(m => (
-            <button key={m} type="button" className={`db-filter-pill${form.collection_methods.includes(m) ? ' db-filter-pill--active' : ''}`}
-              style={{ fontSize: 9 }} onClick={() => toggleTag('collection_methods', m)}>
-              {m.replace(/_/g, ' ')}
-            </button>
-          ))}
-        </div>
-      </div>
+      <TagSection label="Collection Method" required selected={form.collection_methods} options={COLLECTION_METHODS}
+        onToggle={v => toggleTag('collection_methods', v)} />
 
-      <div className="db-form-field">
-        <label className="db-meta-label">Embodiment / Platform</label>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 4 }}>
-          {EMBODIMENT_TYPES.map(e => (
-            <button key={e} type="button" className={`db-filter-pill${form.embodiment_types.includes(e) ? ' db-filter-pill--active' : ''}`}
-              style={{ fontSize: 9 }} onClick={() => toggleTag('embodiment_types', e)}>
-              {e.replace(/_/g, ' ')}
-            </button>
-          ))}
-        </div>
-      </div>
+      <TagSection label="Embodiment / Platform" required selected={form.embodiment_types} options={EMBODIMENT_TYPES}
+        onToggle={v => toggleTag('embodiment_types', v)} />
 
-      <div className="db-form-field">
-        <label className="db-meta-label">Task Types</label>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 4 }}>
-          {TASK_TYPES.map(t => (
-            <button key={t} type="button" className={`db-filter-pill${form.task_types.includes(t) ? ' db-filter-pill--active' : ''}`}
-              style={{ fontSize: 9 }} onClick={() => toggleTag('task_types', t)}>
-              {t.replace(/_/g, ' ')}
-            </button>
-          ))}
-        </div>
-      </div>
+      <TagSection label="Task Types" required selected={form.task_types} options={TASK_TYPES}
+        onToggle={v => toggleTag('task_types', v)} />
 
       <div className="db-form-field">
         <label className="db-meta-label">Description</label>
@@ -1685,35 +1761,32 @@ function CreateListingForm() {
       <div className="db-form-row">
         <div className="db-form-field" style={{ flex: 1 }}>
           <label className="db-meta-label">Price per hour (USD)</label>
-          <input className="db-form-input" type="number" placeholder="50.00" value={form.price_per_hour} onChange={e => update('price_per_hour', e.target.value)} />
+          <input className="db-form-input" type="text" inputMode="decimal" placeholder="50.00" value={form.price_per_hour}
+            onChange={e => update('price_per_hour', e.target.value.replace(/[^0-9.]/g, ''))}
+            onBlur={e => { const v = parseFloat(e.target.value); if (!isNaN(v)) update('price_per_hour', v.toFixed(2)); }} />
         </div>
         <div className="db-form-field" style={{ flex: 1 }}>
           <label className="db-meta-label">Minimum hours</label>
-          <input className="db-form-input" type="number" placeholder="1" value={form.minimum_hours} onChange={e => update('minimum_hours', e.target.value)} />
+          <input className="db-form-input" type="text" inputMode="numeric" placeholder="1" value={form.minimum_hours}
+            onChange={e => update('minimum_hours', e.target.value.replace(/[^0-9]/g, ''))} />
         </div>
         <div className="db-form-field" style={{ flex: 1 }}>
           <label className="db-meta-label">Total hours available</label>
-          <input className="db-form-input" type="number" placeholder="10000" value={form.total_hours} onChange={e => update('total_hours', e.target.value)} />
+          <input className="db-form-input" type="text" inputMode="numeric" placeholder="10,000" value={form.total_hours}
+            onChange={e => update('total_hours', e.target.value.replace(/[^0-9]/g, ''))}
+            onBlur={e => { const v = parseInt(e.target.value); if (!isNaN(v) && v > 0) update('total_hours', v.toLocaleString()); }} />
         </div>
       </div>
 
-      <div className="db-form-row">
-        <div className="db-form-field" style={{ flex: 1 }}>
-          <label className="db-meta-label">Format</label>
-          <select className="db-form-select" value={form.format} onChange={e => update('format', e.target.value)}>
-            {formats.map(f => <option key={f} value={f}>{f.toUpperCase()}</option>)}
-          </select>
-        </div>
-        <div className="db-form-field" style={{ flex: 1 }}>
-          <label className="db-meta-label">License</label>
-          <select className="db-form-select" value={form.license_type} onChange={e => update('license_type', e.target.value)}>
-            {licenses.map(l => <option key={l} value={l}>{l.replace(/_/g, ' ')}</option>)}
-          </select>
-        </div>
+      <div className="db-form-field">
+        <label className="db-meta-label">Format</label>
+        <select className="db-form-select" value={form.format} onChange={e => update('format', e.target.value)}>
+          {formats.map(f => <option key={f} value={f}>{f.toUpperCase()}</option>)}
+        </select>
       </div>
 
       <p style={{ fontSize: 10, color: 'var(--text-dim)', marginTop: 12, lineHeight: 1.5 }}>
-        After saving, you'll be taken to upload sample files. At least one sample is required before submitting for review.
+        After saving, you'll be taken to upload sample files. At least 5 samples are required before submitting for review.
       </p>
 
       <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, marginTop: 12, fontSize: 11, color: 'var(--text-secondary)', cursor: 'pointer', lineHeight: 1.4 }}>
@@ -3570,61 +3643,16 @@ function CustomRequestModal({ onClose }: { onClose: () => void }) {
                 <input className="db-form-input" value={form.company_name} onChange={e => set('company_name', e.target.value)} placeholder="Company name" />
               </div>
             </div>
-            <div className="db-form-field">
-              <label className="db-meta-label">Modalities needed</label>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 4 }}>
-                {MODALITIES.map(m => (
-                  <button key={m} type="button" className={`db-filter-pill${form.modalities.includes(m) ? ' db-filter-pill--active' : ''}`}
-                    style={{ fontSize: 9 }} onClick={() => toggleTag('modalities', m)}>
-                    {m.replace(/_/g, ' ')}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div className="db-form-field">
-              <label className="db-meta-label">Environments needed</label>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 4 }}>
-                {ENVIRONMENTS.map(e => (
-                  <button key={e} type="button" className={`db-filter-pill${form.environments.includes(e) ? ' db-filter-pill--active' : ''}`}
-                    style={{ fontSize: 9 }} onClick={() => toggleTag('environments', e)}>
-                    {e.replace(/_/g, ' ')}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div className="db-form-field">
-              <label className="db-meta-label">Collection Method</label>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 4 }}>
-                {COLLECTION_METHODS.map(m => (
-                  <button key={m} type="button" className={`db-filter-pill${form.collection_methods.includes(m) ? ' db-filter-pill--active' : ''}`}
-                    style={{ fontSize: 9 }} onClick={() => toggleTag('collection_methods', m)}>
-                    {m.replace(/_/g, ' ')}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div className="db-form-field">
-              <label className="db-meta-label">Embodiment / Platform</label>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 4 }}>
-                {EMBODIMENT_TYPES.map(e => (
-                  <button key={e} type="button" className={`db-filter-pill${form.embodiment_types.includes(e) ? ' db-filter-pill--active' : ''}`}
-                    style={{ fontSize: 9 }} onClick={() => toggleTag('embodiment_types', e)}>
-                    {e.replace(/_/g, ' ')}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div className="db-form-field">
-              <label className="db-meta-label">Task Types</label>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 4 }}>
-                {TASK_TYPES.map(t => (
-                  <button key={t} type="button" className={`db-filter-pill${form.task_types.includes(t) ? ' db-filter-pill--active' : ''}`}
-                    style={{ fontSize: 9 }} onClick={() => toggleTag('task_types', t)}>
-                    {t.replace(/_/g, ' ')}
-                  </button>
-                ))}
-              </div>
-            </div>
+            <TagSection label="Modalities needed" required selected={form.modalities} options={MODALITIES}
+              onToggle={v => toggleTag('modalities', v)} />
+            <TagSection label="Environments needed" required selected={form.environments} options={ENVIRONMENTS}
+              onToggle={v => toggleTag('environments', v)} />
+            <TagSection label="Collection Method" selected={form.collection_methods} options={COLLECTION_METHODS}
+              onToggle={v => toggleTag('collection_methods', v)} />
+            <TagSection label="Embodiment / Platform" selected={form.embodiment_types} options={EMBODIMENT_TYPES}
+              onToggle={v => toggleTag('embodiment_types', v)} />
+            <TagSection label="Task Types" selected={form.task_types} options={TASK_TYPES}
+              onToggle={v => toggleTag('task_types', v)} />
             <div className="db-form-field">
               <label className="db-meta-label">Description *</label>
               <textarea className="db-form-input db-form-textarea" value={form.description} onChange={e => set('description', e.target.value)}

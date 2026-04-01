@@ -79,7 +79,7 @@ export function getUploadHint(modalities: string[]): string | null {
 }
 
 export function getPreviewScore(samples: Sample[], modalities: string[]): { score: number; label: string; level: string; suggestions: string[] } {
-  if (!samples || samples.length === 0) return { score: 0, label: 'None', level: 'low', suggestions: ['Upload at least one sample for buyers to preview'] };
+  if (!samples || samples.length === 0) return { score: 0, label: 'None', level: 'low', suggestions: ['Upload at least 5 samples for buyers to preview'] };
   const suggestions: string[] = [];
   let score = 1;
 
@@ -102,8 +102,8 @@ export function getPreviewScore(samples: Sample[], modalities: string[]): { scor
   if (hasChart) score += 1;
   else if (hasTimeSeriesMod) suggestions.push('Upload a .parquet sample for chart preview');
 
-  if (samples.length >= 3) score += 1;
-  else suggestions.push(`Add more samples (${samples.length}/3 recommended)`);
+  if (samples.length >= 5) score += 1;
+  else suggestions.push(`Add more samples (${samples.length}/5 required)`);
 
   const labels = ['None', 'Basic', 'Good', 'Great', 'Excellent', 'Outstanding'];
   const level = score >= 4 ? 'high' : score >= 2 ? 'mid' : 'low';

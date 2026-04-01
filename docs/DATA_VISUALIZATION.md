@@ -50,7 +50,6 @@ When a provider uploads a sample, the system should validate file type against t
 | `rgbd` | `.rosbag`, `.mcap`, `.rrd`, `.hdf5`, `.mp4` | `video/*,.rosbag,.mcap,.rrd,.hdf5` |
 | `depth` | `.png`, `.hdf5`, `.rosbag`, `.mcap`, `.rrd` | `image/*,.hdf5,.rosbag,.mcap,.rrd` |
 | `lidar` | `.rosbag`, `.mcap`, `.rrd`, `.parquet`, `.hdf5` | `.rosbag,.mcap,.rrd,.parquet,.hdf5` |
-| `radar` | `.rosbag`, `.mcap`, `.rrd`, `.parquet`, `.hdf5` | `.rosbag,.mcap,.rrd,.parquet,.hdf5` |
 | `point_cloud` | `.rosbag`, `.mcap`, `.rrd`, `.parquet`, `.hdf5` | `.rosbag,.mcap,.rrd,.parquet,.hdf5` |
 | `motion_capture` | `.rrd`, `.parquet`, `.hdf5`, `.mcap` | `.rrd,.parquet,.hdf5,.mcap` |
 | `tactile` | `.parquet`, `.hdf5`, `.mp4`, `.png`, `.rrd` | `video/*,image/*,.parquet,.hdf5,.rrd` |
@@ -60,7 +59,6 @@ When a provider uploads a sample, the system should validate file type against t
 | `audio` | `.wav`, `.mp3`, `.flac`, `.ogg` | `audio/*` |
 | `language_annotations` | `.json`, `.parquet` | `.json,.parquet,application/json` |
 | `thermal` | `.mp4`, `.png`, `.hdf5`, `.rrd` | `video/*,image/*,.hdf5,.rrd` |
-| `event_camera` | `.hdf5`, `.rosbag`, `.mcap`, `.rrd` | `.hdf5,.rosbag,.mcap,.rrd` |
 | `other` | Any | `*` |
 
 When a listing has **multiple modalities**, the accept filter is the union of all applicable filters.

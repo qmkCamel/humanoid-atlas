@@ -22,8 +22,12 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   if (anonId) headers['x-anonymous-id'] = anonId;
 
   const res = await fetch(`${API_BASE}${path}`, { ...options, headers });
-  const json = await res.json();
-  if (!res.ok) throw new Error(json?.error?.message ?? `API error: ${res.status}`);
+  const json = await res.json().catch(() => null);
+  if (!res.ok) {
+    const msg = json?.error?.message ?? json?.message ?? json?.error ?? (typeof json === 'string' ? json : null) ?? `API error: ${res.status}`;
+    console.error(`[API ${res.status}] ${options.method ?? 'GET'} ${path}:`, json);
+    throw new Error(typeof msg === 'string' ? msg : JSON.stringify(msg));
+  }
   return json;
 }
 

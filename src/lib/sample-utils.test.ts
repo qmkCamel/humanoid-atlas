@@ -297,17 +297,17 @@ describe('getPreviewScore', () => {
     expect(result.level).toBe('mid');
   });
 
-  it('scores video + rrd + parquet for lidar,imu listing as Outstanding (score 5)', () => {
+  it('scores video + rrd + parquet for lidar,imu listing as Excellent (score 4, needs 5 samples)', () => {
     const samples = [
       makeSample('video.mp4', 'video/mp4'),
       makeSample('preview.rrd'),
       makeSample('imu.parquet'),
     ];
     const result = getPreviewScore(samples, ['lidar', 'imu']);
-    expect(result.score).toBe(5); // base + video + rerun + chart + 3 samples
-    expect(result.label).toBe('Outstanding');
+    expect(result.score).toBe(4); // base + video + rerun + chart (only 3 samples, need 5)
+    expect(result.label).toBe('Excellent');
     expect(result.level).toBe('high');
-    expect(result.suggestions).toHaveLength(0);
+    expect(result.suggestions).toContain('Add more samples (3/5 required)');
   });
 
   it('scores 1 parquet for imu listing as Good (score 2)', () => {
@@ -337,9 +337,9 @@ describe('getPreviewScore', () => {
     expect(result.suggestions.find(s => s.includes('.parquet'))).toBeUndefined();
   });
 
-  it('suggests more samples when fewer than 3', () => {
+  it('suggests more samples when fewer than 5', () => {
     const result = getPreviewScore([makeSample('video.mp4', 'video/mp4')], ['rgb']);
-    expect(result.suggestions).toContain('Add more samples (1/3 recommended)');
+    expect(result.suggestions).toContain('Add more samples (1/5 required)');
   });
 
   it('level thresholds: low < 2, mid 2-3, high >= 4', () => {
