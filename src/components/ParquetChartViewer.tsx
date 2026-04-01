@@ -30,12 +30,15 @@ async function loadParquet(url: string): Promise<ChartData> {
   const wasmTable = readParquet(buffer);
   const table = tableFromIPC(wasmTable.intoIPCStream());
 
-  // Find numeric columns
+  // Find numeric columns, excluding index/time columns
+  const INDEX_COLUMNS = new Set(['timestamp', 'time', 'frame', 'index', '_idx', 'step', 'episode_index', 'frame_index', 'task_index']);
   const allColumns: string[] = [];
   for (const field of table.schema.fields) {
     const dt = field.type.toString().toLowerCase();
     if (dt.includes('float') || dt.includes('int') || dt.includes('decimal') || dt.includes('double')) {
-      allColumns.push(field.name);
+      if (!INDEX_COLUMNS.has(field.name.toLowerCase())) {
+        allColumns.push(field.name);
+      }
     }
   }
 
