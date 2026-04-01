@@ -2971,7 +2971,9 @@ Samples are automatically grouped by type in the catalog:
 
 ### Generating .rrd Preview Files
 
-For modalities like point clouds, depth maps, IMU, or motion capture, we recommend generating a \`.rrd\` preview for an interactive 3D viewer experience.
+For spatial modalities (point cloud, LiDAR, motion capture, depth, RGBD), \`.parquet\` and \`.ply\`/\`.pcd\` files display as download cards — buyers can download but not preview inline. To provide an interactive 3D preview, upload a \`.rrd\` file generated with the Rerun SDK.
+
+**Note:** Motion capture \`.parquet\` files (skeleton/joint data) render as download cards, not charts. This is by design — joint trajectories are best viewed as 3D skeleton animations in Rerun, not 2D line charts. Generate a \`.rrd\` preview to show buyers an interactive 3D skeleton visualization.
 
 **Quick start** — use the Atlas Preview Generator CLI:
 

@@ -28,6 +28,8 @@ Sample file arrives → check content_type / extension
   ├── .parquet / .hdf5     → Layer 2: check listing modality
   │     │   NOTE: Rerun web viewer cannot load raw .parquet/.hdf5.
   │     │   Providers must convert to .rrd for 3D preview.
+  │     │   Motion capture .parquet (skeleton/joint data) renders as
+  │     │   download card — use .rrd for animated 3D skeleton preview.
   │     ├── time-series modalities
   │     │   (imu, force_torque, proprioception, tactile)
   │     │                  → Time-series chart (Phase 3)
