@@ -414,6 +414,7 @@ function BuyData() {
     try { return new Set(JSON.parse(localStorage.getItem('db_watchlist') ?? '[]')); } catch { return new Set(); }
   });
   const [showCustomRequest, setShowCustomRequest] = useState(false);
+  const [customRequestListing, setCustomRequestListing] = useState<Listing | null>(null);
   const [showPurchases, setShowPurchases] = useState(false);
   const [showCart, setShowCart] = useState(false);
   const [pendingCheckout, setPendingCheckout] = useState(false);
@@ -516,6 +517,13 @@ function BuyData() {
 
         <PurchaseSection listing={l} cart={cart} onCartOpen={() => {}} />
 
+        <div className="db-custom-request-cta">
+          <span className="db-custom-request-cta__text">Need more data like this?</span>
+          <button className="db-custom-request-cta__btn" onClick={() => { setCustomRequestListing(l); setShowCustomRequest(true); }}>
+            Request Custom Collection
+          </button>
+        </div>
+
         {/* Similar datasets */}
         {listings.filter(o => o.id !== l.id && (
           (Array.isArray(l.modality) ? l.modality : [l.modality]).some(m =>
@@ -549,6 +557,7 @@ function BuyData() {
         )}
 
         {cart.totalItems > 0 && <InlineCart cart={cart} formatUsd={formatUsd} autoCheckout={pendingCheckout} onAutoCheckoutDone={() => setPendingCheckout(false)} onPurchaseComplete={() => setShowPurchases(true)} />}
+        {showCustomRequest && <CustomRequestModal onClose={() => { setShowCustomRequest(false); setCustomRequestListing(null); }} sourceListing={customRequestListing} />}
       </div>
     );
   }
@@ -560,7 +569,7 @@ function BuyData() {
           <div>
             <div className="api-docs-title-row">
               <h2 className="api-docs-title">{showPurchases ? 'My Purchases' : 'Buy Data'}</h2>
-              {!showPurchases && <button className="api-md-btn" onClick={() => setShowCustomRequest(true)}>Request Custom Dataset</button>}
+              {!showPurchases && <button className="api-md-btn" onClick={() => { setCustomRequestListing(null); setShowCustomRequest(true); }}>Request Custom Dataset</button>}
               {isSignedIn && (
                 <button className="api-md-btn" onClick={() => setShowPurchases(!showPurchases)}>
                   {showPurchases ? 'Browse Catalog' : 'My Purchases'}
@@ -760,7 +769,7 @@ function BuyData() {
           </div>
         );
       })()}
-      {showCustomRequest && <CustomRequestModal onClose={() => setShowCustomRequest(false)} />}
+      {showCustomRequest && <CustomRequestModal onClose={() => { setShowCustomRequest(false); setCustomRequestListing(null); }} sourceListing={customRequestListing} />}
     </div>
   );
 }
@@ -3658,8 +3667,24 @@ function CollectorModal({ program, onClose }: { program: CollectionProgram; onCl
 // CUSTOM REQUEST MODAL
 // ═══════════════════════════════════════════════════════════
 
-function CustomRequestModal({ onClose }: { onClose: () => void }) {
-  const [form, setForm] = useState({ contact_name: '', contact_email: '', company_name: '', modalities: [] as string[], environments: [] as string[], collection_methods: [] as string[], embodiment_types: [] as string[], task_types: [] as string[], description: '', hours_needed: '', budget_range: '', timeline: '' });
+function CustomRequestModal({ onClose, sourceListing }: { onClose: () => void; sourceListing?: Listing | null }) {
+  const isLinked = !!sourceListing;
+  const listingModalities = sourceListing ? (Array.isArray(sourceListing.modality) ? sourceListing.modality : [sourceListing.modality]) : [];
+  const listingEnvironments = sourceListing ? (Array.isArray(sourceListing.environment) ? sourceListing.environment : [sourceListing.environment]) : [];
+  const listingTags = sourceListing && Array.isArray(sourceListing.tags) ? sourceListing.tags as string[] : [];
+  const listingCollectionMethods = listingTags.filter(t => t.startsWith('collection:')).map(t => t.split(':')[1]);
+  const listingEmbodimentTypes = listingTags.filter(t => t.startsWith('embodiment:')).map(t => t.split(':')[1]);
+  const listingTaskTypes = listingTags.filter(t => t.startsWith('task:')).map(t => t.split(':')[1]);
+
+  const [form, setForm] = useState({
+    contact_name: '', contact_email: '', company_name: '',
+    modalities: isLinked ? listingModalities : [] as string[],
+    environments: isLinked ? listingEnvironments : [] as string[],
+    collection_methods: isLinked ? listingCollectionMethods : [] as string[],
+    embodiment_types: isLinked ? listingEmbodimentTypes : [] as string[],
+    task_types: isLinked ? listingTaskTypes : [] as string[],
+    description: '', hours_needed: '', budget_range: '', timeline: '',
+  });
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
 
@@ -3672,8 +3697,8 @@ function CustomRequestModal({ onClose }: { onClose: () => void }) {
   };
 
   const handleSubmit = async () => {
-    if (!form.contact_name || !form.contact_email || !form.description) {
-      setError('Name, email, and description are required');
+    if (!form.contact_name || !form.contact_email || !form.description || !form.hours_needed || !form.budget_range || !form.timeline) {
+      setError('All required fields must be filled in');
       return;
     }
     setError('');
@@ -3681,12 +3706,13 @@ function CustomRequestModal({ onClose }: { onClose: () => void }) {
       const { modalities, environments, collection_methods, embodiment_types, task_types, ...rest } = form;
       await api.post('/custom-requests', {
         ...rest,
-        modality: modalities,
-        environment: environments,
-        collection_method: collection_methods.length > 0 ? collection_methods : undefined,
-        embodiment_type: embodiment_types.length > 0 ? embodiment_types : undefined,
-        task_type: task_types.length > 0 ? task_types : undefined,
-        hours_needed: form.hours_needed ? parseInt(form.hours_needed) : null,
+        modality: modalities.join(', ') || undefined,
+        environment: environments.join(', ') || undefined,
+        collection_method: collection_methods.join(', ') || undefined,
+        embodiment_type: embodiment_types.join(', ') || undefined,
+        task_type: task_types.join(', ') || undefined,
+        hours_needed: parseInt(form.hours_needed),
+        source_listing_id: sourceListing?.id,
       });
       setSubmitted(true);
     } catch (err) {
@@ -3694,22 +3720,41 @@ function CustomRequestModal({ onClose }: { onClose: () => void }) {
     }
   };
 
+  const providerName = sourceListing?.providers?.name;
+
   return (
     <div className="db-modal-overlay" onClick={onClose}>
       <div className="db-modal db-modal--wide" onClick={e => e.stopPropagation()}>
         <div className="db-modal-header">
           <div>
-            <div className="db-modal-title">Request Custom Dataset</div>
-            <div className="db-modal-subtitle">Describe what you need and we'll connect you with providers</div>
+            <div className="db-modal-title">{isLinked ? 'Request Custom Collection' : 'Request Custom Dataset'}</div>
+            <div className="db-modal-subtitle">
+              {isLinked
+                ? `Request additional data from ${providerName ?? 'this provider'} based on "${sourceListing!.title}"`
+                : "Describe what you need and we'll connect you with providers"}
+            </div>
           </div>
           <button className="db-modal-close" onClick={onClose}>&times;</button>
         </div>
+
+        {isLinked && (
+          <div className="db-custom-request-ref">
+            <div className="db-custom-request-ref__title">{sourceListing!.title}</div>
+            <div className="db-custom-request-ref__details">
+              <span>${sourceListing!.price_per_hour}/hr</span>
+              {sourceListing!.total_hours && <span>{sourceListing!.total_hours.toLocaleString()} hrs available</span>}
+              <span>{listingModalities.map(m => m.replace(/_/g, ' ')).join(', ')}</span>
+            </div>
+          </div>
+        )}
 
         {submitted ? (
           <div className="db-modal-success">
             <div className="db-modal-success__title">Request submitted</div>
             <div className="db-modal-success__note">
-              We'll review your request and reach out to matching data providers. You'll hear back at {form.contact_email}.
+              {isLinked
+                ? `We'll forward your request to ${providerName ?? 'the provider'} and follow up at ${form.contact_email}.`
+                : `We'll review your request and reach out to matching data providers. You'll hear back at ${form.contact_email}.`}
             </div>
             <button className="db-add-cart-btn" onClick={onClose}>Done</button>
           </div>
@@ -3732,32 +3777,49 @@ function CustomRequestModal({ onClose }: { onClose: () => void }) {
                 <input className="db-form-input" value={form.company_name} onChange={e => set('company_name', e.target.value)} placeholder="Company name" />
               </div>
             </div>
-            <TagSection label="Modalities needed" required selected={form.modalities} options={MODALITIES}
-              onToggle={v => toggleTag('modalities', v)} />
-            <TagSection label="Environments needed" required selected={form.environments} options={ENVIRONMENTS}
-              onToggle={v => toggleTag('environments', v)} />
-            <TagSection label="Collection Method" selected={form.collection_methods} options={COLLECTION_METHODS}
-              onToggle={v => toggleTag('collection_methods', v)} />
-            <TagSection label="Embodiment / Platform" selected={form.embodiment_types} options={EMBODIMENT_TYPES}
-              onToggle={v => toggleTag('embodiment_types', v)} />
-            <TagSection label="Task Types" selected={form.task_types} options={TASK_TYPES}
-              onToggle={v => toggleTag('task_types', v)} />
+            {isLinked ? (
+              <div className="db-custom-request-tags-readonly">
+                <div className="db-meta-label">Dataset tags</div>
+                <div className="db-badges">
+                  {listingModalities.map(m => <span key={`mod-${m}`} className="db-badge">{m.replace(/_/g, ' ')}</span>)}
+                  {listingEnvironments.map(e => <span key={`env-${e}`} className="db-badge">{e.replace(/_/g, ' ')}</span>)}
+                  {listingCollectionMethods.map(c => <span key={`col-${c}`} className="db-badge">{c.replace(/_/g, ' ')}</span>)}
+                  {listingEmbodimentTypes.map(e => <span key={`emb-${e}`} className="db-badge">{e.replace(/_/g, ' ')}</span>)}
+                  {listingTaskTypes.map(t => <span key={`task-${t}`} className="db-badge">{t.replace(/_/g, ' ')}</span>)}
+                </div>
+              </div>
+            ) : (
+              <>
+                <TagSection label="Modalities needed" required selected={form.modalities} options={MODALITIES}
+                  onToggle={v => toggleTag('modalities', v)} />
+                <TagSection label="Environments needed" required selected={form.environments} options={ENVIRONMENTS}
+                  onToggle={v => toggleTag('environments', v)} />
+                <TagSection label="Collection Method" selected={form.collection_methods} options={COLLECTION_METHODS}
+                  onToggle={v => toggleTag('collection_methods', v)} />
+                <TagSection label="Embodiment / Platform" selected={form.embodiment_types} options={EMBODIMENT_TYPES}
+                  onToggle={v => toggleTag('embodiment_types', v)} />
+                <TagSection label="Task Types" selected={form.task_types} options={TASK_TYPES}
+                  onToggle={v => toggleTag('task_types', v)} />
+              </>
+            )}
             <div className="db-form-field">
               <label className="db-meta-label">Description *</label>
               <textarea className="db-form-input db-form-textarea" value={form.description} onChange={e => set('description', e.target.value)}
-                placeholder="Describe the data you need - environment, activities, quality requirements, etc" rows={4} />
+                placeholder={isLinked
+                  ? "Describe what additional data you need - more hours, different scenarios, specific requirements, etc"
+                  : "Describe the data you need - environment, activities, quality requirements, etc"} rows={4} />
             </div>
             <div className="db-form-row">
               <div className="db-form-field">
-                <label className="db-meta-label">Hours needed</label>
+                <label className="db-meta-label">Hours needed *</label>
                 <input className="db-form-input" type="text" inputMode="numeric" value={form.hours_needed} onChange={e => set('hours_needed', e.target.value.replace(/[^0-9]/g, ''))} placeholder="500" />
               </div>
               <div className="db-form-field">
-                <label className="db-meta-label">Budget range</label>
+                <label className="db-meta-label">Budget range *</label>
                 <input className="db-form-input" value={form.budget_range} onChange={e => set('budget_range', e.target.value)} placeholder="$10,000 - $50,000" />
               </div>
               <div className="db-form-field">
-                <label className="db-meta-label">Timeline</label>
+                <label className="db-meta-label">Timeline *</label>
                 <input className="db-form-input" value={form.timeline} onChange={e => set('timeline', e.target.value)} placeholder="3 months" />
               </div>
             </div>
