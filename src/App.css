@@ -5168,6 +5168,14 @@ select.db-form-input { appearance: none; -webkit-appearance: none; background-im
 .db-custom-request-tags-readonly { margin-bottom: 8px; }
 .db-custom-request-tags-readonly .db-badges { margin-top: 6px; }
 
+/* ─── ALIGNMENT VALIDATION ERRORS ────────────────── */
+.db-alignment-errors { margin-top: 12px; padding: 14px 16px; border: 1px solid var(--red); border-radius: 6px; background: rgba(197, 48, 48, 0.04); }
+.db-alignment-errors__title { font-family: 'Share Tech Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--red); font-weight: 600; margin-bottom: 10px; }
+.db-alignment-errors__item { font-family: 'Inter', sans-serif; font-size: 11px; color: var(--text-secondary); line-height: 1.6; padding: 2px 0; }
+.db-alignment-errors__icon { font-family: 'Share Tech Mono', monospace; display: inline-block; width: 16px; height: 16px; line-height: 16px; text-align: center; border-radius: 3px; background: var(--red); color: #fff; font-size: 9px; font-weight: 700; margin-right: 8px; vertical-align: middle; }
+.db-alignment-errors__hint { font-family: 'Share Tech Mono', monospace; font-size: 10px; color: var(--text-dim); margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--border); }
+.db-alignment-errors__hint code { background: var(--bg-muted); padding: 2px 6px; border-radius: 3px; font-size: 10px; }
+
 /* ─── PROVIDER PROFILES ─────────────────────────── */
 .db-provider-logo { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--border); background: var(--bg-muted); display: flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden; }
 .db-provider-logo--lg { width: 56px; height: 56px; }

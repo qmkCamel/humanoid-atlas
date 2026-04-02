@@ -1388,6 +1388,110 @@ function getPreviewScore(samples: Sample[], modalities: string[]): { score: numb
   return { score, label: labels[score] ?? 'Outstanding', level, suggestions };
 }
 
+// ═══════════════════════════════════════════════════════════
+// CROSS-MODALITY ALIGNMENT VALIDATION
+// ═══════════════════════════════════════════════════════════
+
+const MODALITY_KEYWORDS: Record<string, string[]> = {
+  rgb: ['rgb', 'color', 'cam', 'camera', 'visual'],
+  depth: ['depth', 'disparity', 'zmap'],
+  thermal: ['thermal', 'infrared', 'flir', 'ir_'],
+  imu: ['imu', 'accel', 'gyro', 'accelerometer', 'gyroscope'],
+  force_torque: ['force', 'torque', 'ft_', 'wrench'],
+  tactile: ['tactile', 'pressure', 'touch', 'gel', 'taxel'],
+  proprioception: ['proprio', 'joint', 'encoder', 'qpos', 'qvel'],
+  audio: ['audio', 'mic', 'sound', 'speech'],
+  lidar: ['lidar', 'laser', 'scan', 'velodyne'],
+  point_cloud: ['pointcloud', 'point_cloud', 'pcd', 'ply'],
+  motion_capture: ['mocap', 'motion_capture', 'skeleton', 'optitrack', 'vicon'],
+  language_annotations: ['annotation', 'caption', 'language', 'label', 'instruction'],
+  rgbd: ['rgbd', 'rgb_d', 'rgb-d'],
+};
+
+const FORMAT_MODALITY_MAP: Record<string, string[]> = {
+  mp4: ['rgb', 'thermal', 'rgbd', 'tactile'], mov: ['rgb', 'thermal', 'rgbd'], webm: ['rgb', 'thermal'], avi: ['rgb', 'thermal'],
+  png: ['rgb', 'depth', 'thermal'], jpg: ['rgb', 'depth', 'thermal'], jpeg: ['rgb', 'depth', 'thermal'], tiff: ['rgb', 'depth', 'thermal'],
+  parquet: ['imu', 'force_torque', 'proprioception', 'tactile', 'language_annotations'],
+  hdf5: ['imu', 'force_torque', 'proprioception', 'rgbd', 'depth', 'lidar'], h5: ['imu', 'force_torque', 'proprioception', 'rgbd', 'depth', 'lidar'],
+  rosbag: ['lidar', 'point_cloud', 'rgbd', 'depth', 'imu', 'force_torque'], bag: ['lidar', 'point_cloud', 'rgbd', 'depth'],
+  mcap: ['lidar', 'point_cloud', 'rgbd', 'depth', 'imu'], rrd: ['lidar', 'point_cloud', 'motion_capture', 'rgbd', 'depth'],
+  json: ['language_annotations'], jsonl: ['language_annotations'],
+  wav: ['audio'], mp3: ['audio'], ogg: ['audio'], flac: ['audio'],
+  csv: ['imu', 'force_torque', 'proprioception'],
+};
+
+function mapSampleToModality(filename: string, listingModalities: string[]): string | null {
+  const lower = filename.toLowerCase();
+  const nameWithoutExt = lower.replace(/\.[^.]+$/, '');
+  for (const mod of listingModalities) {
+    const keywords = MODALITY_KEYWORDS[mod];
+    if (keywords && keywords.some(kw => nameWithoutExt.includes(kw))) return mod;
+  }
+  const ext = lower.split('.').pop() ?? '';
+  const formatMods = FORMAT_MODALITY_MAP[ext];
+  if (formatMods) {
+    const candidates = listingModalities.filter(m => formatMods.includes(m));
+    if (candidates.length === 1) return candidates[0];
+  }
+  return null;
+}
+
+function extractEpisodeId(filename: string, modality: string | null): string {
+  let base = filename.replace(/\.[^.]+$/, '').toLowerCase();
+  if (modality) {
+    const keywords = MODALITY_KEYWORDS[modality] ?? [];
+    for (const kw of keywords) base = base.replace(new RegExp(`[_\\-]?${kw}[_\\-]?`, 'g'), '_');
+  }
+  base = base.replace(/[_\-]{2,}/g, '_').replace(/^[_\-]+|[_\-]+$/g, '');
+  return base || filename.replace(/\.[^.]+$/, '').toLowerCase();
+}
+
+interface AlignmentIssue { type: 'missing_modality' | 'count_mismatch' | 'missing_pair' | 'unassigned'; message: string; }
+
+function validateModalityAlignment(samples: Sample[], listingModalities: string[]): { valid: boolean; issues: AlignmentIssue[] } {
+  if (listingModalities.length <= 1) return { valid: true, issues: [] };
+  const issues: AlignmentIssue[] = [];
+  const assignments = samples.map(s => ({ filename: s.filename, modality: mapSampleToModality(s.filename, listingModalities), episodeId: '' }));
+  assignments.forEach(a => { a.episodeId = extractEpisodeId(a.filename, a.modality); });
+
+  const unassigned = assignments.filter(a => a.modality === null);
+  for (const u of unassigned) {
+    issues.push({ type: 'unassigned', message: `"${u.filename}" — could not determine modality. Rename: {episode_id}_{modality}.{ext}` });
+  }
+
+  const assigned = assignments.filter(a => a.modality !== null);
+  const byModality: Record<string, typeof assignments> = {};
+  for (const a of assigned) { if (!byModality[a.modality!]) byModality[a.modality!] = []; byModality[a.modality!].push(a); }
+
+  for (const mod of listingModalities) {
+    if (!byModality[mod] || byModality[mod].length === 0) {
+      issues.push({ type: 'missing_modality', message: `No samples detected for modality: ${mod.replace(/_/g, ' ')}` });
+    }
+  }
+
+  const counts = listingModalities.map(mod => ({ mod, count: (byModality[mod] ?? []).length })).filter(c => c.count > 0);
+  if (counts.length > 1) {
+    const expected = counts[0].count;
+    if (counts.some(c => c.count !== expected)) {
+      const detail = counts.map(c => `${c.mod.replace(/_/g, ' ')}: ${c.count}`).join(', ');
+      issues.push({ type: 'count_mismatch', message: `Modality sample counts must match. Current: ${detail}` });
+    }
+  }
+
+  if (counts.length > 1 && counts.every(c => c.count === counts[0].count) && unassigned.length === 0) {
+    const allEpisodes = new Set(assigned.map(a => a.episodeId));
+    for (const ep of allEpisodes) {
+      const episodeMods = new Set(assigned.filter(a => a.episodeId === ep).map(a => a.modality));
+      const missing = listingModalities.filter(mod => !episodeMods.has(mod));
+      if (missing.length > 0) {
+        issues.push({ type: 'missing_pair', message: `Episode "${ep}" is missing: ${missing.map(m => m.replace(/_/g, ' ')).join(', ')}` });
+      }
+    }
+  }
+
+  return { valid: issues.length === 0, issues };
+}
+
 function SampleUploader({ listingId, modalities = [], reviewStatus }: { listingId: string; modalities?: string[]; reviewStatus?: string }) {
   const [samples, setSamples] = useState<Sample[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -1418,9 +1522,24 @@ function SampleUploader({ listingId, modalities = [], reviewStatus }: { listingI
     setImporting(false);
   };
 
+  const [alignmentIssues, setAlignmentIssues] = useState<AlignmentIssue[]>([]);
+
   const handleSubmitForReview = async () => {
     setSubmittingForReview(true);
     setSubmitStatus(null);
+    setAlignmentIssues([]);
+
+    // 0. Cross-modality alignment check (only for multi-modality listings)
+    if (modalities.length > 1) {
+      const alignment = validateModalityAlignment(samples, modalities);
+      if (!alignment.valid) {
+        setAlignmentIssues(alignment.issues);
+        setSubmitStatus('Sample alignment check failed — see issues below');
+        setSubmittingForReview(false);
+        return;
+      }
+    }
+
     try {
       // 1. Test provisioning endpoint first (ping test via authenticated provider route)
       setSubmitStatus('Testing provisioning API...');
@@ -1537,6 +1656,21 @@ function SampleUploader({ listingId, modalities = [], reviewStatus }: { listingI
         </button>
       </div>
     ) : (
+      <>
+      {alignmentIssues.length > 0 && (
+        <div className="db-alignment-errors">
+          <div className="db-alignment-errors__title">Sample alignment issues</div>
+          {alignmentIssues.map((issue, i) => (
+            <div key={i} className="db-alignment-errors__item">
+              <span className="db-alignment-errors__icon">{issue.type === 'unassigned' ? '?' : issue.type === 'missing_modality' ? '!' : issue.type === 'count_mismatch' ? '#' : '~'}</span>
+              {issue.message}
+            </div>
+          ))}
+          <div className="db-alignment-errors__hint">
+            Required naming convention: <code>{'{episode_id}_{modality}.{ext}'}</code> — e.g. episode_001_rgb.mp4, episode_001_imu.parquet
+          </div>
+        </div>
+      )}
       <div className="api-preamble" style={{ marginTop: 12, textAlign: 'center', padding: '20px 24px', opacity: canSubmitForReview ? 1 : 0.4 }}>
         {submitStatus === 'Listing submitted for review' ? (
           <button className="db-add-cart-btn" disabled style={{ background: 'var(--green, #276749)', borderColor: 'var(--green, #276749)', color: '#fff', cursor: 'default' }}>
@@ -1559,6 +1693,7 @@ function SampleUploader({ listingId, modalities = [], reviewStatus }: { listingI
           </>
         )}
       </div>
+      </>
     )}
     </>
   );
@@ -3147,12 +3282,56 @@ Best practices:
 - Keep sample files to 500–1000 rows for fast loading
 - Maximum 500MB per file, but smaller is better for preview
 
+### Sample Naming Convention (Required for Multi-Modality Listings)
+
+If your listing has **multiple modalities** (e.g., RGB + IMU + force/torque), your sample files **must** follow this naming convention:
+
+\`\`\`
+{episode_id}_{modality}.{ext}
+\`\`\`
+
+**Examples:**
+| Filename | Episode | Modality | Format |
+|----------|---------|----------|--------|
+| \`episode_001_rgb.mp4\` | episode_001 | rgb | MP4 |
+| \`episode_001_imu.parquet\` | episode_001 | imu | Parquet |
+| \`episode_001_force.parquet\` | episode_001 | force_torque | Parquet |
+| \`grasp_23_depth.png\` | grasp_23 | depth | PNG |
+| \`grasp_23_tactile.parquet\` | grasp_23 | tactile | Parquet |
+| \`kitchen_01_rgb.mp4\` | kitchen_01 | rgb | MP4 |
+| \`kitchen_01_audio.wav\` | kitchen_01 | audio | WAV |
+
+**Recognized modality keywords:**
+- **rgb**: rgb, color, cam, camera, visual
+- **depth**: depth, disparity, zmap
+- **thermal**: thermal, infrared, flir
+- **imu**: imu, accel, gyro, accelerometer
+- **force_torque**: force, torque, ft_, wrench
+- **tactile**: tactile, pressure, touch, gel, taxel
+- **proprioception**: proprio, joint, encoder, qpos, qvel
+- **audio**: audio, mic, sound, speech
+- **lidar**: lidar, laser, scan, velodyne
+- **point_cloud**: pointcloud, point_cloud, pcd, ply
+- **motion_capture**: mocap, motion_capture, skeleton, optitrack
+- **language_annotations**: annotation, caption, language, label
+
+**Alignment rules enforced on submission:**
+1. Every listed modality must have at least one sample
+2. All modalities must have the **same number** of samples
+3. Samples must be **paired by episode** — each episode must have a file for every modality
+4. Files that cannot be auto-mapped to a modality must be renamed with a recognized keyword
+
+If a file has no modality keyword but only one listing modality matches its format (e.g. a \`.parquet\` on a listing with only \`imu\`), it is auto-assigned. If ambiguous, it is flagged as unassigned.
+
+Single-modality listings skip these checks.
+
 ### Submitting for Review
 
 Once you have 5+ samples uploaded, the **Submit for Review** button activates. Clicking it:
-1. Tests your provisioning API (verifies your webhook is reachable)
-2. Submits the listing for Atlas team review (typically approved within 24 hours)
-3. Once approved and published, your listing appears in the **Buy Data** catalog for OEM buyers
+1. Validates cross-modality sample alignment (for multi-modality listings)
+2. Tests your provisioning API (verifies your webhook is reachable)
+3. Submits the listing for Atlas team review (typically approved within 24 hours)
+4. Once approved and published, your listing appears in the **Buy Data** catalog for OEM buyers
 
 ---
 

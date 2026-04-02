@@ -111,3 +111,198 @@ export function getPreviewScore(samples: Sample[], modalities: string[]): { scor
   const level = score >= 4 ? 'high' : score >= 2 ? 'mid' : 'low';
   return { score, label: labels[score] ?? 'Outstanding', level, suggestions };
 }
+
+// ═══════════════════════════════════════════════════════════
+// CROSS-MODALITY ALIGNMENT VALIDATION
+// ═══════════════════════════════════════════════════════════
+
+/** Keyword patterns that map filename tokens to modalities */
+const MODALITY_KEYWORDS: Record<string, string[]> = {
+  rgb: ['rgb', 'color', 'cam', 'camera', 'visual'],
+  depth: ['depth', 'disparity', 'zmap'],
+  thermal: ['thermal', 'infrared', 'flir', 'ir_'],
+  imu: ['imu', 'accel', 'gyro', 'accelerometer', 'gyroscope'],
+  force_torque: ['force', 'torque', 'ft_', 'wrench'],
+  tactile: ['tactile', 'pressure', 'touch', 'gel', 'taxel'],
+  proprioception: ['proprio', 'joint', 'encoder', 'qpos', 'qvel'],
+  audio: ['audio', 'mic', 'sound', 'speech'],
+  lidar: ['lidar', 'laser', 'scan', 'velodyne'],
+  point_cloud: ['pointcloud', 'point_cloud', 'pcd', 'ply'],
+  motion_capture: ['mocap', 'motion_capture', 'skeleton', 'optitrack', 'vicon'],
+  language_annotations: ['annotation', 'caption', 'language', 'label', 'instruction'],
+  rgbd: ['rgbd', 'rgb_d', 'rgb-d'],
+};
+
+/** Format-to-modality fallback: when filename has no keyword, use file format + listing modalities */
+const FORMAT_MODALITY_MAP: Record<string, string[]> = {
+  mp4: ['rgb', 'thermal', 'rgbd', 'tactile'],
+  mov: ['rgb', 'thermal', 'rgbd'],
+  webm: ['rgb', 'thermal'],
+  avi: ['rgb', 'thermal'],
+  mkv: ['rgb'],
+  png: ['rgb', 'depth', 'thermal'],
+  jpg: ['rgb', 'depth', 'thermal'],
+  jpeg: ['rgb', 'depth', 'thermal'],
+  gif: ['rgb'],
+  webp: ['rgb'],
+  tiff: ['rgb', 'depth', 'thermal'],
+  parquet: ['imu', 'force_torque', 'proprioception', 'tactile', 'language_annotations'],
+  hdf5: ['imu', 'force_torque', 'proprioception', 'rgbd', 'depth', 'lidar'],
+  h5: ['imu', 'force_torque', 'proprioception', 'rgbd', 'depth', 'lidar'],
+  rosbag: ['lidar', 'point_cloud', 'rgbd', 'depth', 'imu', 'force_torque'],
+  bag: ['lidar', 'point_cloud', 'rgbd', 'depth'],
+  mcap: ['lidar', 'point_cloud', 'rgbd', 'depth', 'imu'],
+  rrd: ['lidar', 'point_cloud', 'motion_capture', 'rgbd', 'depth'],
+  json: ['language_annotations'],
+  jsonl: ['language_annotations'],
+  wav: ['audio'],
+  mp3: ['audio'],
+  ogg: ['audio'],
+  flac: ['audio'],
+  aac: ['audio'],
+  m4a: ['audio'],
+  csv: ['imu', 'force_torque', 'proprioception'],
+};
+
+/**
+ * Map a sample file to one of the listing's modalities.
+ * Returns the matched modality string or null if unassigned.
+ */
+export function mapSampleToModality(filename: string, listingModalities: string[]): string | null {
+  const lower = filename.toLowerCase();
+  const nameWithoutExt = lower.replace(/\.[^.]+$/, '');
+
+  // 1. Keyword match: check if filename contains a modality keyword
+  for (const mod of listingModalities) {
+    const keywords = MODALITY_KEYWORDS[mod];
+    if (keywords && keywords.some(kw => nameWithoutExt.includes(kw))) {
+      return mod;
+    }
+  }
+
+  // 2. Format fallback: if only one listing modality matches this file format
+  const ext = lower.split('.').pop() ?? '';
+  const formatModalities = FORMAT_MODALITY_MAP[ext];
+  if (formatModalities) {
+    const candidates = listingModalities.filter(m => formatModalities.includes(m));
+    if (candidates.length === 1) return candidates[0];
+  }
+
+  return null;
+}
+
+/**
+ * Extract an episode/pair identifier from a filename.
+ * Strips modality keywords and extension, returning the base episode name.
+ * e.g. "episode_001_rgb.mp4" → "episode_001"
+ *      "grasp_23_force.parquet" → "grasp_23"
+ *      "kitchen_01_imu_data.parquet" → "kitchen_01_data"
+ */
+export function extractEpisodeId(filename: string, modality: string | null): string {
+  // Remove extension
+  let base = filename.replace(/\.[^.]+$/, '').toLowerCase();
+
+  // Remove modality keywords from the base name
+  if (modality) {
+    const keywords = MODALITY_KEYWORDS[modality] ?? [];
+    for (const kw of keywords) {
+      // Remove keyword with surrounding separators (_, -)
+      base = base.replace(new RegExp(`[_\\-]?${kw}[_\\-]?`, 'g'), '_');
+    }
+  }
+
+  // Clean up: collapse multiple underscores/dashes, trim separators
+  base = base.replace(/[_\-]{2,}/g, '_').replace(/^[_\-]+|[_\-]+$/g, '');
+
+  return base || filename.replace(/\.[^.]+$/, '').toLowerCase();
+}
+
+export interface AlignmentIssue {
+  type: 'missing_modality' | 'count_mismatch' | 'missing_pair' | 'unassigned';
+  message: string;
+}
+
+export interface AlignmentResult {
+  valid: boolean;
+  issues: AlignmentIssue[];
+  assignments: Array<{ filename: string; modality: string | null; episodeId: string }>;
+}
+
+/**
+ * Validate that samples are properly aligned across modalities.
+ * Checks: coverage, count alignment, and pair alignment.
+ * Skips validation for single-modality listings.
+ */
+export function validateModalityAlignment(samples: Sample[], listingModalities: string[]): AlignmentResult {
+  // Skip for single-modality listings
+  if (listingModalities.length <= 1) {
+    return { valid: true, issues: [], assignments: samples.map(s => ({ filename: s.filename, modality: listingModalities[0] ?? null, episodeId: '' })) };
+  }
+
+  const issues: AlignmentIssue[] = [];
+
+  // Assign each sample to a modality
+  const assignments = samples.map(s => {
+    const modality = mapSampleToModality(s.filename, listingModalities);
+    const episodeId = extractEpisodeId(s.filename, modality);
+    return { filename: s.filename, modality, episodeId };
+  });
+
+  // Check for unassigned samples
+  const unassigned = assignments.filter(a => a.modality === null);
+  for (const u of unassigned) {
+    issues.push({
+      type: 'unassigned',
+      message: `"${u.filename}" — could not determine modality. Rename using convention: {episode_id}_{modality}.{ext}`,
+    });
+  }
+
+  // Group assigned samples by modality
+  const assigned = assignments.filter(a => a.modality !== null);
+  const byModality: Record<string, typeof assignments> = {};
+  for (const a of assigned) {
+    if (!byModality[a.modality!]) byModality[a.modality!] = [];
+    byModality[a.modality!].push(a);
+  }
+
+  // 1. Coverage: every listed modality must have at least one sample
+  for (const mod of listingModalities) {
+    if (!byModality[mod] || byModality[mod].length === 0) {
+      issues.push({
+        type: 'missing_modality',
+        message: `No samples detected for modality: ${mod.replace(/_/g, ' ')}`,
+      });
+    }
+  }
+
+  // 2. Count alignment: all modalities with samples must have the same count
+  const counts = listingModalities.map(mod => ({ mod, count: (byModality[mod] ?? []).length })).filter(c => c.count > 0);
+  if (counts.length > 1) {
+    const expectedCount = counts[0].count;
+    const mismatched = counts.filter(c => c.count !== expectedCount);
+    if (mismatched.length > 0) {
+      const detail = counts.map(c => `${c.mod.replace(/_/g, ' ')}: ${c.count}`).join(', ');
+      issues.push({
+        type: 'count_mismatch',
+        message: `Modality sample counts must match. Current: ${detail}`,
+      });
+    }
+  }
+
+  // 3. Pair alignment: for each episode, every modality should have a sample
+  if (counts.length > 1 && counts.every(c => c.count === counts[0].count) && unassigned.length === 0) {
+    const allEpisodes = new Set(assigned.map(a => a.episodeId));
+    for (const ep of allEpisodes) {
+      const episodeMods = new Set(assigned.filter(a => a.episodeId === ep).map(a => a.modality));
+      const missing = listingModalities.filter(mod => !episodeMods.has(mod));
+      if (missing.length > 0) {
+        issues.push({
+          type: 'missing_pair',
+          message: `Episode "${ep}" is missing: ${missing.map(m => m.replace(/_/g, ' ')).join(', ')}`,
+        });
+      }
+    }
+  }
+
+  return { valid: issues.length === 0, issues, assignments };
+}

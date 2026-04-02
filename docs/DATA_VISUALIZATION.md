@@ -82,6 +82,48 @@ When a listing has **multiple modalities**, the accept filter is the union of al
 - **Soft warning**: If a provider uploads a file that doesn't match recommended types, show a yellow warning (not a hard block): *"This file type is uncommon for [modality] datasets. Buyers may not be able to preview it. Consider uploading a .rrd preview alongside your data files."*
 - **Encourage .rrd**: For any non-video/image modality, show a tip suggesting providers generate `.rrd` preview files using the Rerun Python SDK
 
+## Cross-Modality Sample Alignment
+
+For multi-modality listings, samples must be properly aligned across modalities. This is enforced on submit-for-review.
+
+### Required naming convention
+
+```
+{episode_id}_{modality}.{ext}
+```
+
+Examples: `episode_001_rgb.mp4`, `episode_001_imu.parquet`, `episode_001_force.parquet`
+
+### Recognized modality keywords
+
+| Modality | Keywords |
+|----------|----------|
+| rgb | rgb, color, cam, camera, visual |
+| depth | depth, disparity, zmap |
+| thermal | thermal, infrared, flir |
+| imu | imu, accel, gyro, accelerometer |
+| force_torque | force, torque, ft_, wrench |
+| tactile | tactile, pressure, touch, gel, taxel |
+| proprioception | proprio, joint, encoder, qpos, qvel |
+| audio | audio, mic, sound, speech |
+| lidar | lidar, laser, scan, velodyne |
+| point_cloud | pointcloud, point_cloud, pcd, ply |
+| motion_capture | mocap, motion_capture, skeleton, optitrack |
+| language_annotations | annotation, caption, language, label |
+
+### Alignment rules
+
+1. Every listed modality must have at least one sample
+2. All modalities must have the same number of samples
+3. Samples must be paired by episode — each episode ID must have a file for every modality
+4. Files that cannot be auto-mapped to a modality must be renamed with a recognized keyword
+
+Single-modality listings skip alignment checks.
+
+### Fallback: format-based assignment
+
+If a filename has no modality keyword but the listing has only one modality that matches the file format (e.g., a `.parquet` file on a listing with only `imu`), it is auto-assigned. If ambiguous, the file is flagged as unassigned.
+
 ## Phase 1: Content-Type Dispatcher + Native Formats
 
 **Goal**: Replace the monolithic `<video>` player with a component that picks the right renderer based on file type.

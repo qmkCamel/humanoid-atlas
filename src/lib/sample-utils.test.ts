@@ -6,6 +6,9 @@ import {
   getAcceptFilter,
   getUploadHint,
   getPreviewScore,
+  mapSampleToModality,
+  extractEpisodeId,
+  validateModalityAlignment,
   MODALITY_ACCEPT_MAP,
   TIME_SERIES_MODALITIES,
   type Sample,
@@ -371,5 +374,111 @@ describe('TIME_SERIES_MODALITIES', () => {
     expect(TIME_SERIES_MODALITIES).not.toContain('lidar');
     expect(TIME_SERIES_MODALITIES).not.toContain('point_cloud');
     expect(TIME_SERIES_MODALITIES).not.toContain('rgb');
+  });
+});
+
+// ═══════════════════════════════════════════════════════════
+// Cross-Modality Alignment Validation
+// ═══════════════════════════════════════════════════════════
+
+describe('mapSampleToModality', () => {
+  it('maps by filename keyword', () => {
+    expect(mapSampleToModality('episode_001_rgb.mp4', ['rgb', 'imu'])).toBe('rgb');
+    expect(mapSampleToModality('episode_001_imu.parquet', ['rgb', 'imu'])).toBe('imu');
+    expect(mapSampleToModality('grasp_force.parquet', ['rgb', 'force_torque'])).toBe('force_torque');
+    expect(mapSampleToModality('kitchen_thermal.mp4', ['rgb', 'thermal'])).toBe('thermal');
+    expect(mapSampleToModality('test_depth.png', ['rgb', 'depth'])).toBe('depth');
+  });
+
+  it('falls back to format when only one modality matches', () => {
+    expect(mapSampleToModality('data_001.parquet', ['rgb', 'imu'])).toBe('imu');
+    expect(mapSampleToModality('clip_001.mp4', ['rgb', 'imu'])).toBe('rgb');
+    expect(mapSampleToModality('recording.wav', ['rgb', 'audio'])).toBe('audio');
+  });
+
+  it('returns null when ambiguous', () => {
+    expect(mapSampleToModality('data_001.mp4', ['rgb', 'thermal'])).toBeNull();
+    expect(mapSampleToModality('sample.parquet', ['imu', 'force_torque'])).toBeNull();
+  });
+
+  it('returns null when no match', () => {
+    expect(mapSampleToModality('readme.txt', ['rgb', 'imu'])).toBeNull();
+  });
+});
+
+describe('extractEpisodeId', () => {
+  it('strips modality keyword and extension', () => {
+    expect(extractEpisodeId('episode_001_rgb.mp4', 'rgb')).toBe('episode_001');
+    expect(extractEpisodeId('episode_001_imu.parquet', 'imu')).toBe('episode_001');
+    expect(extractEpisodeId('grasp_23_force.parquet', 'force_torque')).toBe('grasp_23');
+  });
+
+  it('handles no modality', () => {
+    const result = extractEpisodeId('episode_001.mp4', null);
+    expect(result).toBe('episode_001');
+  });
+});
+
+describe('validateModalityAlignment', () => {
+  const makeSample = (filename: string): Sample => ({ id: '1', url: '', filename, content_type: '' });
+
+  it('skips validation for single-modality listings', () => {
+    const samples = [makeSample('a.mp4'), makeSample('b.mp4')];
+    const result = validateModalityAlignment(samples, ['rgb']);
+    expect(result.valid).toBe(true);
+    expect(result.issues).toHaveLength(0);
+  });
+
+  it('passes with properly aligned samples', () => {
+    const samples = [
+      makeSample('ep_001_rgb.mp4'),
+      makeSample('ep_001_imu.parquet'),
+      makeSample('ep_002_rgb.mp4'),
+      makeSample('ep_002_imu.parquet'),
+    ];
+    const result = validateModalityAlignment(samples, ['rgb', 'imu']);
+    expect(result.valid).toBe(true);
+    expect(result.issues).toHaveLength(0);
+  });
+
+  it('fails when a modality has no samples', () => {
+    const samples = [makeSample('ep_001_rgb.mp4'), makeSample('ep_002_rgb.mp4')];
+    const result = validateModalityAlignment(samples, ['rgb', 'imu']);
+    expect(result.valid).toBe(false);
+    expect(result.issues.some(i => i.type === 'missing_modality')).toBe(true);
+  });
+
+  it('fails on count mismatch', () => {
+    const samples = [
+      makeSample('ep_001_rgb.mp4'),
+      makeSample('ep_002_rgb.mp4'),
+      makeSample('ep_001_imu.parquet'),
+    ];
+    const result = validateModalityAlignment(samples, ['rgb', 'imu']);
+    expect(result.valid).toBe(false);
+    expect(result.issues.some(i => i.type === 'count_mismatch')).toBe(true);
+  });
+
+  it('fails on pair mismatch (same count but wrong episodes)', () => {
+    const samples = [
+      makeSample('ep_001_rgb.mp4'),
+      makeSample('ep_002_rgb.mp4'),
+      makeSample('ep_001_imu.parquet'),
+      makeSample('ep_003_imu.parquet'),
+    ];
+    const result = validateModalityAlignment(samples, ['rgb', 'imu']);
+    expect(result.valid).toBe(false);
+    expect(result.issues.some(i => i.type === 'missing_pair')).toBe(true);
+  });
+
+  it('flags unassigned samples', () => {
+    const samples = [
+      makeSample('ep_001_rgb.mp4'),
+      makeSample('ep_001_imu.parquet'),
+      makeSample('mystery_file.bin'),
+    ];
+    const result = validateModalityAlignment(samples, ['rgb', 'imu']);
+    expect(result.valid).toBe(false);
+    expect(result.issues.some(i => i.type === 'unassigned')).toBe(true);
   });
 });
