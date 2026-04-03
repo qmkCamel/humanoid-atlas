@@ -27,4 +27,7 @@
 
   <!-- HRI -->
   <url><loc>https://www.humanoids.fyi/hri/displays</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+
+  <!-- Legal -->
+  <url><loc>https://www.humanoids.fyi/privacy</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
 </urlset>

@@ -2193,6 +2193,56 @@ export default function App() {
     );
   }
 
+  // ==================== PRIVACY POLICY VIEW ====================
+  if (location.pathname === '/privacy') {
+    return (
+      <div className="app" style={{ position: 'relative', display: 'flex', flexDirection: 'column', minHeight: '100vh', height: 'auto', overflow: 'visible' }}>
+        <Helmet>
+          <title>Privacy Policy | Humanoid Atlas</title>
+          <meta name="description" content="Privacy policy for Humanoid Atlas (humanoids.fyi)." />
+        </Helmet>
+        <button className="back-btn" onClick={() => navigate('/')} style={{ position: 'absolute', top: '1.5rem', left: '1.5rem' }}>
+          <span className="back-arrow">&larr;</span>
+        </button>
+        <main className="main" style={{ maxWidth: 600, margin: '0 auto', padding: '6rem 2rem 8rem' }}>
+          <h1 style={{ fontFamily: 'var(--font-mono)', fontSize: '1.3rem', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '0.6rem', color: 'var(--text-primary)' }}>Privacy Policy</h1>
+          <p style={{ color: 'var(--text-dim)', fontSize: '0.9rem', marginBottom: '3.5rem' }}>Last updated: April 3, 2026</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2.2rem', color: 'var(--text-dim)', fontSize: '0.9rem', lineHeight: 1.7 }}>
+            <div>
+              <h2 style={{ fontFamily: 'var(--font-mono)', fontSize: '1.05rem', color: 'var(--text-primary)', marginBottom: '0.5rem' }}>Overview</h2>
+              <p>Humanoid Atlas (&ldquo;humanoids.fyi&rdquo;) is an open-source information platform for the humanoid robotics industry. We are committed to respecting your privacy and being transparent about what data we collect.</p>
+            </div>
+            <div>
+              <h2 style={{ fontFamily: 'var(--font-mono)', fontSize: '1.05rem', color: 'var(--text-primary)', marginBottom: '0.5rem' }}>Data We Collect</h2>
+              <p><strong>Analytics:</strong> We use Vercel Analytics to collect anonymous, aggregated usage data such as page views, referrers, and device types. This data cannot identify individual users.</p>
+              <p style={{ marginTop: '0.5rem' }}><strong>Authentication:</strong> If you create an account via Clerk, we store your email address and profile information solely for account functionality. We do not sell or share this information with third parties.</p>
+              <p style={{ marginTop: '0.5rem' }}><strong>Payments:</strong> Payment processing is handled entirely by Stripe. We do not store credit card numbers or financial details on our servers.</p>
+            </div>
+            <div>
+              <h2 style={{ fontFamily: 'var(--font-mono)', fontSize: '1.05rem', color: 'var(--text-primary)', marginBottom: '0.5rem' }}>Cookies</h2>
+              <p>We use essential cookies for authentication sessions. We do not use advertising or tracking cookies.</p>
+            </div>
+            <div>
+              <h2 style={{ fontFamily: 'var(--font-mono)', fontSize: '1.05rem', color: 'var(--text-primary)', marginBottom: '0.5rem' }}>Third-Party Services</h2>
+              <p>We use the following third-party services: Vercel (hosting &amp; analytics), Clerk (authentication), Stripe (payments), and Upstash (data storage). Each operates under their own privacy policies.</p>
+            </div>
+            <div>
+              <h2 style={{ fontFamily: 'var(--font-mono)', fontSize: '1.05rem', color: 'var(--text-primary)', marginBottom: '0.5rem' }}>Data Marketplace</h2>
+              <p>The Atlas Data Brokerage facilitates transactions between data providers and buyers. Data shared through listings is governed by the terms agreed upon between parties. Humanoid Atlas acts as an intermediary and does not claim ownership of user-submitted data.</p>
+            </div>
+            <div>
+              <h2 style={{ fontFamily: 'var(--font-mono)', fontSize: '1.05rem', color: 'var(--text-primary)', marginBottom: '0.5rem' }}>Contact</h2>
+              <p>For privacy-related questions, reach out to <a href="https://x.com/JulianSaks" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-primary)' }}>@JulianSaks</a> or open an issue on our <a href="https://github.com/kingjulio8238/humanoid-atlas" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-primary)' }}>GitHub repository</a>.</p>
+            </div>
+          </div>
+        </main>
+        <footer className="footer" style={{ marginTop: 'auto' }}>
+          <span><a href="https://github.com/kingjulio8238/humanoid-atlas" target="_blank" rel="noopener noreferrer">Contribute</a> · <a href="/changelog" onClick={(e) => { e.preventDefault(); window.history.pushState({}, '', '/changelog'); window.dispatchEvent(new PopStateEvent('popstate')); }}>Changelog</a> · <a href="/sources" onClick={(e) => { e.preventDefault(); window.history.pushState({}, '', '/sources'); window.dispatchEvent(new PopStateEvent('popstate')); }}>Data Sources</a> · Created by <a href="https://x.com/JulianSaks" target="_blank" rel="noopener noreferrer">Julian Saks</a>{viewCount !== null && <span className="view-count"> · {viewCount.toLocaleString()} visits</span>}</span>
+        </footer>
+      </div>
+    );
+  }
+
   // ==================== SOURCES VIEW ====================
   if (location.pathname === '/sources') {
     return (
