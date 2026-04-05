@@ -4719,6 +4719,12 @@ input[type="number"] { -moz-appearance: textfield; }
 .db-modality-purchase-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--border); }
 .db-modality-purchase-row:last-of-type { border-bottom: none; }
 
+/* ─── CUSTOM TAGS ───────────────────────────────────── */
+.db-custom-tag-input { font-family: 'Share Tech Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: 1px; padding: 4px 10px; border: 1px dashed var(--border); border-radius: 20px; background: transparent; color: var(--text); width: 120px; outline: none; }
+.db-custom-tag-input:focus { border-color: var(--text-dim); }
+.db-custom-tag-input::placeholder { color: var(--text-dim); }
+.db-filter-pill--custom { border-style: dashed; }
+
 /* ─── COLLECTION PROGRAMS ────────────────────────────── */
 .db-program-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
 .db-program-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px; padding: 20px; transition: all 0.15s; display: flex; flex-direction: column; }

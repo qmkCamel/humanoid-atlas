@@ -80,33 +80,42 @@ interface CollectionProgram {
 // ═══════════════════════════════════════════════════════════
 
 const MODALITIES = [
-  'rgb', 'rgbd', 'depth', 'lidar', 'point_cloud', 'motion_capture',
-  'tactile', 'force_torque', 'proprioception', 'imu', 'audio',
-  'language_annotations', 'thermal', 'other',
+  'rgb', 'rgbd', 'depth', 'motion_capture',
+  'tactile', 'force_torque', 'proprioception', 'joint_trajectory', 'imu', 'audio',
+  'language_annotations', 'other',
+  // Hidden: 'lidar', 'point_cloud', 'thermal'
 ];
 
 const ENVIRONMENTS = [
-  'domestic', 'kitchen', 'office', 'warehouse', 'retail', 'laboratory',
-  'industrial', 'healthcare', 'restaurant', 'hotel', 'eldercare',
-  'construction', 'logistics', 'outdoor', 'agriculture',
-  'road', 'simulation', 'multi_environment', 'other',
+  'kitchen', 'bathroom', 'living_room', 'bedroom', 'garage',
+  'office', 'warehouse', 'fulfillment_center', 'retail', 'laboratory',
+  'industrial', 'assembly_line', 'data_center', 'healthcare', 'restaurant',
+  'hotel', 'eldercare', 'construction', 'logistics', 'maritime',
+  'outdoor', 'agriculture', 'road', 'simulation', 'other',
+  // Hidden: 'domestic', 'multi_environment'
 ];
 
 const COLLECTION_METHODS = [
-  'teleoperation', 'kinesthetic_teaching', 'autonomous_policy',
-  'human_demonstration', 'play_data', 'crowdsourced', 'scripted',
-  'simulation_generated', 'other',
+  'teleoperation', 'vr_teleoperation', 'leader_follower',
+  'human_demonstration', 'motion_capture_retargeting', 'exoskeleton_capture',
+  'shared_autonomy', 'autonomous_policy', 'fleet_deployed',
+  'video_extraction', 'simulation_generated', 'other',
+  // Hidden: 'kinesthetic_teaching', 'play_data', 'crowdsourced', 'scripted'
 ];
 
 const EMBODIMENT_TYPES = [
-  'humanoid', 'quadruped', 'dual_arm', 'single_arm', 'mobile_manipulator',
-  'hand_dexterous', 'drone', 'autonomous_vehicle', 'human', 'other',
+  'humanoid', 'quadruped', 'legged_biped', 'dual_arm', 'bimanual_fixed', 'single_arm',
+  'parallel_jaw_gripper', 'hand_dexterous', 'mobile_manipulator', 'wheeled_robot',
+  'human', 'other',
+  // Hidden: 'drone', 'autonomous_vehicle'
 ];
 
 const TASK_TYPES = [
-  'pick_and_place', 'pushing', 'stacking', 'pouring', 'folding', 'assembly',
-  'cleaning', 'cooking', 'navigation', 'locomotion', 'articulated_object',
-  'tool_use', 'bin_packing', 'inspection', 'general_manipulation', 'other',
+  'pick_and_place', 'grasping', 'pushing', 'stacking', 'pouring', 'insertion',
+  'sorting', 'wiping', 'folding', 'assembly',
+  'cleaning', 'cooking', 'navigation', 'locomotion', 'whole_body_motion',
+  'tool_use',
+  // Hidden: 'articulated_object', 'bin_packing', 'inspection', 'general_manipulation', 'other'
 ];
 
 function formatTags(value: string | string[]): string {
@@ -744,7 +753,7 @@ function BuyData() {
               <select className="db-form-select" style={{ width: 140, fontSize: 10, paddingRight: 28, appearance: 'none' }} value={filters.collection_method}
                 onChange={e => setFilters(f => ({ ...f, collection_method: e.target.value }))}>
                 <option value="">Collection</option>
-                {(facets.collection_methods ?? COLLECTION_METHODS).map(m => <option key={m} value={m}>{m.replace(/_/g, ' ')}</option>)}
+                {(facets.collection_methods ?? []).map(m => <option key={m} value={m}>{m.replace(/_/g, ' ')}</option>)}
               </select>
               <svg style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1L5 5L9 1" stroke="#8a8580" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
             </div>
@@ -752,7 +761,7 @@ function BuyData() {
               <select className="db-form-select" style={{ width: 140, fontSize: 10, paddingRight: 28, appearance: 'none' }} value={filters.embodiment_type}
                 onChange={e => setFilters(f => ({ ...f, embodiment_type: e.target.value }))}>
                 <option value="">Embodiment</option>
-                {(facets.embodiment_types ?? EMBODIMENT_TYPES).map(e => <option key={e} value={e}>{e.replace(/_/g, ' ')}</option>)}
+                {(facets.embodiment_types ?? []).map(e => <option key={e} value={e}>{e.replace(/_/g, ' ')}</option>)}
               </select>
               <svg style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1L5 5L9 1" stroke="#8a8580" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
             </div>
@@ -760,7 +769,7 @@ function BuyData() {
               <select className="db-form-select" style={{ width: 140, fontSize: 10, paddingRight: 28, appearance: 'none' }} value={filters.task_type}
                 onChange={e => setFilters(f => ({ ...f, task_type: e.target.value }))}>
                 <option value="">Task Type</option>
-                {(facets.task_types ?? TASK_TYPES).map(t => <option key={t} value={t}>{t.replace(/_/g, ' ')}</option>)}
+                {(facets.task_types ?? []).map(t => <option key={t} value={t}>{t.replace(/_/g, ' ')}</option>)}
               </select>
               <svg style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1L5 5L9 1" stroke="#8a8580" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
             </div>
@@ -1946,12 +1955,24 @@ function ProviderDashboard() {
 }
 
 
-function TagSection({ label, required, selected, options, onToggle, defaultOpen }: {
+function TagSection({ label, required, selected, options, onToggle, defaultOpen, allowCustom }: {
   label: string; required?: boolean; selected: string[]; options: string[];
-  onToggle: (value: string) => void; defaultOpen?: boolean;
+  onToggle: (value: string) => void; defaultOpen?: boolean; allowCustom?: boolean;
 }) {
   const [open, setOpen] = useState(defaultOpen ?? false);
+  const [customInput, setCustomInput] = useState('');
   const count = selected.length;
+
+  const handleCustomAdd = () => {
+    const normalized = customInput.trim().toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
+    if (normalized && !selected.includes(normalized) && !options.includes(normalized)) {
+      onToggle(normalized);
+    }
+    setCustomInput('');
+  };
+
+  // Custom tags are selected values not in the predefined options
+  const customTags = selected.filter(v => !options.includes(v));
 
   return (
     <div className="db-tag-section">
@@ -1970,6 +1991,19 @@ function TagSection({ label, required, selected, options, onToggle, defaultOpen 
               {v.replace(/_/g, ' ')}
             </button>
           ))}
+          {customTags.map(v => (
+            <button key={v} type="button" className="db-filter-pill db-filter-pill--active db-filter-pill--custom"
+              style={{ fontSize: 9 }} onClick={() => onToggle(v)}>
+              {v.replace(/_/g, ' ')} ×
+            </button>
+          ))}
+          {allowCustom && (
+            <input className="db-custom-tag-input" type="text" placeholder="Add custom..."
+              value={customInput}
+              onChange={e => setCustomInput(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleCustomAdd(); } }}
+              onBlur={() => { if (customInput.trim()) handleCustomAdd(); }} />
+          )}
         </div>
       )}
     </div>
@@ -2252,7 +2286,7 @@ function ListingDetail({ listing, onBack, onListingUpdated }: {
               onToggle={v => toggleEditTag('embodiment_types', v)} />
 
             <TagSection label="Task Types" selected={editForm.task_types} options={TASK_TYPES}
-              onToggle={v => toggleEditTag('task_types', v)} />
+              onToggle={v => toggleEditTag('task_types', v)} allowCustom />
 
             <div className="db-form-row" style={{ marginTop: 12 }}>
               {editForm.modalities.length <= 1 && (
@@ -2511,7 +2545,7 @@ function CreateListingForm() {
         onToggle={v => toggleTag('embodiment_types', v)} />
 
       <TagSection label="Task Types" required selected={form.task_types} options={TASK_TYPES}
-        onToggle={v => toggleTag('task_types', v)} />
+        onToggle={v => toggleTag('task_types', v)} allowCustom />
 
       <div className="db-form-field">
         <label className="db-meta-label">Description</label>
@@ -4737,7 +4771,7 @@ function CustomRequestModal({ onClose, sourceListing }: { onClose: () => void; s
                 <TagSection label="Embodiment / Platform" selected={form.embodiment_types} options={EMBODIMENT_TYPES}
                   onToggle={v => toggleTag('embodiment_types', v)} />
                 <TagSection label="Task Types" selected={form.task_types} options={TASK_TYPES}
-                  onToggle={v => toggleTag('task_types', v)} />
+                  onToggle={v => toggleTag('task_types', v)} allowCustom />
               </>
             )}
             <div className="db-form-field">

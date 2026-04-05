@@ -13,7 +13,7 @@ export interface Sample {
 
 export type SampleCategory = 'video' | 'image' | 'audio' | 'json' | 'rerun' | 'timeseries' | 'tactile' | 'download';
 
-export const TIME_SERIES_MODALITIES = ['imu', 'force_torque', 'proprioception'];
+export const TIME_SERIES_MODALITIES = ['imu', 'force_torque', 'proprioception', 'joint_trajectory'];
 export const TACTILE_MODALITIES = ['tactile'];
 
 export function formatTags(value: string | string[]): string {
@@ -55,6 +55,7 @@ export const MODALITY_ACCEPT_MAP: Record<string, string> = {
   tactile: 'video/*,image/*,.parquet,.hdf5,.rrd',
   force_torque: '.parquet,.hdf5,.rosbag,.rrd',
   proprioception: '.parquet,.hdf5,.rosbag,.rrd',
+  joint_trajectory: '.parquet,.hdf5,.rosbag,.rrd',
   imu: '.parquet,.hdf5,.rosbag,.rrd',
   audio: 'audio/*',
   language_annotations: '.json,.parquet,application/json',
@@ -74,7 +75,7 @@ export function getAcceptFilter(modalities: string[]): string {
 
 export function getUploadHint(modalities: string[]): string | null {
   const spatial = ['lidar', 'point_cloud', 'motion_capture', 'rgbd', 'depth'];
-  const timeSeries = ['imu', 'force_torque', 'proprioception', 'tactile'];
+  const timeSeries = ['imu', 'force_torque', 'proprioception', 'joint_trajectory', 'tactile'];
   if (modalities.some(m => spatial.includes(m))) return 'For 3D/spatial data, upload .rrd preview files for interactive viewer. Generate with: pip install atlas-preview-generator';
   if (modalities.some(m => timeSeries.includes(m))) return 'Upload .parquet for interactive charts, or .rrd for 3D preview. Generate with: pip install atlas-preview-generator';
   return null;
@@ -94,7 +95,7 @@ export function getPreviewScore(samples: Sample[], modalities: string[]): { scor
   else suggestions.push('Add a video or image sample for visual preview');
 
   const spatial = ['lidar', 'point_cloud', 'motion_capture', 'rgbd', 'depth'];
-  const timeSeries = ['imu', 'force_torque', 'proprioception', 'tactile'];
+  const timeSeries = ['imu', 'force_torque', 'proprioception', 'joint_trajectory', 'tactile'];
   const hasSpatialMod = modalities.some(m => spatial.includes(m));
   const hasTimeSeriesMod = modalities.some(m => timeSeries.includes(m));
 
@@ -124,7 +125,8 @@ const MODALITY_KEYWORDS: Record<string, string[]> = {
   imu: ['imu', 'accel', 'gyro', 'accelerometer', 'gyroscope'],
   force_torque: ['force', 'torque', 'ft_', 'wrench'],
   tactile: ['tactile', 'pressure', 'touch', 'gel', 'taxel'],
-  proprioception: ['proprio', 'joint', 'encoder', 'qpos', 'qvel'],
+  proprioception: ['proprio', 'encoder', 'qpos', 'qvel'],
+  joint_trajectory: ['trajectory', 'joint_traj', 'ee_pose', 'end_effector', 'cartesian', 'action'],
   audio: ['audio', 'mic', 'sound', 'speech'],
   lidar: ['lidar', 'laser', 'scan', 'velodyne'],
   point_cloud: ['pointcloud', 'point_cloud', 'pcd', 'ply'],
@@ -146,7 +148,7 @@ const FORMAT_MODALITY_MAP: Record<string, string[]> = {
   gif: ['rgb'],
   webp: ['rgb'],
   tiff: ['rgb', 'depth', 'thermal'],
-  parquet: ['imu', 'force_torque', 'proprioception', 'tactile', 'language_annotations'],
+  parquet: ['imu', 'force_torque', 'proprioception', 'joint_trajectory', 'tactile', 'language_annotations'],
   hdf5: ['imu', 'force_torque', 'proprioception', 'rgbd', 'depth', 'lidar'],
   h5: ['imu', 'force_torque', 'proprioception', 'rgbd', 'depth', 'lidar'],
   rosbag: ['lidar', 'point_cloud', 'rgbd', 'depth', 'imu', 'force_torque'],
