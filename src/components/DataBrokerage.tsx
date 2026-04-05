@@ -2381,7 +2381,6 @@ function CreateListingForm() {
 
   const handleSubmit = async () => {
     const isMultiModality = form.modalities.length > 1;
-    const hasModalityPrices = isMultiModality && Object.values(form.modality_prices).some(v => parseFloat(v) > 0);
     if (!form.title || !form.description) {
       setError('Title and description are required');
       return;
