@@ -2026,7 +2026,7 @@ function ListingDetail({ listing, onBack, onListingUpdated }: {
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0, marginLeft: 16 }}>
             <span className={`db-status-badge db-status-badge--${displayStatus}`}>{displayStatus.replace(/_/g, ' ')}</span>
             {!isEditing && (
-              <button className="db-regen-btn" style={{ margin: 0 }} onClick={enterEditMode}>Edit</button>
+              <button className="db-status-badge" style={{ cursor: 'pointer', border: '1px solid var(--border)' }} onClick={enterEditMode}>Edit</button>
             )}
             {!isEditing && (reviewStatus === 'pending_review' || reviewStatus === 'pending') && (
               <button className="db-regen-btn" style={{ margin: 0, fontSize: 8 }} onClick={handleWithdraw} disabled={withdrawing}>
@@ -2120,7 +2120,7 @@ function ListingDetail({ listing, onBack, onListingUpdated }: {
               <button className="db-add-cart-btn" style={{ maxWidth: 120 }} onClick={handleSave} disabled={saving}>
                 {saving ? 'Saving...' : 'Save'}
               </button>
-              <button className="db-regen-btn" style={{ margin: 0 }} onClick={() => setIsEditing(false)} disabled={saving}>Cancel</button>
+              <button className="db-add-cart-btn" style={{ maxWidth: 120, background: 'transparent', color: 'var(--text)', border: '1px solid var(--border)' }} onClick={() => setIsEditing(false)} disabled={saving}>Cancel</button>
               {saveMsg && <span style={{ fontSize: 10, fontFamily: "'Share Tech Mono', monospace", color: 'var(--green)' }}>{saveMsg}</span>}
             </div>
           </div>
