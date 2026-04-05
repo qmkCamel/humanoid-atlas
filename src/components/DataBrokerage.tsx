@@ -280,17 +280,58 @@ function SampleGallery({ samples, modalities = [] }: { samples: Sample[]; modali
   if (otherImages.length > 0) groups.push({ label: 'Images', type: 'video-strip' as const, samples: otherImages, stateKey: 'other-img' });
 
   // Group remaining by category with readable labels
-  const catLabels: Record<string, string> = {
-    audio: 'Audio', json: 'Language Annotations',
-    rerun: '3D Visualization', timeseries: 'Sensor Data', tactile: 'Tactile Pressure', download: 'Data Files',
-  };
   const catOrder = ['tactile', 'timeseries', 'download', 'rerun', 'json', 'audio'];
-  // Categories that should use thumb strip (one at a time) instead of stacked
+
+  // Modality keyword map for splitting timeseries by detected modality
+  const modalityKeywords: Record<string, string[]> = {
+    imu: ['imu', 'accel', 'gyro'], force_torque: ['force', 'torque', 'ft_', 'wrench'],
+    proprioception: ['proprio', 'encoder', 'qpos', 'qvel', 'joints', 'joint_state'],
+    joint_trajectory: ['trajectory', 'ee_pose', 'action', 'cartesian'],
+    motion_capture: ['mocap', 'motion_capture', 'skeleton'],
+    tactile: ['tactile', 'pressure', 'touch', 'taxel'],
+  };
+  const modalityLabels: Record<string, string> = {
+    imu: 'IMU Data', force_torque: 'Force/Torque Data', proprioception: 'Proprioception Data',
+    joint_trajectory: 'Joint Trajectory Data', motion_capture: 'Motion Capture Data', tactile: 'Tactile Pressure',
+  };
+
+  const detectModality = (filename: string): string | null => {
+    const fn = filename.toLowerCase();
+    for (const [mod, kws] of Object.entries(modalityKeywords)) {
+      if (kws.some(kw => fn.includes(kw))) return mod;
+    }
+    return null;
+  };
+
   for (const cat of catOrder) {
     const items = others.filter(o => o.category === cat);
-    if (items.length > 0) {
+    if (items.length === 0) continue;
+
+    // For timeseries with multi-modality listings, split by detected modality
+    if (cat === 'timeseries' && modalities.length > 1) {
+      const byMod: Record<string, Sample[]> = {};
+      const unmatched: Sample[] = [];
+      for (const o of items) {
+        const detected = detectModality(o.sample.filename);
+        if (detected) {
+          if (!byMod[detected]) byMod[detected] = [];
+          byMod[detected].push(o.sample);
+        } else {
+          unmatched.push(o.sample);
+        }
+      }
+      for (const [mod, modSamples] of Object.entries(byMod)) {
+        const label = modalityLabels[mod] ?? `${mod.replace(/_/g, ' ')} Data`;
+        const type = modSamples.length > 1 ? 'video-strip' as const : 'inline' as const;
+        groups.push({ label, type, samples: modSamples, stateKey: `ts-${mod}` });
+      }
+      if (unmatched.length > 0) {
+        const type = unmatched.length > 1 ? 'video-strip' as const : 'inline' as const;
+        groups.push({ label: 'Sensor Data', type, samples: unmatched, stateKey: 'ts-other' });
+      }
+    } else {
       const ext = items[0].sample.filename.split('.').pop()?.toUpperCase() ?? '';
-      const label = cat === 'download' ? `Data Files (${ext})` : cat === 'json' ? `Language Annotations (JSON)` : cat === 'timeseries' ? `Sensor Data (PARQUET)` : cat === 'tactile' ? `Tactile Pressure` : catLabels[cat] ?? ext;
+      const label = cat === 'download' ? `Data Files (${ext})` : cat === 'json' ? `Language Annotations (JSON)` : cat === 'timeseries' ? `Sensor Data (PARQUET)` : cat === 'tactile' ? `Tactile Pressure` : cat === 'audio' ? 'Audio' : cat === 'rerun' ? '3D Visualization' : ext;
       const type = items.length > 1 ? 'video-strip' as const : 'inline' as const;
       groups.push({ label, type, samples: items.map(o => o.sample), stateKey: cat });
     }
@@ -375,7 +416,11 @@ function PurchaseSection({ listing, cart, onCartOpen }: { listing: Listing; cart
   const [hoursStr, setHoursStr] = useState(String(listing.minimum_hours));
   const [minNotice, setMinNotice] = useState(false);
   const [advanced, setAdvanced] = useState(false);
-  const allModalities = Array.isArray(listing.modality) ? listing.modality.map(String) : [String(listing.modality)];
+  const listingTags = Array.isArray(listing.tags) ? listing.tags as string[] : [];
+  const allModalities = [
+    ...(Array.isArray(listing.modality) ? listing.modality.map(String) : [String(listing.modality)]),
+    ...listingTags.filter(t => t.startsWith('modality:')).map(t => t.replace('modality:', '')),
+  ];
   const hasModalityPrices = listing.modality_prices && Object.keys(listing.modality_prices).length > 1;
 
   // Advanced mode state: per-modality selection and hours
@@ -500,7 +545,7 @@ function PurchaseSection({ listing, cart, onCartOpen }: { listing: Listing; cart
               )}
             </div>
           ))}
-          <div style={{ borderTop: '1px solid var(--border)', paddingTop: 8, marginTop: 8, display: 'flex', justifyContent: 'space-between' }}>
+          <div style={{ borderTop: '1px solid var(--border)', paddingTop: 10, marginTop: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span className="db-meta-label" style={{ margin: 0 }}>Total</span>
             <span className="db-purchase-amount">${advancedSubtotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
           </div>
@@ -511,7 +556,10 @@ function PurchaseSection({ listing, cart, onCartOpen }: { listing: Listing; cart
 
       {hasModalityPrices && (
         <button className="db-advanced-toggle" onClick={() => setAdvanced(!advanced)}>
-          {advanced ? 'Bundle Purchase' : 'Advanced Purchasing'} {advanced ? '▲' : '▼'}
+          {advanced ? 'Bundle Purchase' : 'Advanced Purchasing'}
+          <svg width="10" height="6" viewBox="0 0 10 6" fill="none" style={{ marginLeft: 6, transform: advanced ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }}>
+            <path d="M1 1L5 5L9 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
         </button>
       )}
 
@@ -646,9 +694,14 @@ function BuyData() {
           </div>
         )}
 
-        {l.samples && l.samples.length > 0 && (
-          <SampleGallery samples={l.samples} modalities={Array.isArray(l.modality) ? l.modality : [l.modality]} />
-        )}
+        {l.samples && l.samples.length > 0 && (() => {
+          const tags = Array.isArray(l.tags) ? l.tags as string[] : [];
+          const allMods = [
+            ...(Array.isArray(l.modality) ? l.modality : [l.modality]),
+            ...tags.filter(t => t.startsWith('modality:')).map(t => t.replace('modality:', '')),
+          ];
+          return <SampleGallery samples={l.samples} modalities={allMods} />;
+        })()}
 
 
         <PurchaseSection listing={l} cart={cart} onCartOpen={() => {}} />
@@ -1542,7 +1595,8 @@ const MODALITY_KEYWORDS: Record<string, string[]> = {
   imu: ['imu', 'accel', 'gyro', 'accelerometer', 'gyroscope'],
   force_torque: ['force', 'torque', 'ft_', 'wrench'],
   tactile: ['tactile', 'pressure', 'touch', 'gel', 'taxel'],
-  proprioception: ['proprio', 'joint', 'encoder', 'qpos', 'qvel'],
+  proprioception: ['proprio', 'encoder', 'qpos', 'qvel'],
+  joint_trajectory: ['trajectory', 'joint_traj', 'ee_pose', 'end_effector', 'cartesian', 'action'],
   audio: ['audio', 'mic', 'sound', 'speech'],
   lidar: ['lidar', 'laser', 'scan', 'velodyne'],
   point_cloud: ['pointcloud', 'point_cloud', 'pcd', 'ply'],
@@ -1554,13 +1608,13 @@ const MODALITY_KEYWORDS: Record<string, string[]> = {
 const FORMAT_MODALITY_MAP: Record<string, string[]> = {
   mp4: ['rgb', 'thermal', 'rgbd', 'tactile'], mov: ['rgb', 'thermal', 'rgbd'], webm: ['rgb', 'thermal'], avi: ['rgb', 'thermal'],
   png: ['rgb', 'depth', 'thermal'], jpg: ['rgb', 'depth', 'thermal'], jpeg: ['rgb', 'depth', 'thermal'], tiff: ['rgb', 'depth', 'thermal'],
-  parquet: ['imu', 'force_torque', 'proprioception', 'tactile', 'language_annotations'],
+  parquet: ['imu', 'force_torque', 'proprioception', 'joint_trajectory', 'tactile', 'language_annotations'],
   hdf5: ['imu', 'force_torque', 'proprioception', 'rgbd', 'depth', 'lidar'], h5: ['imu', 'force_torque', 'proprioception', 'rgbd', 'depth', 'lidar'],
   rosbag: ['lidar', 'point_cloud', 'rgbd', 'depth', 'imu', 'force_torque'], bag: ['lidar', 'point_cloud', 'rgbd', 'depth'],
   mcap: ['lidar', 'point_cloud', 'rgbd', 'depth', 'imu'], rrd: ['lidar', 'point_cloud', 'motion_capture', 'rgbd', 'depth'],
   json: ['language_annotations'], jsonl: ['language_annotations'],
   wav: ['audio'], mp3: ['audio'], ogg: ['audio'], flac: ['audio'],
-  csv: ['imu', 'force_torque', 'proprioception'],
+  csv: ['imu', 'force_torque', 'proprioception', 'joint_trajectory'],
 };
 
 function mapSampleToModality(filename: string, listingModalities: string[]): string | null {
@@ -2018,7 +2072,7 @@ function ListingDetail({ listing, onBack, onListingUpdated }: {
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({
     title: '', description: '', price_per_hour: '', minimum_hours: '', total_hours: '',
-    format: '', license_terms: '', modalities: [] as string[], environments: [] as string[],
+    formats: [] as string[], license_terms: '', modalities: [] as string[], environments: [] as string[],
     collection_methods: [] as string[], embodiment_types: [] as string[], task_types: [] as string[],
     license_type: 'commercial',
     modality_prices: {} as Record<string, string>,
@@ -2063,7 +2117,7 @@ function ListingDetail({ listing, onBack, onListingUpdated }: {
       price_per_hour: String(listing.price_per_hour ?? ''),
       minimum_hours: String(listing.minimum_hours ?? '1'),
       total_hours: listing.total_hours ? String(listing.total_hours) : '',
-      format: String(listing.format ?? 'parquet'),
+      formats: listing.format ? String(listing.format).split(',').map(s => s.trim()).filter(Boolean) : [],
       license_terms: String(listing.license_terms ?? ''),
       license_type: String(listing.license_type ?? 'commercial'),
       modalities: [...allModalities],
@@ -2122,7 +2176,7 @@ function ListingDetail({ listing, onBack, onListingUpdated }: {
         modality_prices: modalityPricesObj ?? null,
         minimum_hours: parseFloat(editForm.minimum_hours) || 1,
         total_hours: editForm.total_hours ? parseFloat(editForm.total_hours.replace(/,/g, '')) : null,
-        format: editForm.format || null,
+        format: editForm.formats.length > 0 ? editForm.formats.join(', ') : null,
         license_terms: editForm.license_terms || null,
       };
       // Modality + license_type only if unlocked
@@ -2310,12 +2364,8 @@ function ListingDetail({ listing, onBack, onListingUpdated }: {
               </div>
             </div>
 
-            <div className="db-form-field" style={{ marginTop: 12 }}>
-              <label className="db-meta-label">Format</label>
-              <select className="db-form-select" value={editForm.format} onChange={e => updateField('format', e.target.value)}>
-                {formats.map(f => <option key={f} value={f}>{f.toUpperCase()}</option>)}
-              </select>
-            </div>
+            <TagSection label="Formats" required selected={editForm.formats} options={formats}
+              onToggle={v => setEditForm(f => ({ ...f, formats: f.formats.includes(v) ? f.formats.filter(x => x !== v) : [...f.formats, v] }))} />
 
             {isLicenseTypeLocked ? (
               <div className="db-form-field" style={{ marginTop: 12 }}>
@@ -2393,7 +2443,7 @@ function CreateListingForm() {
   const [form, setForm] = useState({
     title: '', description: '', modalities: [] as string[], environments: [] as string[],
     collection_methods: [] as string[], embodiment_types: [] as string[], task_types: [] as string[],
-    price_per_hour: '', minimum_hours: '1', total_hours: '', format: 'parquet',
+    price_per_hour: '', minimum_hours: '1', total_hours: '', formats: [] as string[],
     license_type: 'commercial', license_terms: '',
     modality_prices: {} as Record<string, string>,
   });
@@ -2435,6 +2485,10 @@ function CreateListingForm() {
       setError('Select at least one environment');
       return;
     }
+    if (form.formats.length === 0) {
+      setError('Select at least one format');
+      return;
+    }
     setSubmitting(true);
     setError('');
     try {
@@ -2456,7 +2510,7 @@ function CreateListingForm() {
         modality_prices: modalityPricesObj,
         minimum_hours: parseFloat(form.minimum_hours) || 1,
         total_hours: form.total_hours ? parseFloat(form.total_hours.replace(/,/g, '')) : undefined,
-        format: form.format || undefined,
+        format: form.formats.length > 0 ? form.formats.join(', ') : undefined,
         license_type: form.license_type,
         license_terms: form.license_terms || undefined,
         tags: [
@@ -2467,7 +2521,7 @@ function CreateListingForm() {
           ...form.task_types.map(v => `task:${v}`),
         ].filter(Boolean),
       });
-      setForm({ title: '', description: '', modalities: [], environments: [], collection_methods: [], embodiment_types: [], task_types: [], price_per_hour: '', minimum_hours: '1', total_hours: '', format: 'parquet', license_type: 'commercial', license_terms: '', modality_prices: {} });
+      setForm({ title: '', description: '', modalities: [], environments: [], collection_methods: [], embodiment_types: [], task_types: [], price_per_hour: '', minimum_hours: '1', total_hours: '', formats: [], license_type: 'commercial', license_terms: '', modality_prices: {} });
       // Navigate to listing detail for sample upload
       const newId = res?.data?.id;
       if (newId) {
@@ -2574,12 +2628,8 @@ function CreateListingForm() {
         </div>
       </div>
 
-      <div className="db-form-field">
-        <label className="db-meta-label">Format</label>
-        <select className="db-form-select" value={form.format} onChange={e => update('format', e.target.value)}>
-          {formats.map(f => <option key={f} value={f}>{f.toUpperCase()}</option>)}
-        </select>
-      </div>
+      <TagSection label="Formats" required selected={form.formats} options={formats}
+        onToggle={v => setForm(f => ({ ...f, formats: f.formats.includes(v) ? f.formats.filter(x => x !== v) : [...f.formats, v] }))} />
 
       <p style={{ fontSize: 10, color: 'var(--text-dim)', marginTop: 12, lineHeight: 1.5 }}>
         After saving, you'll be taken to upload sample files. At least 5 samples are required before submitting for review.
