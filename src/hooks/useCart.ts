@@ -1,5 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 
+export interface ModalityItem {
+  modality: string;
+  hours: number;
+  price_per_hour: number;
+}
+
 export interface CartItem {
   id?: string;
   listing_id: string;
@@ -9,6 +15,7 @@ export interface CartItem {
   modality: string | string[];
   price_per_hour: number;
   hours: number;
+  modality_items?: ModalityItem[];
   added_at: number;
 }
 
@@ -38,7 +45,9 @@ export function useCart() {
       const existing = prev.findIndex(i => i.listing_id === item.listing_id);
       if (existing >= 0) {
         const updated = [...prev];
-        updated[existing] = { ...updated[existing], hours: item.hours, added_at: Date.now() };
+        const entry = { ...updated[existing], hours: item.hours, added_at: Date.now() };
+        if (item.modality_items) { entry.modality_items = item.modality_items; } else { delete entry.modality_items; }
+        updated[existing] = entry;
         return updated;
       }
       return [...prev, { ...item, added_at: Date.now() }];
@@ -62,16 +71,19 @@ export function useCart() {
   }, [items]);
 
   const totalItems = items.length;
-  const subtotalCents = items.reduce((s, i) => s + Math.round(i.price_per_hour * i.hours * 100), 0);
+  const itemSubtotal = (i: CartItem) => i.modality_items
+    ? i.modality_items.reduce((s, m) => s + Math.round(m.price_per_hour * m.hours * 100), 0)
+    : Math.round(i.price_per_hour * i.hours * 100);
+
+  const subtotalCents = items.reduce((s, i) => s + itemSubtotal(i), 0);
 
   // Group by provider
   const byProvider = items.reduce((acc, item) => {
     if (!acc[item.provider_id]) {
       acc[item.provider_id] = { provider_name: item.provider_name, items: [], subtotal_cents: 0 };
     }
-    const sub = Math.round(item.price_per_hour * item.hours * 100);
     acc[item.provider_id].items.push(item);
-    acc[item.provider_id].subtotal_cents += sub;
+    acc[item.provider_id].subtotal_cents += itemSubtotal(item);
     return acc;
   }, {} as Record<string, { provider_name: string; items: CartItem[]; subtotal_cents: number }>);
 

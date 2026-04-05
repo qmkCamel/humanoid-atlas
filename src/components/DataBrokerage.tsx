@@ -60,7 +60,7 @@ interface Listing {
   id: string; title: string; slug: string; description: string; modality: string | string[];
   environment: string | string[]; collection_method?: string | string[]; embodiment_type?: string | string[];
   task_type?: string | string[]; use_cases: string[]; tags: string[]; total_hours: number | null;
-  format: string | null; resolution: string | null; price_per_hour: number; currency: string;
+  format: string | null; resolution: string | null; price_per_hour: number; modality_prices?: Record<string, number> | null; currency: string;
   minimum_hours: number; license_type: string; license_terms: string | null; featured: boolean;
   created_at: string; thumbnail_url?: string | null;
   review_status?: string; has_purchases?: boolean; is_active?: boolean;
@@ -365,39 +365,150 @@ function SampleList({ samples, modalities = [], onRemove }: { samples: Sample[];
 function PurchaseSection({ listing, cart, onCartOpen }: { listing: Listing; cart: ReturnType<typeof useCart>; onCartOpen: () => void }) {
   const [hoursStr, setHoursStr] = useState(String(listing.minimum_hours));
   const [minNotice, setMinNotice] = useState(false);
+  const [advanced, setAdvanced] = useState(false);
+  const allModalities = Array.isArray(listing.modality) ? listing.modality.map(String) : [String(listing.modality)];
+  const hasModalityPrices = listing.modality_prices && Object.keys(listing.modality_prices).length > 1;
+
+  // Advanced mode state: per-modality selection and hours
+  const [selectedMods, setSelectedMods] = useState<Record<string, boolean>>(() =>
+    Object.fromEntries(allModalities.map(m => [m, true]))
+  );
+  const [modHours, setModHours] = useState<Record<string, string>>(() =>
+    Object.fromEntries(allModalities.map(m => [m, String(listing.minimum_hours)]))
+  );
+  const [applyAll, setApplyAll] = useState(true);
+
   const hours = parseInt(hoursStr) || 0;
-  const subtotal = hours * listing.price_per_hour;
+  const bundleSubtotal = hours * listing.price_per_hour;
   const prov = listing.providers;
   const inCart = cart.isInCart(listing.id);
 
+  // Advanced subtotal calculation
+  const advancedSubtotal = hasModalityPrices
+    ? allModalities.reduce((s, m) => {
+        if (!selectedMods[m]) return s;
+        const h = parseInt(modHours[m]) || 0;
+        const p = listing.modality_prices![m] ?? 0;
+        return s + h * p;
+      }, 0)
+    : 0;
+
+  const handleAddToCart = () => {
+    if (advanced && hasModalityPrices) {
+      const selected = allModalities.filter(m => selectedMods[m]);
+      if (selected.length === 0) { setMinNotice(true); setTimeout(() => setMinNotice(false), 3000); return; }
+      const modalityItems = selected.map(m => ({
+        modality: m,
+        hours: parseInt(modHours[m]) || 0,
+        price_per_hour: listing.modality_prices![m] ?? 0,
+      }));
+      const totalHours = modalityItems.reduce((s, m) => s + m.hours, 0);
+      if (totalHours < listing.minimum_hours) {
+        setMinNotice(true); setTimeout(() => setMinNotice(false), 3000); return;
+      }
+      setMinNotice(false);
+      cart.addItem({
+        listing_id: listing.id, title: listing.title, provider_name: prov?.name ?? '', provider_id: prov?.id ?? '',
+        modality: listing.modality, price_per_hour: listing.price_per_hour, hours: totalHours,
+        modality_items: modalityItems,
+      });
+      onCartOpen();
+    } else {
+      if (hours < listing.minimum_hours) {
+        setHoursStr(String(listing.minimum_hours));
+        setMinNotice(true); setTimeout(() => setMinNotice(false), 3000); return;
+      }
+      setMinNotice(false);
+      cart.addItem({
+        listing_id: listing.id, title: listing.title, provider_name: prov?.name ?? '', provider_id: prov?.id ?? '',
+        modality: listing.modality, price_per_hour: listing.price_per_hour, hours,
+      });
+      onCartOpen();
+    }
+  };
+
   return (
     <div className="db-purchase-section">
-      <div className="db-purchase-row">
-        <div className="db-purchase-input">
-          <div className="db-meta-label">Hours</div>
-          <input type="text" inputMode="numeric" className="db-purchase-hours" value={hoursStr}
-            onChange={e => { setHoursStr(e.target.value.replace(/[^0-9]/g, '')); setMinNotice(false); }} />
+      {(!advanced || !hasModalityPrices) && (
+        <div className="db-purchase-row">
+          <div className="db-purchase-input">
+            <div className="db-meta-label">Hours</div>
+            <input type="text" inputMode="numeric" className="db-purchase-hours" value={hoursStr}
+              onChange={e => {
+                const v = e.target.value.replace(/[^0-9]/g, '');
+                setHoursStr(v);
+                setMinNotice(false);
+                if (applyAll) setModHours(Object.fromEntries(allModalities.map(m => [m, v])));
+              }} />
+          </div>
+          <div className="db-purchase-total">
+            <div className="db-meta-label">Subtotal</div>
+            <div className="db-purchase-amount">${bundleSubtotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
+          </div>
         </div>
-        <div className="db-purchase-total">
-          <div className="db-meta-label">Subtotal</div>
-          <div className="db-purchase-amount">${subtotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
+      )}
+
+      {advanced && hasModalityPrices && (
+        <div className="db-advanced-purchase">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+            <label className="db-meta-label" style={{ margin: 0 }}>Select modalities</label>
+            <label style={{ fontSize: 9, fontFamily: "'Share Tech Mono', monospace", color: 'var(--text-dim)', display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer' }}>
+              <input type="checkbox" checked={applyAll} onChange={e => {
+                setApplyAll(e.target.checked);
+                if (e.target.checked) setModHours(Object.fromEntries(allModalities.map(m => [m, hoursStr])));
+              }} />
+              Same hours for all
+            </label>
+          </div>
+          {allModalities.map(m => (
+            <div key={m} className="db-modality-purchase-row">
+              <label style={{ display: 'flex', alignItems: 'center', gap: 6, flex: 1, cursor: 'pointer' }}>
+                <input type="checkbox" checked={selectedMods[m] ?? false}
+                  onChange={e => setSelectedMods(p => ({ ...p, [m]: e.target.checked }))} />
+                <span className="db-badge" style={{ margin: 0 }}>{m.replace(/_/g, ' ')}</span>
+                <span style={{ fontFamily: "'Share Tech Mono', monospace", fontSize: 10, color: 'var(--text-dim)' }}>
+                  ${listing.modality_prices![m]}/hr
+                </span>
+              </label>
+              {selectedMods[m] && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <input type="text" inputMode="numeric" className="db-purchase-hours" style={{ width: 60 }}
+                    value={modHours[m] ?? ''}
+                    onChange={e => {
+                      const v = e.target.value.replace(/[^0-9]/g, '');
+                      if (applyAll) {
+                        setModHours(Object.fromEntries(allModalities.map(mm => [mm, v])));
+                        setHoursStr(v);
+                      } else {
+                        setModHours(p => ({ ...p, [m]: v }));
+                      }
+                    }} />
+                  <span style={{ fontFamily: "'Share Tech Mono', monospace", fontSize: 10, color: 'var(--text-dim)' }}>hrs</span>
+                  <span style={{ fontFamily: "'Share Tech Mono', monospace", fontSize: 10, minWidth: 60, textAlign: 'right' }}>
+                    ${((parseInt(modHours[m]) || 0) * (listing.modality_prices![m] ?? 0)).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                  </span>
+                </div>
+              )}
+            </div>
+          ))}
+          <div style={{ borderTop: '1px solid var(--border)', paddingTop: 8, marginTop: 8, display: 'flex', justifyContent: 'space-between' }}>
+            <span className="db-meta-label" style={{ margin: 0 }}>Total</span>
+            <span className="db-purchase-amount">${advancedSubtotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+          </div>
         </div>
-      </div>
+      )}
+
       {minNotice && <div className="db-min-notice">Minimum {listing.minimum_hours} hrs required</div>}
-      <button className={`db-add-cart-btn${inCart ? ' db-add-cart-btn--in-cart' : ''}`} onClick={() => {
-        if (hours < listing.minimum_hours) {
-          setHoursStr(String(listing.minimum_hours));
-          setMinNotice(true);
-          setTimeout(() => setMinNotice(false), 3000);
-          return;
-        }
-        setMinNotice(false);
-        cart.addItem({
-          listing_id: listing.id, title: listing.title, provider_name: prov?.name ?? '', provider_id: prov?.id ?? '',
-          modality: listing.modality, price_per_hour: listing.price_per_hour, hours,
-        });
-        onCartOpen();
-      }}>{inCart ? 'IN CART - UPDATE' : 'ADD TO CART'}</button>
+
+      {hasModalityPrices && (
+        <button className="db-advanced-toggle" onClick={() => setAdvanced(!advanced)}>
+          {advanced ? 'Bundle Purchase' : 'Advanced Purchasing'} {advanced ? '▲' : '▼'}
+        </button>
+      )}
+
+      <button className={`db-add-cart-btn${inCart ? ' db-add-cart-btn--in-cart' : ''}`} onClick={handleAddToCart}>
+        {inCart ? 'IN CART - UPDATE' : 'ADD TO CART'}
+      </button>
     </div>
   );
 }
@@ -511,12 +622,20 @@ function BuyData() {
               {tags.filter(t => t.startsWith('embodiment:')).map(t => <span key={t} className="db-badge">{t.split(':')[1].replace(/_/g, ' ')}</span>)}
               {tags.filter(t => t.startsWith('task:')).map(t => <span key={t} className="db-badge">{t.split(':')[1].replace(/_/g, ' ')}</span>)}
               {l.format && <span className="db-badge">{l.format}</span>}
-              <span className="db-badge">${l.price_per_hour}/hr</span>
+              <span className="db-badge">${l.price_per_hour}/hr{l.modality_prices ? ' (bundle)' : ''}</span>
               {l.total_hours && <span className="db-badge">{l.total_hours.toLocaleString()} hrs</span>}
               <span className="db-badge">min {l.minimum_hours} hrs</span>
             </div>
           );
         })()}
+
+        {l.modality_prices && (
+          <div className="db-modality-prices-display" style={{ marginTop: 8, marginBottom: 8 }}>
+            {Object.entries(l.modality_prices).map(([mod, price]) => (
+              <span key={mod} className="db-badge" style={{ fontSize: 9 }}>{mod.replace(/_/g, ' ')}: ${price}/hr</span>
+            ))}
+          </div>
+        )}
 
         {l.samples && l.samples.length > 0 && (
           <SampleGallery samples={l.samples} modalities={Array.isArray(l.modality) ? l.modality : [l.modality]} />
@@ -830,7 +949,7 @@ function InlineCart({ cart, formatUsd, autoCheckout, onAutoCheckoutDone, onPurch
       const serverCart = await api.get<{ data: { items: Array<{ id: string }> } }>('/cart').catch(() => ({ data: { items: [] } }));
       await Promise.all(serverCart.data.items.map(item => api.delete(`/cart/items/${item.id}`).catch(() => {})));
       const allItems = Object.values(cart.byProvider).flatMap(g => g.items);
-      await Promise.all(allItems.map(item => api.post('/cart/items', { listing_id: item.listing_id, hours: item.hours })));
+      await Promise.all(allItems.map(item => api.post('/cart/items', { listing_id: item.listing_id, hours: item.hours, modality_items: item.modality_items })));
       const res = await api.post<{ data: { payment_intents: PaymentIntentData[] } }>('/checkout/create-payment-intents');
       setPaymentIntents(res.data.payment_intents);
     } catch (err) {
@@ -877,11 +996,25 @@ function InlineCart({ cart, formatUsd, autoCheckout, onAutoCheckoutDone, onPurch
               <div className="db-inline-cart__item-left">
                 <div className="db-inline-cart__item-title">{item.title}</div>
                 <div className="db-inline-cart__item-provider">{group.provider_name}</div>
-                <div className="db-inline-cart__item-detail">{item.hours} hrs x ${item.price_per_hour}/hr</div>
+                {item.modality_items ? (
+                  <div className="db-inline-cart__item-modalities">
+                    {item.modality_items.map(m => (
+                      <div key={m.modality} style={{ fontSize: 9, color: 'var(--text-dim)', fontFamily: "'Share Tech Mono', monospace" }}>
+                        {m.modality.replace(/_/g, ' ')}: {m.hours} hrs x ${m.price_per_hour}/hr
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="db-inline-cart__item-detail">{item.hours} hrs x ${item.price_per_hour}/hr</div>
+                )}
               </div>
               <div className="db-inline-cart__item-right">
                 <div className="db-inline-cart__item-price-row">
-                  <span className="db-inline-cart__item-subtotal">{formatUsd(Math.round(item.price_per_hour * item.hours * 100))}</span>
+                  <span className="db-inline-cart__item-subtotal">{formatUsd(
+                    item.modality_items
+                      ? item.modality_items.reduce((s, m) => s + Math.round(m.price_per_hour * m.hours * 100), 0)
+                      : Math.round(item.price_per_hour * item.hours * 100)
+                  )}</span>
                   <button className="db-inline-cart__remove" onClick={() => cart.removeItem(item.listing_id)}>Remove</button>
                 </div>
               </div>
@@ -1854,6 +1987,7 @@ function ListingDetail({ listing, onBack, onListingUpdated }: {
     format: '', license_terms: '', modalities: [] as string[], environments: [] as string[],
     collection_methods: [] as string[], embodiment_types: [] as string[], task_types: [] as string[],
     license_type: 'commercial',
+    modality_prices: {} as Record<string, string>,
   });
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState('');
@@ -1903,6 +2037,9 @@ function ListingDetail({ listing, onBack, onListingUpdated }: {
       collection_methods: [...collectionTags],
       embodiment_types: [...embodimentTags],
       task_types: [...taskTags],
+      modality_prices: listing.modality_prices
+        ? Object.fromEntries(Object.entries(listing.modality_prices as Record<string, number>).map(([k, v]) => [k, String(v)]))
+        : {},
     });
     setIsEditing(true);
     setSaveError('');
@@ -1910,8 +2047,17 @@ function ListingDetail({ listing, onBack, onListingUpdated }: {
   };
 
   const handleSave = async () => {
-    if (!editForm.title || !editForm.description || !editForm.price_per_hour) {
-      setSaveError('Title, description, and price are required');
+    const isMultiMod = editForm.modalities.length > 1;
+    if (!editForm.title || !editForm.description) {
+      setSaveError('Title and description are required');
+      return;
+    }
+    if (!isMultiMod && !editForm.price_per_hour) {
+      setSaveError('Price per hour is required');
+      return;
+    }
+    if (isMultiMod && editForm.modalities.some(m => !editForm.modality_prices[m] || parseFloat(editForm.modality_prices[m]) <= 0)) {
+      setSaveError('Set a price for each modality');
       return;
     }
     if (!isModalityLocked && editForm.modalities.length === 0) {
@@ -1926,10 +2072,20 @@ function ListingDetail({ listing, onBack, onListingUpdated }: {
     setSaveError('');
     setSaveMsg('');
     try {
+      // Build modality_prices for multi-modality listings
+      const isMultiModality = editForm.modalities.length > 1;
+      const modalityPricesObj = isMultiModality && Object.keys(editForm.modality_prices).length > 0
+        ? Object.fromEntries(editForm.modalities.map(m => [m, parseFloat(editForm.modality_prices[m]) || 0]))
+        : undefined;
+      const computedPrice = modalityPricesObj
+        ? Object.values(modalityPricesObj).reduce((s, v) => s + v, 0)
+        : parseFloat(editForm.price_per_hour);
+
       const body: Record<string, unknown> = {
         title: editForm.title,
         description: editForm.description,
-        price_per_hour: parseFloat(editForm.price_per_hour),
+        price_per_hour: computedPrice,
+        modality_prices: modalityPricesObj ?? null,
         minimum_hours: parseFloat(editForm.minimum_hours) || 1,
         total_hours: editForm.total_hours ? parseFloat(editForm.total_hours.replace(/,/g, '')) : null,
         format: editForm.format || null,
@@ -2052,7 +2208,38 @@ function ListingDetail({ listing, onBack, onListingUpdated }: {
               </div>
             ) : (
               <TagSection label="Modalities" required selected={editForm.modalities} options={MODALITIES}
-                onToggle={v => toggleEditTag('modalities', v)} />
+                onToggle={v => {
+                  toggleEditTag('modalities', v);
+                  setEditForm(f => {
+                    const mp = { ...f.modality_prices };
+                    if (f.modalities.includes(v)) { mp[v] = mp[v] ?? ''; } else { delete mp[v]; }
+                    return { ...f, modality_prices: mp };
+                  });
+                }} />
+            )}
+
+            {editForm.modalities.length > 1 && (
+              <div className="db-modality-prices">
+                <label className="db-meta-label">Price per modality (USD/hr)</label>
+                {editForm.modalities.map(m => (
+                  <div key={m} className="db-modality-price-row">
+                    <span className="db-badge" style={{ minWidth: 80, textAlign: 'center' }}>{m.replace(/_/g, ' ')}</span>
+                    <input className="db-form-input" type="text" inputMode="decimal" placeholder="0.00"
+                      style={{ flex: 1, maxWidth: 120 }}
+                      value={editForm.modality_prices[m] ?? ''}
+                      onChange={e => setEditForm(f => ({ ...f, modality_prices: { ...f.modality_prices, [m]: e.target.value.replace(/[^0-9.]/g, '') } }))}
+                      onBlur={e => { const v = parseFloat(e.target.value); if (!isNaN(v)) setEditForm(f => ({ ...f, modality_prices: { ...f.modality_prices, [m]: v.toFixed(2) } })); }}
+                      disabled={isModalityLocked} />
+                    <span className="db-meta-label" style={{ margin: 0 }}>/hr</span>
+                  </div>
+                ))}
+                <div className="db-modality-price-row" style={{ borderTop: '1px solid var(--border)', paddingTop: 8, marginTop: 4 }}>
+                  <span style={{ fontFamily: "'Share Tech Mono', monospace", fontSize: 10, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-dim)', minWidth: 80, textAlign: 'center' }}>Bundle</span>
+                  <span style={{ fontFamily: "'Share Tech Mono', monospace", fontSize: 12, fontWeight: 500 }}>
+                    ${Object.values(editForm.modality_prices).reduce((s, v) => s + (parseFloat(v) || 0), 0).toFixed(2)}/hr
+                  </span>
+                </div>
+              </div>
             )}
 
             <TagSection label="Environments" required selected={editForm.environments} options={ENVIRONMENTS}
@@ -2068,12 +2255,14 @@ function ListingDetail({ listing, onBack, onListingUpdated }: {
               onToggle={v => toggleEditTag('task_types', v)} />
 
             <div className="db-form-row" style={{ marginTop: 12 }}>
+              {editForm.modalities.length <= 1 && (
               <div className="db-form-field" style={{ flex: 1 }}>
                 <label className="db-meta-label">Price per hour (USD)</label>
                 <input className="db-form-input" type="text" inputMode="decimal" value={editForm.price_per_hour}
                   onChange={e => updateField('price_per_hour', e.target.value.replace(/[^0-9.]/g, ''))}
                   onBlur={e => { const v = parseFloat(e.target.value); if (!isNaN(v)) updateField('price_per_hour', v.toFixed(2)); }} />
               </div>
+              )}
               <div className="db-form-field" style={{ flex: 1 }}>
                 <label className="db-meta-label">Minimum hours</label>
                 <input className="db-form-input" type="text" inputMode="numeric" value={editForm.minimum_hours}
@@ -2172,6 +2361,7 @@ function CreateListingForm() {
     collection_methods: [] as string[], embodiment_types: [] as string[], task_types: [] as string[],
     price_per_hour: '', minimum_hours: '1', total_hours: '', format: 'parquet',
     license_type: 'commercial', license_terms: '',
+    modality_prices: {} as Record<string, string>,
   });
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState<string | null>(null);
@@ -2190,8 +2380,18 @@ function CreateListingForm() {
   };
 
   const handleSubmit = async () => {
-    if (!form.title || !form.description || !form.price_per_hour) {
-      setError('Title, description, and price are required');
+    const isMultiModality = form.modalities.length > 1;
+    const hasModalityPrices = isMultiModality && Object.values(form.modality_prices).some(v => parseFloat(v) > 0);
+    if (!form.title || !form.description) {
+      setError('Title and description are required');
+      return;
+    }
+    if (!isMultiModality && !form.price_per_hour) {
+      setError('Price per hour is required');
+      return;
+    }
+    if (isMultiModality && form.modalities.some(m => !form.modality_prices[m] || parseFloat(form.modality_prices[m]) <= 0)) {
+      setError('Set a price for each modality');
       return;
     }
     if (form.modalities.length === 0) {
@@ -2205,13 +2405,22 @@ function CreateListingForm() {
     setSubmitting(true);
     setError('');
     try {
+      // Build modality_prices for multi-modality listings
+      const modalityPricesObj = isMultiModality
+        ? Object.fromEntries(form.modalities.map(m => [m, parseFloat(form.modality_prices[m]) || 0]))
+        : undefined;
+      const computedPrice = modalityPricesObj
+        ? Object.values(modalityPricesObj).reduce((s, v) => s + v, 0)
+        : parseFloat(form.price_per_hour);
+
       // Backend expects modality/environment as single strings; pack extras into tags
       const res = await api.post<{ data: { id: string } }>('/provider/listings', {
         title: form.title,
         description: form.description,
         modality: form.modalities[0],
         environment: form.environments[0],
-        price_per_hour: parseFloat(form.price_per_hour),
+        price_per_hour: computedPrice,
+        modality_prices: modalityPricesObj,
         minimum_hours: parseFloat(form.minimum_hours) || 1,
         total_hours: form.total_hours ? parseFloat(form.total_hours.replace(/,/g, '')) : undefined,
         format: form.format || undefined,
@@ -2225,7 +2434,7 @@ function CreateListingForm() {
           ...form.task_types.map(v => `task:${v}`),
         ].filter(Boolean),
       });
-      setForm({ title: '', description: '', modalities: [], environments: [], collection_methods: [], embodiment_types: [], task_types: [], price_per_hour: '', minimum_hours: '1', total_hours: '', format: 'parquet', license_type: 'commercial', license_terms: '' });
+      setForm({ title: '', description: '', modalities: [], environments: [], collection_methods: [], embodiment_types: [], task_types: [], price_per_hour: '', minimum_hours: '1', total_hours: '', format: 'parquet', license_type: 'commercial', license_terms: '', modality_prices: {} });
       // Navigate to listing detail for sample upload
       const newId = res?.data?.id;
       if (newId) {
@@ -2260,7 +2469,38 @@ function CreateListingForm() {
       </div>
 
       <TagSection label="Modalities" required selected={form.modalities} options={MODALITIES}
-        onToggle={v => toggleTag('modalities', v)} />
+        onToggle={v => {
+          toggleTag('modalities', v);
+          // Sync modality_prices: add/remove entry when toggling modalities
+          setForm(f => {
+            const mp = { ...f.modality_prices };
+            if (f.modalities.includes(v)) { mp[v] = mp[v] ?? ''; } else { delete mp[v]; }
+            return { ...f, modality_prices: mp };
+          });
+        }} />
+
+      {form.modalities.length > 1 && (
+        <div className="db-modality-prices">
+          <label className="db-meta-label">Price per modality (USD/hr)</label>
+          {form.modalities.map(m => (
+            <div key={m} className="db-modality-price-row">
+              <span className="db-badge" style={{ minWidth: 80, textAlign: 'center' }}>{m.replace(/_/g, ' ')}</span>
+              <input className="db-form-input" type="text" inputMode="decimal" placeholder="0.00"
+                style={{ flex: 1, maxWidth: 120 }}
+                value={form.modality_prices[m] ?? ''}
+                onChange={e => setForm(f => ({ ...f, modality_prices: { ...f.modality_prices, [m]: e.target.value.replace(/[^0-9.]/g, '') } }))}
+                onBlur={e => { const v = parseFloat(e.target.value); if (!isNaN(v)) setForm(f => ({ ...f, modality_prices: { ...f.modality_prices, [m]: v.toFixed(2) } })); }} />
+              <span className="db-meta-label" style={{ margin: 0 }}>/hr</span>
+            </div>
+          ))}
+          <div className="db-modality-price-row" style={{ borderTop: '1px solid var(--border)', paddingTop: 8, marginTop: 4 }}>
+            <span style={{ fontFamily: "'Share Tech Mono', monospace", fontSize: 10, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-dim)', minWidth: 80, textAlign: 'center' }}>Bundle</span>
+            <span style={{ fontFamily: "'Share Tech Mono', monospace", fontSize: 12, fontWeight: 500 }}>
+              ${Object.values(form.modality_prices).reduce((s, v) => s + (parseFloat(v) || 0), 0).toFixed(2)}/hr
+            </span>
+          </div>
+        </div>
+      )}
 
       <TagSection label="Environments" required selected={form.environments} options={ENVIRONMENTS}
         onToggle={v => toggleTag('environments', v)} />
@@ -2280,12 +2520,14 @@ function CreateListingForm() {
       </div>
 
       <div className="db-form-row">
-        <div className="db-form-field" style={{ flex: 1 }}>
-          <label className="db-meta-label">Price per hour (USD)</label>
-          <input className="db-form-input" type="text" inputMode="decimal" placeholder="50.00" value={form.price_per_hour}
-            onChange={e => update('price_per_hour', e.target.value.replace(/[^0-9.]/g, ''))}
-            onBlur={e => { const v = parseFloat(e.target.value); if (!isNaN(v)) update('price_per_hour', v.toFixed(2)); }} />
-        </div>
+        {form.modalities.length <= 1 && (
+          <div className="db-form-field" style={{ flex: 1 }}>
+            <label className="db-meta-label">Price per hour (USD)</label>
+            <input className="db-form-input" type="text" inputMode="decimal" placeholder="50.00" value={form.price_per_hour}
+              onChange={e => update('price_per_hour', e.target.value.replace(/[^0-9.]/g, ''))}
+              onBlur={e => { const v = parseFloat(e.target.value); if (!isNaN(v)) update('price_per_hour', v.toFixed(2)); }} />
+          </div>
+        )}
         <div className="db-form-field" style={{ flex: 1 }}>
           <label className="db-meta-label">Minimum hours</label>
           <input className="db-form-input" type="text" inputMode="numeric" placeholder="1" value={form.minimum_hours}
