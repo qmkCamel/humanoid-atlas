@@ -5496,7 +5496,7 @@ function TermsPage({ title, subtitle, children }: { title: string; subtitle: str
       <div style={{ maxWidth: 680 }}>
         {children}
         <div style={{ marginTop: 40, padding: '16px 0', borderTop: '1px solid var(--border)', fontSize: 10, color: 'var(--text-dim)', fontFamily: 'Share Tech Mono, monospace' }}>
-          Atlas Data Brokerage · Humanoid Atlas · Last updated March 2026
+          Atlas Data Brokerage · Humanoid Atlas · Last updated April 2026
         </div>
       </div>
     </div>
