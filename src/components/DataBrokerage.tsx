@@ -2545,7 +2545,7 @@ function CreateListingForm() {
     return (
       <div className="api-preamble" style={{ marginTop: 16, textAlign: 'center', padding: 32 }}>
         <div className="db-sell-headline" style={{ fontSize: 14, marginBottom: 8 }}>{result}</div>
-        <p style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 16 }}>Upload at least 3 samples from My Listings, then submit for review.</p>
+        <p style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 16 }}>Upload at least 5 samples from My Listings, then submit for review.</p>
         <button className="db-add-cart-btn" style={{ maxWidth: 200, margin: '0 auto' }} onClick={() => setResult(null)}>Create Another</button>
       </div>
     );
@@ -2597,13 +2597,13 @@ function CreateListingForm() {
       <TagSection label="Environments" required selected={form.environments} options={ENVIRONMENTS}
         onToggle={v => toggleTag('environments', v)} />
 
-      <TagSection label="Collection Method" required selected={form.collection_methods} options={COLLECTION_METHODS}
+      <TagSection label="Collection Method" selected={form.collection_methods} options={COLLECTION_METHODS}
         onToggle={v => toggleTag('collection_methods', v)} />
 
-      <TagSection label="Embodiment / Platform" required selected={form.embodiment_types} options={EMBODIMENT_TYPES}
+      <TagSection label="Embodiment / Platform" selected={form.embodiment_types} options={EMBODIMENT_TYPES}
         onToggle={v => toggleTag('embodiment_types', v)} />
 
-      <TagSection label="Task Types" required selected={form.task_types} options={TASK_TYPES}
+      <TagSection label="Task Types" selected={form.task_types} options={TASK_TYPES}
         onToggle={v => toggleTag('task_types', v)} allowCustom />
 
       <div className="db-form-field">
