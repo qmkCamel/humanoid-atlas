@@ -1982,16 +1982,14 @@ function ProviderDashboard() {
           {listings.map(l => {
             const rowStatus = l.is_active === false ? 'deactivated' : String(l.review_status);
             return (
-              <div key={String(l.id)} className={`db-catalog-row${l.is_active === false ? ' db-listing-deactivated' : ''}`} onClick={() => setSelectedListingId(String(l.id))}>
-                <div className="db-catalog-row__line1">
-                  <span className="db-catalog-row__title">{String(l.title)}</span>
-                  <span className="db-catalog-row__view">Manage &rarr;</span>
+              <div key={String(l.id)} className={`db-catalog-row db-listing-row--provider${l.is_active === false ? ' db-listing-deactivated' : ''}`} onClick={() => setSelectedListingId(String(l.id))}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div className="db-catalog-row__title">{String(l.title)}</div>
+                  <div className="db-catalog-row__details" style={{ marginTop: 4 }}>{formatTags(l.modality as string | string[])} · ${String(l.price_per_hour)}/hr</div>
                 </div>
-                <div className="db-catalog-row__line2">
-                  <div className="db-catalog-row__meta">
-                    <span className="db-catalog-row__details">{formatTags(l.modality as string | string[])} · ${String(l.price_per_hour)}/hr</span>
-                  </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0, marginLeft: 16 }}>
                   <span className={`db-status-badge db-status-badge--${rowStatus}`}>{rowStatus.replace(/_/g, ' ')}</span>
+                  <span className="db-catalog-row__view">Manage &rarr;</span>
                 </div>
               </div>
             );
@@ -2809,26 +2807,31 @@ function MyPurchases() {
 
   return (
     <div>
-      {purchases.map(p => (
-        <div key={String(p.id)} className="db-catalog-row" onClick={() => viewPurchase(String(p.id))}>
-          <div className="db-catalog-row__line1">
-            <span className="db-catalog-row__title">
-              {((p.transaction_items as Array<Record<string, unknown>>) ?? []).map(i => {
-                const listing = i.listings as Record<string, unknown> | null;
-                return listing?.title ?? '';
-              }).join(', ')}
-            </span>
-            <span className="db-catalog-row__view">{String(p.provisioning_status) === 'ready' ? 'Download →' : 'View →'}</span>
-          </div>
-          <div className="db-catalog-row__line2">
-            <div className="db-catalog-row__meta">
-              <span className="db-catalog-row__provider">{String((p.providers as Record<string, unknown>)?.name ?? '')}</span>
-              <span className="db-catalog-row__details">{formatUsd((p.total_cents as number) ?? 0)} · {new Date(String(p.created_at)).toLocaleDateString()}</span>
+      {purchases.map(p => {
+        const provStatus = String(p.provisioning_status);
+        const isReady = provStatus === 'ready';
+        return (
+          <div key={String(p.id)} className="db-catalog-row db-listing-row--provider" onClick={() => viewPurchase(String(p.id))}>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div className="db-catalog-row__title">
+                {((p.transaction_items as Array<Record<string, unknown>>) ?? []).map(i => {
+                  const listing = i.listings as Record<string, unknown> | null;
+                  return listing?.title ?? '';
+                }).join(', ')}
+              </div>
+              <div className="db-catalog-row__details" style={{ marginTop: 4 }}>
+                {String((p.providers as Record<string, unknown>)?.name ?? '')} · {formatUsd((p.total_cents as number) ?? 0)} · {new Date(String(p.created_at)).toLocaleDateString()}
+              </div>
             </div>
-            <span className="db-catalog-row__price">{String(p.provisioning_status)}</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0, marginLeft: 16 }}>
+              <span className={`db-status-badge db-status-badge--${isReady ? 'approved' : 'pending'}`}>
+                {isReady ? 'ready' : provStatus.replace(/_/g, ' ')}
+              </span>
+              <span className="db-catalog-row__view">{isReady ? 'Download \u2192' : 'View \u2192'}</span>
+            </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
@@ -3009,21 +3012,18 @@ function CollectionProgramsManager() {
           const signups = p.collector_signups as Array<{ count: number }> | undefined;
           const count = signups?.[0]?.count ?? 0;
           return (
-            <div key={String(p.id)} className="db-catalog-row" onClick={() => setSelectedProgramId(String(p.id))}>
-              <div className="db-catalog-row__line1">
-                <span className="db-catalog-row__title">{String(p.title)}</span>
-                <span className="db-catalog-row__view">Manage →</span>
-              </div>
-              <div className="db-catalog-row__line2">
-                <div className="db-catalog-row__meta">
-                  <span className="db-catalog-row__details">
-                    {count} signup{count !== 1 ? 's' : ''} · ${((p.referral_fee_cents as number ?? 0) / 100).toFixed(0)} referral fee
-                    {p.is_active ? '' : ' · inactive'}
-                  </span>
+            <div key={String(p.id)} className="db-catalog-row db-listing-row--provider" onClick={() => setSelectedProgramId(String(p.id))}>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div className="db-catalog-row__title">{String(p.title)}</div>
+                <div className="db-catalog-row__details" style={{ marginTop: 4 }}>
+                  {count} signup{count !== 1 ? 's' : ''} · ${((p.referral_fee_cents as number ?? 0) / 100).toFixed(0)} referral fee
                 </div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0, marginLeft: 16 }}>
                 <span className={`db-status-badge db-status-badge--${p.is_active ? 'approved' : 'rejected'}`}>
                   {p.is_active ? 'active' : 'inactive'}
                 </span>
+                <span className="db-catalog-row__view">Manage &rarr;</span>
               </div>
             </div>
           );
@@ -3226,7 +3226,10 @@ function ProviderAnalytics() {
   const txns = (data?.transaction_count as number) ?? 0;
   const buyers = (data?.unique_buyers as number) ?? 0;
   const collectors = (data?.collector_count as number) ?? 0;
+  const totalListings = (data?.total_listings as number) ?? 0;
+  const activeListings = (data?.active_listings as number) ?? 0;
   const topListings = (data?.top_listings as Array<Record<string, unknown>>) ?? [];
+  const modalityHoursData = (data?.modality_hours as Record<string, number>) ?? {};
 
   // Revenue timeline from real transaction dates, padded to fill the chart
   const rawTimeline = (data?.revenue_timeline as Array<{ date: string; revenue_cents: number }>) ?? [];
@@ -3262,20 +3265,15 @@ function ProviderAnalytics() {
     value: Math.round((l.revenue_cents as number) / 100),
   }));
 
-  // Donut: breakdown by modality from top listings
-  const modalityMap = new Map<string, number>();
-  for (const l of topListings) {
-    const rawMod = (l as Record<string, unknown>).modality;
-    const mods = Array.isArray(rawMod) ? rawMod.map(String) : [String(rawMod ?? 'other')];
-    const perMod = (l.hours as number) / mods.length;
-    for (const mod of mods) modalityMap.set(mod, (modalityMap.get(mod) ?? 0) + perMod);
-  }
-  const donutColors = ['#1a1a1a', '#8a8580', '#c5c0b8', '#e0ddd8', '#a0a0a0'];
-  const donutSegments = [...modalityMap.entries()].map(([name, value], i) => ({
-    name: name.replace(/_/g, ' ').toUpperCase(),
-    value,
-    color: donutColors[i % donutColors.length],
-  }));
+  // Donut: breakdown by modality from backend-aggregated modality_hours
+  const donutColors = ['#1a1a1a', '#8a8580', '#c5c0b8', '#e0ddd8', '#a0a0a0', '#6b6560', '#3a3a3a'];
+  const donutSegments = Object.entries(modalityHoursData)
+    .sort((a, b) => b[1] - a[1])
+    .map(([name, value], i) => ({
+      name: name.replace(/_/g, ' ').toUpperCase(),
+      value,
+      color: donutColors[i % donutColors.length],
+    }));
   const finalDonut = donutSegments.length > 0 ? donutSegments : [
     { name: 'No data', value: 0, color: '#e0ddd8' },
   ];
@@ -3301,6 +3299,10 @@ function ProviderAnalytics() {
         <div className="db-analytics-card">
           <div className="db-analytics-card__value">{buyers}</div>
           <div className="db-meta-label">Unique buyers</div>
+        </div>
+        <div className="db-analytics-card">
+          <div className="db-analytics-card__value">{activeListings}/{totalListings}</div>
+          <div className="db-meta-label">Active listings</div>
         </div>
         <div className="db-analytics-card">
           <div className="db-analytics-card__value">{collectors}</div>
@@ -3636,12 +3638,18 @@ Content-Type: application/json
       "listing_id": "lst_xyz",
       "listing_title": "Indoor Navigation Dataset",
       "hours": 50,
-      "license_type": "commercial"
+      "license_type": "commercial",
+      "modality_items": [
+        { "modality": "rgb", "hours": 50, "price_per_hour": 25 },
+        { "modality": "depth", "hours": 50, "price_per_hour": 15 }
+      ]
     }
   ],
   "callback_url": "${cbUrl}"
 }
 \`\`\`
+
+> **Note:** \`modality_items\` is included when the buyer uses per-modality (advanced) purchasing. If absent, the buyer purchased the full bundle at the listing's \`price_per_hour\`.
 
 **Response option A — Synchronous (instant access):**
 
@@ -3800,15 +3808,15 @@ All 3 tests returning PASS means your integration is production-ready.
 Once your webhook is verified, go to **Sell Data → Create Listing** and add your first dataset:
 
 - **Title** — descriptive name (e.g. "Kitchen Activity Egocentric Video")
-- **Modality** — rgb, rgbd, depth, lidar, tactile, motion_capture, proprioception, imu, etc.
-- **Environment** — domestic, kitchen, office, warehouse, laboratory, industrial, simulation, etc.
-- **Collection Method** — teleoperation, human_demonstration, kinesthetic_teaching, etc.
-- **Embodiment** — humanoid, dual_arm, mobile_manipulator, human, etc.
-- **Task Type** — pick_and_place, cooking, navigation, locomotion, assembly, etc.
+- **Modalities** — rgb, rgbd, depth, tactile, motion_capture, proprioception, joint_trajectory, imu, force_torque, audio, language_annotations, etc.
+- **Environment** — kitchen, bathroom, office, warehouse, laboratory, assembly_line, fulfillment_center, data_center, etc.
+- **Collection Method** — teleoperation, vr_teleoperation, leader_follower, human_demonstration, shared_autonomy, fleet_deployed, video_extraction, etc.
+- **Embodiment** — humanoid, dual_arm, bimanual_fixed, single_arm, legged_biped, mobile_manipulator, human, etc.
+- **Task Type** — pick_and_place, grasping, insertion, sorting, cooking, locomotion, whole_body_motion, etc. (supports custom free-text entries)
 - **Total hours** — how much data is available
-- **Price per hour** — in USD
+- **Pricing** — single price for single-modality listings, or per-modality prices for multi-modality listings (bundle price is auto-calculated as sum)
 - **Minimum hours** — smallest purchase allowed
-- **Format** — parquet, rosbag, mp4, hdf5, etc.
+- **Formats** — select all applicable formats (parquet, mp4, png, hdf5, rosbag, etc.)
 - **Description** — what the data contains, how it was collected, quality notes
 
 After creating a listing, you'll be taken to upload samples. **At least 5 samples are required** before you can submit for review. Samples are displayed to buyers grouped by type.
@@ -3826,8 +3834,8 @@ Samples are automatically grouped by type in the catalog:
 - **RGB Images** — color images grouped separately (files with "rgb" or "color" in name)
 - **Depth Maps** — depth images with dark background (files with "depth" or "disparity" in name)
 - **Thermal Images** — infrared/thermal images (files with "thermal" or "infrared" in name)
-- **Tactile Pressure** (.parquet with tactile modality) — interactive 3D hand pressure visualization with animated playback, plus chart toggle
-- **Sensor Data** (.parquet with imu/force_torque/proprioception modality) — interactive time-series chart with auto-detected columns
+- **Tactile Pressure** (.parquet with tactile modality) — interactive time-series chart with auto-detected columns
+- **Sensor Data** (.parquet with imu/force_torque/proprioception/joint_trajectory modality) — interactive time-series chart. For multi-modality listings, sensor data is grouped by modality (e.g. "IMU Data", "Proprioception Data", "Motion Capture Data")
 - **Language Annotations** (.json) — pretty-printed preview with expand
 - **3D Visualization** (.rrd, .rosbag, .mcap) — embedded Rerun 3D viewer
 - **Audio** (.wav, .mp3) — native audio player
@@ -3923,7 +3931,8 @@ If your listing has **multiple modalities** (e.g., RGB + IMU + force/torque), yo
 - **imu**: imu, accel, gyro, accelerometer
 - **force_torque**: force, torque, ft_, wrench
 - **tactile**: tactile, pressure, touch, gel, taxel
-- **proprioception**: proprio, joint, encoder, qpos, qvel
+- **proprioception**: proprio, encoder, qpos, qvel
+- **joint_trajectory**: trajectory, joint_traj, ee_pose, end_effector, cartesian, action
 - **audio**: audio, mic, sound, speech
 - **lidar**: lidar, laser, scan, velodyne
 - **point_cloud**: pointcloud, point_cloud, pcd, ply
@@ -4034,7 +4043,7 @@ function downloadProviderDocsMd(callbackUrl: string) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = 'PROVIDER-WEBHOOKS.md';
+  a.download = 'ATLAS_ONBOARDING.md';
   a.click();
   URL.revokeObjectURL(url);
 }
@@ -4265,11 +4274,18 @@ Content-Type: application/json
       "listing_id": "lst_xyz",
       "listing_title": "Indoor Navigation Dataset",
       "hours": 50,
-      "license_type": "commercial"
+      "license_type": "commercial",
+      "modality_items": [
+        { "modality": "rgb", "hours": 50, "price_per_hour": 25 },
+        { "modality": "depth", "hours": 50, "price_per_hour": 15 }
+      ]
     }
   ],
   "callback_url": "${callbackUrl}"
 }`} />
+      <p style={{ fontSize: 10, color: 'var(--text-dim)', marginTop: 8, lineHeight: 1.5, fontFamily: "'Share Tech Mono', monospace" }}>
+        <strong>modality_items</strong> is included when the buyer uses per-modality purchasing. If absent, the buyer purchased the full bundle.
+      </p>
 
       <div style={{ marginTop: 16 }} />
       <div className="db-meta-label" style={{ marginBottom: 8 }}>Response - Synchronous (instant access)</div>
@@ -4585,24 +4601,17 @@ function ProviderList({ onSelectProvider }: { onSelectProvider: (slug: string) =
       <div className="db-meta-label" style={{ marginBottom: 12 }}>{providers.length} Data Provider{providers.length !== 1 ? 's' : ''}</div>
       <div className="db-catalog-list">
         {providers.map(p => (
-          <div key={p.id} className="db-catalog-row" onClick={() => onSelectProvider(p.slug)}>
-            <div className="db-provider-logo">
+          <div key={p.id} className="db-catalog-row db-listing-row--provider" onClick={() => onSelectProvider(p.slug)}>
+            <div className="db-provider-logo" style={{ flexShrink: 0 }}>
               {p.logo_url ? <img src={p.logo_url} alt="" className="db-provider-logo__img" /> : <span className="db-provider-logo__initial">{p.name.charAt(0).toUpperCase()}</span>}
             </div>
-            <div className="db-catalog-row__content">
-              <div className="db-catalog-row__line1">
-                <span className="db-catalog-row__title">{p.name}</span>
-                <span className="db-catalog-row__view">View →</span>
-              </div>
-              <div className="db-catalog-row__line2">
-                <div className="db-catalog-row__meta">
-                  {p.company_name && p.company_name !== p.name && <span className="db-catalog-row__provider">{p.company_name}</span>}
-                  <span className="db-catalog-row__details">
-                    {p.description ? (p.description.length > 120 ? p.description.slice(0, 120) + '...' : p.description) : 'No description'}
-                  </span>
-                </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div className="db-catalog-row__title">{p.name}</div>
+              <div className="db-catalog-row__details" style={{ marginTop: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {p.company_name && p.company_name !== p.name ? `${p.company_name} · ` : ''}{p.description || 'No description'}
               </div>
             </div>
+            <span className="db-catalog-row__view" style={{ flexShrink: 0, marginLeft: 16 }}>View →</span>
           </div>
         ))}
       </div>

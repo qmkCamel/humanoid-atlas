@@ -4708,6 +4708,7 @@ input[type="number"] { -moz-appearance: textfield; }
 .db-form-input:disabled, .db-form-select:disabled, .db-form-textarea:disabled { opacity: 0.5; cursor: not-allowed; }
 .db-regen-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 .db-listing-deactivated { opacity: 0.5; }
+.db-listing-row--provider { display: flex; align-items: center; }
 
 /* ─── MODALITY PRICING ──────────────────────────────── */
 .db-modality-prices { margin: 8px 0 12px; }
