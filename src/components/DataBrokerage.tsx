@@ -1376,7 +1376,7 @@ function SellData({ viewCount }: { viewCount: number | null }) {
       <div className="api-docs">
         <div className="api-docs-header">
           <div><h2 className="api-docs-title">Sell Data</h2>
-          <p className="api-docs-desc">List your datasets on Atlas Data Brokerage</p></div>
+          <p className="api-docs-desc">List your datasets on Atlas</p></div>
         </div>
 
         <div className="db-sell-hero">
@@ -1415,8 +1415,8 @@ function SellData({ viewCount }: { viewCount: number | null }) {
                 <div className="db-sell-term__value">Your price per hour</div>
               </div>
               <div className="db-sell-term">
-                <div className="db-sell-term__label">Platform fee</div>
-                <div className="db-sell-term__value">15% commission</div>
+                <div className="db-sell-term__label">Atlas fee</div>
+                <div className="db-sell-term__value">15%</div>
               </div>
               <div className="db-sell-term">
                 <div className="db-sell-term__label">Payouts via</div>
@@ -1446,13 +1446,13 @@ function SellData({ viewCount }: { viewCount: number | null }) {
             <div className="db-sell-how__step">
               <div className="db-sell-how__num">02</div>
               <div className="db-sell-how__title">Review</div>
-              <div className="db-sell-how__desc">Our team verifies quality and accuracy before your listing goes live on the marketplace</div>
+              <div className="db-sell-how__desc">Our team verifies quality and accuracy before your listing goes live on Atlas</div>
             </div>
             <div className="db-sell-how__connector" />
             <div className="db-sell-how__step">
               <div className="db-sell-how__num">03</div>
               <div className="db-sell-how__title">Earn</div>
-              <div className="db-sell-how__desc">OEMs purchase hours of your data directly. Payouts deposited to your Stripe account</div>
+              <div className="db-sell-how__desc">OEMs and labs purchase hours of your data directly. Payouts deposited to your Stripe account</div>
             </div>
           </div>
         </div>
@@ -4923,7 +4923,7 @@ function CollectData({ viewCount: _viewCount }: { viewCount: number | null }) {
     <div className="api-docs">
       <div className="api-docs-header">
         <div><h2 className="api-docs-title">Collect Data</h2>
-        <p className="api-docs-desc">Get paid to collect robot training data</p></div>
+        <p className="api-docs-desc">Get paid to collect training data</p></div>
       </div>
 
       {/* Context section */}
@@ -4931,7 +4931,7 @@ function CollectData({ viewCount: _viewCount }: { viewCount: number | null }) {
         <div className="db-collect-context__left">
           <div className="db-collect-context__body">
             Data providers need people to record real-world activities - cooking, cleaning,
-            factory work, navigation. Browse active programs, apply, and start earning.
+            factory work, sorting, ... Browse active programs, apply, and start earning.
           </div>
         </div>
         <div className="db-collect-context__stats">
