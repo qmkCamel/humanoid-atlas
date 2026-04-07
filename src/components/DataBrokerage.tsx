@@ -135,7 +135,7 @@ interface Sample {
 
 type SampleCategory = 'video' | 'image' | 'audio' | 'json' | 'rerun' | 'timeseries' | 'tactile' | 'download';
 
-const TIME_SERIES_MODALITIES = ['imu', 'force_torque', 'proprioception'];
+const TIME_SERIES_MODALITIES = ['imu', 'force_torque', 'proprioception', 'joint_trajectory'];
 const TACTILE_MODALITIES = ['tactile'];
 
 function getSampleCategory(contentType?: string, filename?: string, modalities?: string[]): SampleCategory {
@@ -283,7 +283,7 @@ function SampleGallery({ samples, modalities = [] }: { samples: Sample[]; modali
   // Modality keyword map for splitting timeseries by detected modality
   const modalityKeywords: Record<string, string[]> = {
     imu: ['imu', 'accel', 'gyro'], force_torque: ['force', 'torque', 'ft_', 'wrench'],
-    proprioception: ['proprio', 'encoder', 'qpos', 'qvel', 'joints', 'joint_state'],
+    proprioception: ['proprio', 'encoder', 'qpos', 'qvel'],
     joint_trajectory: ['trajectory', 'ee_pose', 'action', 'cartesian'],
     motion_capture: ['mocap', 'motion_capture', 'skeleton'],
     tactile: ['tactile', 'pressure', 'touch', 'taxel'],
@@ -3981,7 +3981,7 @@ function generateProviderDocsMd(callbackUrl: string): string {
 
 ## What is Atlas Data Brokerage?
 
-Atlas Data Brokerage is a vertical marketplace for embodied AI training data, built into [Humanoid Atlas](https://humanoids.fyi). As a data provider, you list datasets (RGB, depth, tactile, motion capture, etc.) and OEM buyers purchase hours of data directly through the platform. Atlas handles discovery, payments (via Stripe), and buyer management. You handle data delivery via a webhook integration.
+Atlas Data Brokerage is a broker for physical AI training data, built into [Humanoid Atlas](https://humanoids.fyi). As a data provider, you list datasets (RGB, depth, tactile, motion capture, etc.) and OEMs and labs purchase hours of data directly through the platform. Atlas handles discovery, payments (via Stripe), and buyer management. You handle data delivery via a webhook integration.
 
 **How it works:**
 1. You create listings describing your datasets (modality, hours available, price per hour, license type)
@@ -3990,7 +3990,7 @@ Atlas Data Brokerage is a vertical marketplace for embodied AI training data, bu
 4. Your API responds with an access URL (or processes asynchronously and calls back)
 5. The buyer receives access instructions
 
-**Economics:** Atlas retains a 15% platform fee. You receive 85% of each sale, deposited directly to your connected Stripe account.
+**Economics:** Atlas retains a 15% fee. You receive 85% of each sale, deposited directly to your connected Stripe account.
 
 ---
 
@@ -4348,9 +4348,10 @@ If your listing has **multiple modalities** (e.g., RGB + IMU + force/torque), yo
 
 **Recognized modality keywords:**
 - **rgb**: rgb, color, cam, camera, visual
+- **rgbd**: rgbd, rgb_d, rgb-d
 - **depth**: depth, disparity, zmap
-- **thermal**: thermal, infrared, flir
-- **imu**: imu, accel, gyro, accelerometer
+- **thermal**: thermal, infrared, flir, ir_
+- **imu**: imu, accel, gyro, accelerometer, gyroscope
 - **force_torque**: force, torque, ft_, wrench
 - **tactile**: tactile, pressure, touch, gel, taxel
 - **proprioception**: proprio, encoder, qpos, qvel
@@ -4358,8 +4359,8 @@ If your listing has **multiple modalities** (e.g., RGB + IMU + force/torque), yo
 - **audio**: audio, mic, sound, speech
 - **lidar**: lidar, laser, scan, velodyne
 - **point_cloud**: pointcloud, point_cloud, pcd, ply
-- **motion_capture**: mocap, motion_capture, skeleton, optitrack
-- **language_annotations**: annotation, caption, language, label
+- **motion_capture**: mocap, motion_capture, skeleton, optitrack, vicon
+- **language_annotations**: annotation, caption, language, label, instruction
 
 **Alignment rules enforced on submission:**
 1. Every listed modality must have at least one sample
@@ -4500,6 +4501,26 @@ dataset/
 | single_arm | \`koch\`, \`so100\` |
 | (any) | custom string |
 
+### Example info.json
+
+\`\`\`json
+{
+  "codebase_version": "v3.0",
+  "robot_type": "aloha",
+  "fps": 50,
+  "total_episodes": 100,
+  "total_frames": 50000,
+  "total_tasks": 1,
+  "chunks_size": 1000,
+  "splits": { "train": "0:100" },
+  "features": {
+    "observation.state": { "dtype": "float32", "shape": [14], "names": null },
+    "action": { "dtype": "float32", "shape": [14], "names": null },
+    "observation.images.cam_high": { "dtype": "video", "shape": [480, 640, 3], "names": ["height", "width", "channel"] }
+  }
+}
+\`\`\`
+
 ### Buyer usage
 
 \`\`\`python
@@ -4515,6 +4536,10 @@ sample = dataset[0]
 ## Support
 
 Contact the Atlas team at **juliansaks@gmail.com** for onboarding help, API questions, or issues.
+
+---
+
+*Last updated April 2026*
 `;
 }
 
@@ -5504,9 +5529,9 @@ function TermsPage({ title, subtitle, children }: { title: string; subtitle: str
 function SellerTerms() {
   return (
     <TermsPage title="Data Provider Conditions" subtitle="Guidelines for selling data on Atlas">
-      <TermsSection title="Platform & fees">
-        <p>Atlas retains a 15% platform fee on all data sales. You receive 85% of each transaction, deposited directly to your connected Stripe account.</p>
-        <p style={{ marginTop: 8 }}>A $5 platform fee is charged per accepted collector, invoiced via Stripe with 7-day payment terms. You must complete Stripe onboarding before you can receive payouts or accept collectors.</p>
+      <TermsSection title="Atlas fees">
+        <p>Atlas retains a 15% fee on all data sales. You receive 85% of each transaction, deposited directly to your connected Stripe account.</p>
+        <p style={{ marginTop: 8 }}>A $5 fee is charged per accepted collector, invoiced via Stripe with 7-day payment terms. You must complete Stripe onboarding before you can receive payouts or accept collectors.</p>
       </TermsSection>
 
       <TermsSection title="Your responsibilities">
@@ -5581,7 +5606,7 @@ function CollectorTerms() {
 
       <TermsSection title="Atlas's role">
         <p>Atlas is a marketplace connecting collectors to data providers. Atlas is not a party to the collection agreement between you and the provider.</p>
-        <p style={{ marginTop: 8 }}>Atlas charges the provider a platform fee per accepted collector. This fee does not affect your compensation.</p>
+        <p style={{ marginTop: 8 }}>Atlas charges the provider a fee per accepted collector. This fee does not affect your compensation.</p>
       </TermsSection>
     </TermsPage>
   );
