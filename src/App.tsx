@@ -1170,10 +1170,15 @@ export default function App() {
     const handler = (e: Event) => {
       const nowSignedIn = (e as CustomEvent).detail?.isSignedIn ?? false;
       setClerkSignedIn((prev: boolean) => {
-        // Redirect to Sell Data when signing in, but only if not already on a data page
-        // (buyer checkout flow uses pending_checkout flag and should stay on buy page)
-        if (!prev && nowSignedIn && IS_LOCAL && !window.location.pathname.startsWith('/data/')) {
-          navigate('/data/sell');
+        if (!prev && nowSignedIn) {
+          const path = window.location.pathname;
+          if (path.startsWith('/data/')) {
+            // Already on a data page - re-navigate to ensure tab stays active
+            navigate(path);
+          } else {
+            // Not on a data page - redirect to Sell Data
+            navigate('/data/sell');
+          }
         }
         return nowSignedIn;
       });
@@ -2413,11 +2418,12 @@ export default function App() {
               {g.id === 'cli' && <div className="filter-bar__separator" />}
               <button
                 className={`tab-group-pill ${activeTabGroup === g.id ? 'tab-group-pill--active' : ''}`}
+                style={g.id === 'data' ? { position: 'relative', paddingRight: 22 } : undefined}
                 onClick={() => {
                   const firstTab = TABS.find((t) => t.group === g.id);
                   if (firstTab) { navigate(TAB_TO_PATH[firstTab.id] || '/'); setChainFocus(null); }
                 }}
-              >{g.label}</button>
+              >{g.label}{g.id === 'data' && <span className="tab-new-badge">NEW</span>}</button>
             </Fragment>
           ))}
         </div>

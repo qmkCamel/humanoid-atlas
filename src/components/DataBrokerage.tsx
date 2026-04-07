@@ -3,9 +3,7 @@ import { useAuth, useClerk, SignInButton, SignUpButton } from '@clerk/clerk-reac
 import { loadStripe, type Stripe, type StripeElements } from '@stripe/stripe-js';
 import { api, setTokenGetter } from '../lib/brokerage-api';
 import { useCart } from '../hooks/useCart';
-import { companies } from '../data';
 
-const OEM_COUNT = companies.filter((c) => c.type === 'oem').length;
 
 const LOCATION_OPTIONS = [
   'San Francisco, USA', 'New York, USA', 'Austin, USA', 'Boston, USA', 'Seattle, USA', 'Los Angeles, USA', 'Pittsburgh, USA', 'Chicago, USA',
@@ -1388,8 +1386,8 @@ function SellData({ viewCount }: { viewCount: number | null }) {
           </div>
           <div className="db-sell-hero__divider" />
           <div className="db-sell-hero__stat">
-            <div className="db-sell-hero__num">{OEM_COUNT}</div>
-            <div className="db-sell-hero__label">OEMs on platform</div>
+            <div className="db-sell-hero__num">{MODALITIES.length}</div>
+            <div className="db-sell-hero__label">Modalities supported</div>
           </div>
           <div className="db-sell-hero__divider" />
           <div className="db-sell-hero__stat">

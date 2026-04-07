@@ -187,6 +187,8 @@ body {
   color: var(--bg);
   border-color: var(--text);
 }
+.tab-new-badge { font-size: 6px; font-weight: 700; letter-spacing: 0.5px; background: #1a1a1a; color: #f5f2ed; padding: 1px 2px; border-radius: 2px; position: absolute; top: 3px; right: 4px; line-height: 1; }
+.tab-group-pill--active .tab-new-badge { background: #f5f2ed; color: #1a1a1a; }
 
 /* ========== COMPONENT NAV ========== */
 .component-nav {
