@@ -4241,11 +4241,11 @@ All 3 tests returning PASS means your integration is production-ready.
 Once your webhook is verified, go to **Sell Data → Create Listing** and add your first dataset:
 
 - **Title** — descriptive name (e.g. "Kitchen Activity Egocentric Video")
-- **Modalities** — rgb, rgbd, depth, tactile, motion_capture, proprioception, joint_trajectory, imu, force_torque, audio, language_annotations, etc.
-- **Environment** — kitchen, bathroom, office, warehouse, laboratory, assembly_line, fulfillment_center, data_center, etc.
-- **Collection Method** — teleoperation, vr_teleoperation, leader_follower, human_demonstration, shared_autonomy, fleet_deployed, video_extraction, etc.
-- **Embodiment** — humanoid, dual_arm, bimanual_fixed, single_arm, legged_biped, mobile_manipulator, human, etc.
-- **Task Type** — pick_and_place, grasping, insertion, sorting, cooking, locomotion, whole_body_motion, etc. (supports custom free-text entries)
+- **Modalities** — rgb, rgbd, depth, motion_capture, tactile, force_torque, proprioception, joint_trajectory, imu, audio, language_annotations, other
+- **Environment** — kitchen, bathroom, living_room, bedroom, garage, office, warehouse, fulfillment_center, retail, laboratory, industrial, assembly_line, data_center, healthcare, restaurant, hotel, eldercare, construction, logistics, maritime, outdoor, agriculture, road, simulation, other
+- **Collection Method** — teleoperation, vr_teleoperation, leader_follower, human_demonstration, motion_capture_retargeting, exoskeleton_capture, shared_autonomy, autonomous_policy, fleet_deployed, video_extraction, simulation_generated, other
+- **Embodiment** — humanoid, quadruped, legged_biped, dual_arm, bimanual_fixed, single_arm, parallel_jaw_gripper, hand_dexterous, mobile_manipulator, wheeled_robot, human, other
+- **Task Type** — pick_and_place, grasping, pushing, stacking, pouring, insertion, sorting, wiping, folding, assembly, cleaning, cooking, navigation, locomotion, whole_body_motion, tool_use (+ custom free-text)
 - **Total hours** — how much data is available
 - **Pricing** — single price for single-modality listings, or per-modality prices for multi-modality listings (bundle price is auto-calculated as sum)
 - **Minimum hours** — smallest purchase allowed
