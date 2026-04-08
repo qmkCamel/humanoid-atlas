@@ -582,7 +582,7 @@ function BuyData() {
   });
   const [showCustomRequest, setShowCustomRequest] = useState(false);
   const [customRequestListing, setCustomRequestListing] = useState<Listing | null>(null);
-  const [showPurchases, setShowPurchases] = useState(false);
+  const [showPurchases, setShowPurchases] = useState(() => window.location.hash === '#purchases');
   const [showProviders, setShowProviders] = useState(false);
   const [selectedProvider, setSelectedProvider] = useState<string | null>(null);
   const [listingReferrer, setListingReferrer] = useState<{ providerSlug: string; providerName: string } | null>(null);
@@ -1902,7 +1902,11 @@ function SampleUploader({ listingId, modalities = [], reviewStatus }: { listingI
 }
 
 function ProviderDashboard() {
-  const [activeTab, setActiveTab] = useState('listings');
+  const [activeTab, setActiveTab] = useState(() => {
+    const hash = window.location.hash.replace('#', '');
+    if (hash === 'settings') return 'stripe';
+    return ['listings', 'create', 'programs', 'analytics', 'docs', 'stripe'].includes(hash) ? hash : 'listings';
+  });
   const [listings, setListings] = useState<Record<string, unknown>[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedListingId, setSelectedListingId] = useState<string | null>(null);
@@ -5479,19 +5483,117 @@ function CustomRequestModal({ onClose, sourceListing }: { onClose: () => void; s
 
 function AccountPage() {
   const clerk = CLERK_AVAILABLE ? useClerk() : null;
+  const user = clerk?.user;
+  const [stats, setStats] = useState<{ purchases: number; listings: number; isProvider: boolean } | null>(null);
+  const { isSignedIn } = useClerkAuth();
+
+  useEffect(() => {
+    if (!isSignedIn) return;
+    Promise.all([
+      api.get<{ data: Array<unknown> }>('/purchases').catch(() => ({ data: [] })),
+      api.get<{ data: Array<unknown> }>('/provider/listings').catch(() => ({ data: [] })),
+      api.get<{ data: { status: string } }>('/auth/provider/onboarding-status').catch(() => null),
+    ]).then(([purchases, listings, providerStatus]) => {
+      setStats({
+        purchases: purchases.data.length,
+        listings: listings.data.length,
+        isProvider: !!providerStatus,
+      });
+    });
+  }, [isSignedIn]);
+
+  const memberSince = user?.createdAt ? new Date(user.createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : '';
 
   return (
     <div className="api-docs">
       <div className="api-docs-header">
         <div><h2 className="api-docs-title">Account</h2></div>
       </div>
-      <div className="api-preamble" style={{ marginTop: 16 }}>
-        {clerk ? (
-          <button className="db-signout-btn" onClick={() => clerk.signOut()}>Sign out</button>
-        ) : (
+
+      {clerk && user ? (
+        <>
+          {/* Profile */}
+          <div className="api-preamble" style={{ marginTop: 16, padding: '20px 24px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+              {user.imageUrl ? (
+                <img src={user.imageUrl} alt="" style={{ width: 56, height: 56, borderRadius: '50%', border: '1px solid var(--border)' }} />
+              ) : (
+                <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, fontWeight: 600, color: 'var(--bg)' }}>
+                  {(user.firstName ?? 'U').charAt(0)}
+                </div>
+              )}
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 16, fontWeight: 500 }}>{user.fullName || user.firstName || 'User'}</div>
+                <div style={{ fontFamily: "'Share Tech Mono', monospace", fontSize: 10, color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '1px', marginTop: 2 }}>
+                  {user.primaryEmailAddress?.emailAddress ?? ''}
+                </div>
+                {memberSince && (
+                  <div style={{ fontFamily: "'Share Tech Mono', monospace", fontSize: 9, color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '1px', marginTop: 4 }}>
+                    Member since {memberSince}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Activity */}
+          {stats && (
+            <div className="db-analytics-grid" style={{ marginTop: 16 }}>
+              <div className="db-analytics-card">
+                <div className="db-analytics-card__value">{stats.purchases}</div>
+                <div className="db-meta-label">Purchases</div>
+              </div>
+              {stats.isProvider && (
+                <div className="db-analytics-card">
+                  <div className="db-analytics-card__value">{stats.listings}</div>
+                  <div className="db-meta-label">Listings</div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Quick links */}
+          <div style={{ marginTop: 16 }}>
+            <div className="db-meta-label" style={{ marginBottom: 8 }}>Quick links</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+              <div className="db-catalog-row db-listing-row--provider" style={{ cursor: 'pointer' }} onClick={() => window.location.href = '/data/buy#purchases'}>
+                <div style={{ flex: 1 }}>
+                  <div className="db-catalog-row__title" style={{ fontSize: 13 }}>My Purchases</div>
+                  <div className="db-catalog-row__details" style={{ marginTop: 2 }}>View your purchased datasets</div>
+                </div>
+                <span className="db-catalog-row__view">View →</span>
+              </div>
+              {stats?.isProvider && (
+                <>
+                  <div className="db-catalog-row db-listing-row--provider" style={{ cursor: 'pointer' }} onClick={() => window.location.href = '/data/sell#listings'}>
+                    <div style={{ flex: 1 }}>
+                      <div className="db-catalog-row__title" style={{ fontSize: 13 }}>My Listings</div>
+                      <div className="db-catalog-row__details" style={{ marginTop: 2 }}>Manage your dataset listings</div>
+                    </div>
+                    <span className="db-catalog-row__view">View →</span>
+                  </div>
+                  <div className="db-catalog-row db-listing-row--provider" style={{ cursor: 'pointer' }} onClick={() => window.location.href = '/data/sell#settings'}>
+                    <div style={{ flex: 1 }}>
+                      <div className="db-catalog-row__title" style={{ fontSize: 13 }}>Provider Settings</div>
+                      <div className="db-catalog-row__details" style={{ marginTop: 2 }}>Stripe, webhook, and profile settings</div>
+                    </div>
+                    <span className="db-catalog-row__view">View →</span>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* Sign out */}
+          <div className="api-preamble" style={{ marginTop: 16, padding: '20px 24px' }}>
+            <button className="db-signout-btn" onClick={() => clerk.signOut()}>Sign out</button>
+          </div>
+        </>
+      ) : (
+        <div className="api-preamble" style={{ marginTop: 16 }}>
           <p style={{ fontSize: 12, color: 'var(--text-dim)' }}>Not signed in</p>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

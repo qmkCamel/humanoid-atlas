@@ -47,7 +47,7 @@ const TABS: { id: string; label: string; group: TabGroup; hidden?: boolean }[] =
   { id: 'seller_terms', label: '', group: 'data', hidden: true },
   { id: 'buyer_terms', label: '', group: 'data', hidden: true },
   { id: 'collector_terms', label: '', group: 'data', hidden: true },
-  { id: 'account', label: 'Sign Out', group: 'data' },
+  { id: 'account', label: 'Account', group: 'data' },
   // Arena
   { id: 'arena_oems', label: 'Atlas Arena', group: 'arena' },
   { id: 'arena_suppliers', label: 'Supplier Arena', group: 'arena', hidden: true },
