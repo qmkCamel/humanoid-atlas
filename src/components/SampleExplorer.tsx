@@ -40,7 +40,10 @@ function formatDuration(seconds: number): string {
 }
 
 function formatHours(hours: number): string {
-  return hours < 1 ? `${Math.round(hours * 60)} min` : `${hours.toFixed(1)} hrs`;
+  if (hours < 0.017) return '< 1 min'; // less than 1 minute
+  const mins = hours * 60;
+  if (mins < 60) return `${mins.toFixed(1)} min`;
+  return `${hours.toFixed(1)} hrs`;
 }
 
 // ─── EPISODE CARD ──────────────────────────────────────────
@@ -88,18 +91,20 @@ function EpisodeCard({ episode, baseUrl, onClick, isSelected }: {
               onLoadedMetadata={() => setVideoLoaded(true)} />
             {!videoLoaded && (
               <div className="se-card__placeholder">
-                <span className="se-card__play-icon">&#9654;</span>
-                <span>{episode.id}</span>
+                {episode.duration_seconds && <span>{formatDuration(episode.duration_seconds)}</span>}
+                {episode.instruction && <span className="se-card__placeholder-instruction">{episode.instruction.length > 80 ? episode.instruction.slice(0, 80) + '...' : episode.instruction}</span>}
               </div>
             )}
           </>
         )}
-        <div className="se-card__overlay">
-          <span className="se-card__play-icon">&#9654;</span>
-          {episode.instruction && (
-            <p className="se-card__instruction">{episode.instruction.length > 120 ? episode.instruction.slice(0, 120) + '...' : episode.instruction}</p>
-          )}
-        </div>
+        {(thumbnailUrl || videoLoaded) && (
+          <div className="se-card__overlay">
+            <span className="se-card__play-icon">&#9654;</span>
+            {episode.instruction && (
+              <p className="se-card__instruction">{episode.instruction.length > 120 ? episode.instruction.slice(0, 120) + '...' : episode.instruction}</p>
+            )}
+          </div>
+        )}
       </div>
       <div className="se-card__meta">
         <span className="se-card__id">{episode.title || episode.id}</span>
@@ -202,8 +207,27 @@ function EpisodeExpanded({ episode, baseUrl, onClose, onPrev, onNext, hasPrev, h
         </div>
       </div>
       <div className="se-expanded__nav">
-        <a className="se-expanded__download" href={videoUrl} target="_blank" rel="noopener noreferrer">Download Video</a>
-        {episode.annotations && <a className="se-expanded__download" href={resolveUrl(episode.annotations)} target="_blank" rel="noopener noreferrer">Download Annotations</a>}
+        <div className="se-expanded__downloads">
+          <button className="se-expanded__download" onClick={async () => {
+            try {
+              const res = await fetch(videoUrl);
+              const blob = await res.blob();
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement('a'); a.href = url; a.download = `${episode.id}_video.mp4`; a.click();
+              URL.revokeObjectURL(url);
+            } catch { window.open(videoUrl, '_blank'); }
+          }}>Download Video</button>
+          {episode.annotations && <button className="se-expanded__download" onClick={async () => {
+            try {
+              const url = resolveUrl(episode.annotations!);
+              const res = await fetch(url);
+              const blob = await res.blob();
+              const objUrl = URL.createObjectURL(blob);
+              const a = document.createElement('a'); a.href = objUrl; a.download = `${episode.id}_annotations.json`; a.click();
+              URL.revokeObjectURL(objUrl);
+            } catch { window.open(resolveUrl(episode.annotations!), '_blank'); }
+          }}>Download Annotations</button>}
+        </div>
         <div className="se-expanded__arrows">
           <button className="se-expanded__arrow" onClick={onPrev} disabled={!hasPrev}>&larr; Prev</button>
           <button className="se-expanded__arrow" onClick={onNext} disabled={!hasNext}>Next &rarr;</button>
@@ -279,6 +303,16 @@ export default function SampleExplorer({ slug }: { slug: string }) {
   const [selectedEpisodeId, setSelectedEpisodeId] = useState<string | null>(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const gridRef = useRef<HTMLDivElement>(null);
+
+  // Hide browser scrollbar on this page
+  useEffect(() => {
+    document.documentElement.style.scrollbarWidth = 'none';
+    document.body.style.overflow = 'auto';
+    const style = document.createElement('style');
+    style.textContent = 'html::-webkit-scrollbar, body::-webkit-scrollbar { display: none !important; }';
+    document.head.appendChild(style);
+    return () => { document.documentElement.style.scrollbarWidth = ''; style.remove(); };
+  }, []);
 
   // Debounce search
   useEffect(() => {
@@ -371,7 +405,7 @@ export default function SampleExplorer({ slug }: { slug: string }) {
     return (
       <div className="se-page">
         <div className="se-header">
-          <a className="se-header__back" href={`/data/buy#listing-${slug}`}>&larr; Back to Listing</a>
+          <a className="se-header__back" href={`/data/buy?listing=${slug}`}>&larr; Back to Listing</a>
         </div>
         <div className="se-loading">
           <div className="se-loading__skeleton" /><div className="se-loading__skeleton" /><div className="se-loading__skeleton" />
@@ -402,7 +436,7 @@ export default function SampleExplorer({ slug }: { slug: string }) {
     <div className="se-page">
       {/* Header */}
       <div className="se-header">
-        <a className="se-header__back" href={`/data/buy`} onClick={e => { e.preventDefault(); window.history.back(); }}>&larr; Back to Listing</a>
+        <a className="se-header__back" href={`/data/buy?listing=${slug}`}>&larr; Back to Listing</a>
         <div className="se-header__info">
           <h1 className="se-header__title">{data.listing_title}</h1>
           <p className="se-header__sub">
@@ -449,7 +483,7 @@ export default function SampleExplorer({ slug }: { slug: string }) {
             <EpisodeExpanded
               episode={selectedEpisode}
               baseUrl={data.base_url}
-              onClose={() => setSelectedEpisodeId(null)}
+              onClose={() => { setSelectedEpisodeId(null); gridRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }}
               onPrev={handlePrev}
               onNext={handleNext}
               hasPrev={selectedIndex > 0}

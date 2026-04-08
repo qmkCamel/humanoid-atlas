@@ -483,10 +483,20 @@ function PurchaseSection({ listing, cart, onCartOpen }: { listing: Listing; cart
 
   return (
     <div className="db-purchase-section">
+      {hasModalityPrices && (
+        <div>
+          <div className="db-meta-label" style={{ marginBottom: 6 }}>Purchasing Mode</div>
+          <div className="db-purchase-mode-toggle">
+            <button className={`db-purchase-mode-btn${!advanced ? ' db-purchase-mode-btn--active' : ''}`} onClick={() => setAdvanced(false)}>Bundle</button>
+            <button className={`db-purchase-mode-btn${advanced ? ' db-purchase-mode-btn--active' : ''}`} onClick={() => setAdvanced(true)}>Advanced</button>
+          </div>
+        </div>
+      )}
+
       {(!advanced || !hasModalityPrices) && (
         <div className="db-purchase-row">
           <div className="db-purchase-input">
-            <div className="db-meta-label">Hours</div>
+            <div className="db-meta-label">Hours{listing.total_hours ? ` (${Number(listing.total_hours).toLocaleString()} available)` : ''}</div>
             <input type="text" inputMode="numeric" className="db-purchase-hours" value={hoursStr}
               onChange={e => {
                 const v = e.target.value.replace(/[^0-9]/g, '');
@@ -519,14 +529,14 @@ function PurchaseSection({ listing, cart, onCartOpen }: { listing: Listing; cart
               <label style={{ display: 'flex', alignItems: 'center', gap: 6, flex: 1, cursor: 'pointer' }}>
                 <input type="checkbox" checked={selectedMods[m] ?? false}
                   onChange={e => setSelectedMods(p => ({ ...p, [m]: e.target.checked }))} />
-                <span className="db-badge" style={{ margin: 0 }}>{m.replace(/_/g, ' ')}</span>
-                <span style={{ fontFamily: "'Share Tech Mono', monospace", fontSize: 10, color: 'var(--text-dim)' }}>
+                <span className="db-badge" style={{ margin: 0, fontSize: 8 }}>{m.replace(/_/g, ' ')}</span>
+                <span style={{ fontFamily: "'Share Tech Mono', monospace", fontSize: 9, color: 'var(--text-dim)', letterSpacing: '0.5px' }}>
                   ${listing.modality_prices![m]}/hr
                 </span>
               </label>
               {selectedMods[m] && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <input type="text" inputMode="numeric" className="db-purchase-hours" style={{ width: 60 }}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                  <input type="text" inputMode="numeric" className="db-purchase-hours" style={{ width: 50, fontSize: 12, padding: '5px 8px' }}
                     value={modHours[m] ?? ''}
                     onChange={e => {
                       const v = e.target.value.replace(/[^0-9]/g, '');
@@ -537,8 +547,8 @@ function PurchaseSection({ listing, cart, onCartOpen }: { listing: Listing; cart
                         setModHours(p => ({ ...p, [m]: v }));
                       }
                     }} />
-                  <span style={{ fontFamily: "'Share Tech Mono', monospace", fontSize: 10, color: 'var(--text-dim)' }}>hrs</span>
-                  <span style={{ fontFamily: "'Share Tech Mono', monospace", fontSize: 10, minWidth: 60, textAlign: 'right' }}>
+                  <span style={{ fontFamily: "'Share Tech Mono', monospace", fontSize: 9, color: 'var(--text-dim)', letterSpacing: '0.5px' }}>hrs</span>
+                  <span style={{ fontFamily: "'Share Tech Mono', monospace", fontSize: 9, minWidth: 50, textAlign: 'right', letterSpacing: '0.5px' }}>
                     ${((parseInt(modHours[m]) || 0) * (listing.modality_prices![m] ?? 0)).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                   </span>
                 </div>
@@ -553,15 +563,6 @@ function PurchaseSection({ listing, cart, onCartOpen }: { listing: Listing; cart
       )}
 
       {minNotice && <div className="db-min-notice">Minimum {listing.minimum_hours} hrs required</div>}
-
-      {hasModalityPrices && (
-        <button className="db-advanced-toggle" onClick={() => setAdvanced(!advanced)}>
-          {advanced ? 'Bundle Purchase' : 'Advanced Purchasing'}
-          <svg width="10" height="6" viewBox="0 0 10 6" fill="none" style={{ marginLeft: 6, transform: advanced ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }}>
-            <path d="M1 1L5 5L9 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </button>
-      )}
 
       <button className={`db-add-cart-btn${inCart ? ' db-add-cart-btn--in-cart' : ''}`} onClick={handleAddToCart}>
         {inCart ? 'IN CART - UPDATE' : 'ADD TO CART'}
@@ -647,6 +648,17 @@ function BuyData() {
   useEffect(() => { fetchListings(); }, [fetchListings]);
   useEffect(() => { api.get<{ data: typeof facets }>('/catalog/facets').then(r => setFacets(r.data)).catch(console.error); }, []);
 
+  // Auto-open listing from ?listing= query param (e.g., returning from Sample Explorer)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const listingSlug = params.get('listing');
+    if (listingSlug) {
+      selectListing(listingSlug);
+      // Clean up URL
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }, []);
+
   const selectListing = async (slug: string, referrer?: { providerSlug: string; providerName: string }) => {
     try {
       setListingReferrer(referrer ?? null);
@@ -666,37 +678,59 @@ function BuyData() {
           if (listingReferrer) { setShowProviders(true); setSelectedProvider(listingReferrer.providerSlug); setListingReferrer(null); }
           setSelectedListing(null);
         }}>← {listingReferrer ? `Back to ${listingReferrer.providerName}` : 'Back to catalog'}</button>
-        <h2 className="api-docs-title">{l.title}</h2>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
+          <h2 className="api-docs-title" style={{ margin: 0 }}>{l.title}</h2>
+          {l.sample_manifest_url && <a href={`/data/explore/${l.slug}`} className="db-explore-cta__btn" style={{ flexShrink: 0 }}>Explore All Samples &rarr;</a>}
+        </div>
         {l.description && <p style={{ fontFamily: "'Share Tech Mono', monospace", fontSize: 11, color: 'var(--text-dim)', marginTop: 4, lineHeight: 1.5 }}>{l.description}</p>}
         {prov && <p style={{ fontFamily: "'Share Tech Mono', monospace", fontSize: 11, color: 'var(--text-dim)', marginTop: 4, marginBottom: 12 }}>By <span className="db-provider-link" onClick={() => { setSelectedListing(null); setShowProviders(true); setSelectedProvider(prov.slug); }}>{prov.name}</span></p>}
         {(() => {
           const tags = Array.isArray(l.tags) ? l.tags as string[] : [];
+          const collectionTags = tags.filter(t => t.startsWith('collection:')).map(t => t.split(':')[1]);
+          const embodimentTags = tags.filter(t => t.startsWith('embodiment:')).map(t => t.split(':')[1]);
+          const taskTags = tags.filter(t => t.startsWith('task:')).map(t => t.split(':')[1]);
+          const formats = l.format ? String(l.format).split(',').map(f => f.trim()).filter(Boolean) : [];
           return (
-            <div className="db-badges">
-              {(Array.isArray(l.modality) ? l.modality : [l.modality]).map(m => <span key={m} className="db-badge">{m.replace(/_/g, ' ')}</span>)}
-              {(Array.isArray(l.environment) ? l.environment : [l.environment]).map(e => <span key={e} className="db-badge">{e.replace(/_/g, ' ')}</span>)}
-              {tags.filter(t => t.startsWith('collection:')).map(t => <span key={t} className="db-badge">{t.split(':')[1].replace(/_/g, ' ')}</span>)}
-              {tags.filter(t => t.startsWith('embodiment:')).map(t => <span key={t} className="db-badge">{t.split(':')[1].replace(/_/g, ' ')}</span>)}
-              {tags.filter(t => t.startsWith('task:')).map(t => <span key={t} className="db-badge">{t.split(':')[1].replace(/_/g, ' ')}</span>)}
-              {l.format && String(l.format).split(',').map(f => f.trim()).filter(Boolean).map(f =>
-                f === 'lerobot'
-                  ? <span key={f} className="db-badge db-badge--lerobot">LeRobot</span>
-                  : <span key={f} className="db-badge">{f}</span>
-              )}
-              <span className="db-badge">${l.price_per_hour}/hr{l.modality_prices ? ' (bundle)' : ''}</span>
-              {l.total_hours && <span className="db-badge">{l.total_hours.toLocaleString()} hrs</span>}
-              <span className="db-badge">min {l.minimum_hours} hrs</span>
+            <div className="db-listing-tags">
+              <div className="db-listing-tags__row">
+                <span className="db-listing-tags__label">Modality</span>
+                {(Array.isArray(l.modality) ? l.modality : [l.modality]).map(m => <span key={m} className="db-badge">{m.replace(/_/g, ' ')}</span>)}
+              </div>
+              <div className="db-listing-tags__row">
+                <span className="db-listing-tags__label">Environment</span>
+                {(Array.isArray(l.environment) ? l.environment : [l.environment]).map(e => <span key={e} className="db-badge">{e.replace(/_/g, ' ')}</span>)}
+              </div>
+              {collectionTags.length > 0 && <div className="db-listing-tags__row">
+                <span className="db-listing-tags__label">Collection</span>
+                {collectionTags.map(t => <span key={t} className="db-badge">{t.replace(/_/g, ' ')}</span>)}
+              </div>}
+              {embodimentTags.length > 0 && <div className="db-listing-tags__row">
+                <span className="db-listing-tags__label">Embodiment</span>
+                {embodimentTags.map(t => <span key={t} className="db-badge">{t.replace(/_/g, ' ')}</span>)}
+              </div>}
+              {taskTags.length > 0 && <div className="db-listing-tags__row">
+                <span className="db-listing-tags__label">Tasks</span>
+                {taskTags.map(t => <span key={t} className="db-badge">{t.replace(/_/g, ' ')}</span>)}
+              </div>}
+              {formats.length > 0 && <div className="db-listing-tags__row">
+                <span className="db-listing-tags__label">Format</span>
+                {formats.map(f => f === 'lerobot' ? <span key={f} className="db-badge db-badge--lerobot">LeRobot</span> : <span key={f} className="db-badge">{f}</span>)}
+              </div>}
+              <div className="db-listing-tags__row">
+                <span className="db-listing-tags__label">Pricing</span>
+                <span className="db-badge">${l.price_per_hour}/hr{l.modality_prices ? ' (bundle)' : ''}</span>
+                {l.total_hours && <span className="db-badge">{l.total_hours.toLocaleString()} hrs total</span>}
+                <span className="db-badge">min {l.minimum_hours} hrs</span>
+              </div>
+              {l.modality_prices && <div className="db-listing-tags__row">
+                <span className="db-listing-tags__label">Per-modality</span>
+                {Object.entries(l.modality_prices).map(([mod, price]) => (
+                  <span key={mod} className="db-badge">{mod.replace(/_/g, ' ')}: ${price}/hr</span>
+                ))}
+              </div>}
             </div>
           );
         })()}
-
-        {l.modality_prices && (
-          <div className="db-modality-prices-display" style={{ marginTop: 8, marginBottom: 8 }}>
-            {Object.entries(l.modality_prices).map(([mod, price]) => (
-              <span key={mod} className="db-badge" style={{ fontSize: 9 }}>{mod.replace(/_/g, ' ')}: ${price}/hr</span>
-            ))}
-          </div>
-        )}
 
         {l.samples && l.samples.length > 0 && (() => {
           const tags = Array.isArray(l.tags) ? l.tags as string[] : [];
@@ -706,18 +740,6 @@ function BuyData() {
           ];
           return <SampleGallery samples={l.samples} modalities={allMods} />;
         })()}
-
-        {/* View All Samples — links to Sample Explorer */}
-        {l.sample_manifest_url && l.manifest_summary && (
-          <div className="api-preamble" style={{ marginTop: 12, textAlign: 'center', padding: '16px 24px' }}>
-            <p style={{ fontSize: 10, color: 'var(--text-dim)', marginBottom: 8 }}>
-              {l.manifest_summary!.episode_count} episodes · {l.manifest_summary!.total_duration_hours} hours of sample data
-            </p>
-            <a href={`/data/explore/${l.slug}`} className="db-add-cart-btn" style={{ display: 'inline-block', textDecoration: 'none', padding: '10px 28px' }}>
-              Explore All Samples &rarr;
-            </a>
-          </div>
-        )}
 
         <PurchaseSection listing={l} cart={cart} onCartOpen={() => {}} />
 
@@ -1891,7 +1913,7 @@ function SampleUploader({ listingId, modalities = [], reviewStatus }: { listingI
   return (
     <>
     <div className="api-preamble" style={{ marginTop: 12 }}>
-      <div className="db-meta-label" style={{ marginBottom: 10 }}>Samples ({samples.length}/{minSamples})</div>
+      <div className="db-meta-label" style={{ marginBottom: 10 }}>Samples ({samples.length})</div>
 
       {samples.length > 0 && <SampleList samples={samples} modalities={modalities} onRemove={async (sampleId) => {
         try {
