@@ -765,8 +765,7 @@ function BuyData() {
                 )
               )).slice(0, 5).map(o => (
                 <div key={o.id} className="db-catalog-row" onClick={() => selectListing(o.slug)}>
-                  {o.thumbnail_url && <img className="db-catalog-row__thumb" src={o.thumbnail_url} alt="" />}
-                  <div className="db-catalog-row__content">
+                                    <div className="db-catalog-row__content">
                     <div className="db-catalog-row__line1">
                       <span className="db-catalog-row__title">{o.title}</span>
                       <span className="db-catalog-row__view">View →</span>
@@ -926,8 +925,7 @@ function BuyData() {
               {[...listings].sort((a, b) => (watchlist.has(b.id) ? 1 : 0) - (watchlist.has(a.id) ? 1 : 0)).map(l => (
                 <div key={l.id} className="db-catalog-row" onClick={() => selectListing(l.slug)}>
                   <input type="checkbox" className="db-compare-check" checked={compareIds.has(l.id)} onClick={e => toggleCompare(l.id, e)} onChange={() => {}} title="Compare" />
-                  {l.thumbnail_url && <img className="db-catalog-row__thumb" src={l.thumbnail_url} alt="" />}
-                  <div className="db-catalog-row__content">
+                                    <div className="db-catalog-row__content">
                     <div className="db-catalog-row__line1">
                       <span className="db-catalog-row__title">{l.title}</span>
                       <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
