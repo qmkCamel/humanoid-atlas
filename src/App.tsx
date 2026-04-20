@@ -2436,7 +2436,7 @@ export default function App() {
       </div>
 
       {TABS.filter((t) => t.group === activeTabGroup && !t.hidden).filter((t) => t.id !== 'account' || clerkSignedIn).length > 1 && (
-      <nav className="component-nav">
+      <nav className={`component-nav${activeTabGroup === 'cli' ? ' component-nav--cli' : ''}`}>
         {TABS.filter((t) => t.group === activeTabGroup && !t.hidden).filter((t) => t.id !== 'account' || clerkSignedIn).map((t) => {
           return (
             <button

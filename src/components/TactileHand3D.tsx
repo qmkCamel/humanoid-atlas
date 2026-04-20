@@ -186,7 +186,7 @@ export function TactileHand3DScene({ pressures, taxelToBone, hasLeft, hasRight }
   return (
     <div className="db-tactile-3d-canvas">
       <Canvas camera={{ position: [0, 0, 3], fov: 45 }} gl={{ alpha: true }}>
-        <color attach="background" args={['#f5f2ed']} />
+        <color attach="background" args={['#faf8f4']} />
         <ambientLight intensity={0.6} />
         <directionalLight position={[2, 3, 4]} intensity={0.8} />
         <directionalLight position={[-2, -1, 2]} intensity={0.3} />

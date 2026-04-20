@@ -197,8 +197,8 @@ function EpisodeExpanded({ episode, baseUrl, onClose, onPrev, onNext, hasPrev, h
           {episode.annotations && (
             <div className="se-expanded__annotations">
               <span className="se-expanded__label">Annotations</span>
-              {annLoading && <p style={{ fontSize: 10, color: 'var(--text-dim)' }}>Loading...</p>}
-              {annError && <p style={{ fontSize: 10, color: 'var(--red)' }}>Failed to load: {annError}</p>}
+              {annLoading && <p style={{ fontSize: 14, color: 'var(--text-dim)' }}>Loading...</p>}
+              {annError && <p style={{ fontSize: 14, color: 'var(--red)' }}>Failed to load: {annError}</p>}
               {annotations && (
                 <pre className="se-expanded__json">{JSON.stringify(annotations, null, 2)}</pre>
               )}
