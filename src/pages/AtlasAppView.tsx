@@ -1,7 +1,8 @@
 import { useState, useMemo, useEffect, useCallback, useRef, Fragment } from 'react';
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import PLYViewer, { preloadPLY } from '../components/PLYViewer';
+import PLYViewer from '../components/PLYViewer';
+import { preloadPLY } from '../components/plyCache';
 import SupplyChainGraph from '../components/SupplyChainGraph';
 import { companies, relationships, componentCategories, vlaModels, rewardModels, rewardComparisons, worldModels, vizTools, headDesigns, simPlatforms, safetyStandards, oemSafetyProfiles } from '../data';
 import type { RewardModelType, WorldModelType, VizToolType, FaceDisplayType, FundingStatus, FactoryStatus, SimPlatformType, SafetyComplianceLevel } from '../data';

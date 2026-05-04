@@ -974,10 +974,6 @@ export default function Arena({ activeSubTab }: ArenaProps) {
     return Math.min(...chartData.map((r) => r.elo)) - 50;
   }, [chartData]);
 
-  // ==================== RENDER ====================
-
-  if (!config) return null;
-
   // In blind mode, only show specs both entities share for fair comparison
   const sharedLabels = useMemo(() => {
     if (!matchup || !isBlindMode) return null;
@@ -995,6 +991,10 @@ export default function Arena({ activeSubTab }: ArenaProps) {
       skipCountRef.current = 0;
     }
   }, [sharedLabels, isBlindMode, voteResult, fetchMatchup]);
+
+  // ==================== RENDER ====================
+
+  if (!config) return null;
 
   function renderCard(entity: ArenaEntity, side: 'A' | 'B') {
     const result = voteResult?.[side === 'A' ? 'entityA' : 'entityB'];

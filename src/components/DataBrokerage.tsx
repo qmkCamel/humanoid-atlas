@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef, Suspense } from 'react';
+import React, { useState, useEffect, useCallback, useRef, Suspense, useMemo } from 'react';
 import { useAuth, useClerk, SignInButton, SignUpButton } from '@clerk/clerk-react';
 import { loadStripe, type Stripe, type StripeElements } from '@stripe/stripe-js';
 import { api, setTokenGetter } from '../lib/brokerage-api';
@@ -35,6 +35,12 @@ const stripePromise = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
   : null;
 
 const CLERK_AVAILABLE = !!import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+
+function deferStateUpdate(update: () => void) {
+  queueMicrotask(update);
+}
+
+type ClerkResource = ReturnType<typeof useClerk>;
 
 // Safe Clerk hook — returns defaults if ClerkProvider is not mounted
 function useClerkAuth(): { isSignedIn: boolean; getToken: () => Promise<string | null> } {
@@ -617,8 +623,10 @@ function BuyData() {
   useEffect(() => {
     if (isSignedIn && localStorage.getItem('db_pending_checkout') && cart.totalItems > 0) {
       localStorage.removeItem('db_pending_checkout');
-      setShowCart(true);
-      setPendingCheckout(true);
+      deferStateUpdate(() => {
+        setShowCart(true);
+        setPendingCheckout(true);
+      });
     }
   }, [isSignedIn, cart.totalItems]);
 
@@ -643,29 +651,29 @@ function BuyData() {
     if (filters.max_price) params.set('max_price', filters.max_price);
     if (filters.sort && filters.sort !== 'newest') params.set('sort', filters.sort);
     api.get<{ data: Listing[] }>(`/catalog?${params}`).then(r => setListings(r.data)).catch(console.error).finally(() => setLoading(false));
-  }, [filters.modality, filters.environment, filters.collection_method, filters.embodiment_type, filters.task_type, filters.min_price, filters.max_price, filters.sort, debouncedQ]);
+  }, [filters.modality, filters.environment, filters.collection_method, filters.embodiment_type, filters.task_type, filters.min_price, filters.max_price, filters.sort, debouncedQ, listings.length]);
 
-  useEffect(() => { fetchListings(); }, [fetchListings]);
+  useEffect(() => { deferStateUpdate(fetchListings); }, [fetchListings]);
   useEffect(() => { api.get<{ data: typeof facets }>('/catalog/facets').then(r => setFacets(r.data)).catch(console.error); }, []);
+
+  const selectListing = useCallback(async (slug: string, referrer?: { providerSlug: string; providerName: string }) => {
+    try {
+      setListingReferrer(referrer ?? null);
+      const r = await api.get<{ data: Listing }>(`/catalog/${slug}`);
+      setSelectedListing(r.data);
+    } catch (err) { console.error(err); }
+  }, []);
 
   // Auto-open listing from ?listing= query param (e.g., returning from Sample Explorer)
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const listingSlug = params.get('listing');
     if (listingSlug) {
-      selectListing(listingSlug);
+      deferStateUpdate(() => selectListing(listingSlug));
       // Clean up URL
       window.history.replaceState({}, '', window.location.pathname);
     }
-  }, []);
-
-  const selectListing = async (slug: string, referrer?: { providerSlug: string; providerName: string }) => {
-    try {
-      setListingReferrer(referrer ?? null);
-      const r = await api.get<{ data: Listing }>(`/catalog/${slug}`);
-      setSelectedListing(r.data);
-    } catch (err) { console.error(err); }
-  };
+  }, [selectListing]);
 
   const formatUsd = (cents: number) => `$${(cents / 100).toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
 
@@ -1055,7 +1063,7 @@ function InlineCart({ cart, formatUsd, autoCheckout, onAutoCheckoutDone, onPurch
   useEffect(() => {
     if (autoCheckout && isSignedIn) {
       onAutoCheckoutDone?.();
-      handleCheckout();
+      deferStateUpdate(handleCheckout);
     }
   }, [autoCheckout, isSignedIn, handleCheckout, onAutoCheckoutDone]);
 
@@ -1151,12 +1159,13 @@ function CheckoutModal({ paymentIntents, formatUsd, onSuccess, onClose, onPurcha
   const elementsRef = useRef<StripeElements | null>(null);
 
   const current = paymentIntents[currentIdx];
+  const currentClientSecret = current?.client_secret;
   const totalAmount = paymentIntents.reduce((s, pi) => s + pi.amount_cents, 0);
   const allDone = completed.length === paymentIntents.length;
 
   // Mount Stripe Payment Element for current PaymentIntent
   useEffect(() => {
-    if (!current || !stripePromise || allDone) return;
+    if (!currentClientSecret || !stripePromise || allDone) return;
     let mounted = true;
 
     async function init() {
@@ -1165,7 +1174,7 @@ function CheckoutModal({ paymentIntents, formatUsd, onSuccess, onClose, onPurcha
       stripeRef.current = stripe;
 
       const elements = stripe.elements({
-        clientSecret: current.client_secret,
+        clientSecret: currentClientSecret,
         appearance: {
           theme: 'flat',
           variables: {
@@ -1193,7 +1202,9 @@ function CheckoutModal({ paymentIntents, formatUsd, onSuccess, onClose, onPurcha
       }
     }
 
-    setStripeReady(false);
+    deferStateUpdate(() => {
+      if (mounted) setStripeReady(false);
+    });
     init();
 
     return () => {
@@ -1203,7 +1214,7 @@ function CheckoutModal({ paymentIntents, formatUsd, onSuccess, onClose, onPurcha
       }
       elementsRef.current = null;
     };
-  }, [current?.client_secret, allDone]);
+  }, [currentClientSecret, allDone]);
 
   const handlePay = async () => {
     const stripe = stripeRef.current;
@@ -1668,9 +1679,9 @@ function extractEpisodeId(filename: string, modality: string | null): string {
   let base = filename.replace(/\.[^.]+$/, '').toLowerCase();
   if (modality) {
     const keywords = MODALITY_KEYWORDS[modality] ?? [];
-    for (const kw of keywords) base = base.replace(new RegExp(`[_\\-]?${kw}[_\\-]?`, 'g'), '_');
+    for (const kw of keywords) base = base.replace(new RegExp(`[_-]?${kw}[_-]?`, 'g'), '_');
   }
-  base = base.replace(/[_\-]{2,}/g, '_').replace(/^[_\-]+|[_\-]+$/g, '');
+  base = base.replace(/[_-]{2,}/g, '_').replace(/^[_-]+|[_-]+$/g, '');
   return base || filename.replace(/\.[^.]+$/, '').toLowerCase();
 }
 
@@ -2850,7 +2861,7 @@ function generateDatasetCard(listing: Record<string, unknown>, providerName: str
   // Build details table rows, skipping empty values
   const rows: string[] = [];
   rows.push(`| **Provider** | ${providerName} |`);
-  if (allMods.length > 0) rows.push(`| **Modalities** | ${allMods.map(m => '\`' + m.replace(/_/g, ' ') + '\`').join(', ')} |`);
+  if (allMods.length > 0) rows.push(`| **Modalities** | ${allMods.map(m => '`' + m.replace(/_/g, ' ') + '`').join(', ')} |`);
   if (allEnvs.length > 0) rows.push(`| **Environment** | ${allEnvs.map(e => e.replace(/_/g, ' ')).join(', ')} |`);
   if (collections.length > 0) rows.push(`| **Collection Method** | ${collections.join(', ')} |`);
   if (embodiments.length > 0) rows.push(`| **Embodiment** | ${embodiments.join(', ')} |`);
@@ -3525,15 +3536,15 @@ function CollectionProgramsManager() {
   const [selectedProgramId, setSelectedProgramId] = useState<string | null>(null);
   const [showCreate, setShowCreate] = useState(false);
 
-  const fetchPrograms = () => {
+  const fetchPrograms = useCallback(() => {
     setLoading(true);
     api.get<{ data: Record<string, unknown>[] }>('/provider/collection-programs')
       .then(r => setPrograms(r.data))
       .catch(console.error)
       .finally(() => setLoading(false));
-  };
+  }, []);
 
-  useEffect(() => { fetchPrograms(); }, []);
+  useEffect(() => { deferStateUpdate(fetchPrograms); }, [fetchPrograms]);
 
   if (loading) return <div className="db-loading">Loading programs...</div>;
 
@@ -3586,15 +3597,15 @@ function ProgramSignups({ programId, program, onBack }: { programId: string; pro
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [actionMsg, setActionMsg] = useState<string | null>(null);
 
-  const fetchSignups = () => {
+  const fetchSignups = useCallback(() => {
     setLoading(true);
     api.get<{ data: Record<string, unknown>[] }>(`/provider/collection-programs/${programId}/signups`)
       .then(r => setSignups(r.data))
       .catch(console.error)
       .finally(() => setLoading(false));
-  };
+  }, [programId]);
 
-  useEffect(() => { fetchSignups(); }, [programId]);
+  useEffect(() => { deferStateUpdate(fetchSignups); }, [fetchSignups]);
 
   const handleStatusChange = async (signupId: string, status: string) => {
     setActionLoading(signupId);
@@ -3757,7 +3768,7 @@ function ProviderAnalytics() {
   const [period, setPeriod] = useState('all');
 
   useEffect(() => {
-    setLoading(true);
+    deferStateUpdate(() => setLoading(true));
     api.get<{ data: Record<string, unknown> }>(`/provider/analytics?period=${period}`)
       .then(r => setData(r.data))
       .catch(console.error)
@@ -5178,11 +5189,11 @@ function TestWebhookPanel() {
     }
   };
 
-  const events = [
+  const events = useMemo(() => [
     { id: 'ping' as const, label: 'Ping', desc: 'Basic connectivity check' },
     { id: 'purchase' as const, label: 'Purchase', desc: 'Simulates a data purchase event' },
     { id: 'collector_accepted' as const, label: 'Collector Accepted', desc: 'Simulates a collector signup event' },
-  ];
+  ], []);
 
   // Check if all 3 passed
   const allPassed = events.every(ev => {
@@ -5209,7 +5220,7 @@ function TestWebhookPanel() {
       }
     }
     return () => timers.forEach(clearTimeout);
-  }, [results]);
+  }, [events, hidden, results]);
 
   return (
     <div>
@@ -5326,7 +5337,7 @@ Content-Type: application/json
 // COLLECT DATA
 // ═══════════════════════════════════════════════════════════
 
-function CollectData({ viewCount: _viewCount }: { viewCount: number | null }) {
+function CollectData() {
   const [programs, setPrograms] = useState<CollectionProgram[]>([]);
   const [loading, setLoading] = useState(true);
   useEffect(() => { api.post('/page-views', { page: 'collect_data' }).catch(() => {}); }, []);
@@ -5630,7 +5641,7 @@ function ProviderProfile({ slug, onBack, onSelectListing }: { slug: string; onBa
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setLoading(true);
+    deferStateUpdate(() => setLoading(true));
     api.get<{ data: CatalogProvider }>(`/catalog/providers/${slug}`)
       .then(r => setProvider(r.data))
       .catch(console.error)
@@ -5873,7 +5884,16 @@ function CustomRequestModal({ onClose, sourceListing }: { onClose: () => void; s
 // ═══════════════════════════════════════════════════════════
 
 function AccountPage() {
-  const clerk = CLERK_AVAILABLE ? useClerk() : null;
+  if (!CLERK_AVAILABLE) return <AccountPageContent clerk={null} />;
+  return <AccountPageWithClerk />;
+}
+
+function AccountPageWithClerk() {
+  const clerk = useClerk();
+  return <AccountPageContent clerk={clerk} />;
+}
+
+function AccountPageContent({ clerk }: { clerk: ClerkResource | null }) {
   const user = clerk?.user;
   const [stats, setStats] = useState<{ purchases: number; listings: number; isProvider: boolean } | null>(null);
   const { isSignedIn } = useClerkAuth();
@@ -6127,7 +6147,7 @@ export default function DataBrokerage({ activeSubTab, viewCount }: { activeSubTa
     <>
       {activeSubTab === 'buy_data' && <BuyData />}
       {activeSubTab === 'sell_data' && <SellData viewCount={viewCount} />}
-      {activeSubTab === 'collect_data' && <CollectData viewCount={viewCount} />}
+      {activeSubTab === 'collect_data' && <CollectData />}
       {activeSubTab === 'seller_terms' && <SellerTerms />}
       {activeSubTab === 'buyer_terms' && <BuyerTerms />}
       {activeSubTab === 'collector_terms' && <CollectorTerms />}

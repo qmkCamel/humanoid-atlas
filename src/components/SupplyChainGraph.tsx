@@ -199,7 +199,7 @@ export default function SupplyChainGraph({ onNodeSelect, countryFilter, highligh
   // Clear internal focus when external highlights change
   useEffect(() => {
     if (highlightedIds && highlightedIds.size > 0) {
-      setFocusedId(null);
+      queueMicrotask(() => setFocusedId(null));
     }
   }, [highlightedIds]);
 
