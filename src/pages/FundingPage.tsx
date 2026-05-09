@@ -6,6 +6,8 @@ import {
   getFundingSortedByRaised,
 } from '../domain/atlasAnalytics';
 import type { CountryGroup } from '../domain/atlasAnalytics';
+import { useI18n } from '../i18n';
+import type { MessageKey } from '../i18n/messages';
 
 interface FundingPageProps {
   fundingStatusFilter: 'all' | FundingStatus;
@@ -14,13 +16,13 @@ interface FundingPageProps {
   onSelectCompany: (id: string) => void;
 }
 
-function getFundingStatusLabel(s: FundingStatus) {
+function getFundingStatusLabel(s: FundingStatus, t: (key: MessageKey) => string) {
   switch (s) {
-    case 'private': return 'Private';
-    case 'public': return 'Public';
-    case 'ipo-filed': return 'IPO Filed';
-    case 'acquired': return 'Acquired';
-    case 'subsidiary': return 'Subsidiary';
+    case 'private': return t('funding.private');
+    case 'public': return t('funding.public');
+    case 'ipo-filed': return t('funding.ipoFiled');
+    case 'acquired': return t('funding.acquired');
+    case 'subsidiary': return t('funding.subsidiary');
   }
 }
 
@@ -36,6 +38,7 @@ export default function FundingPage({
   onFundingStatusFilterChange,
   onSelectCompany,
 }: FundingPageProps) {
+  const { t } = useI18n();
   const filteredFunding = getFilteredFunding(fundingStatusFilter);
   const fundingSortedByRaised = getFundingSortedByRaised(filteredFunding);
   const scaleMax = Math.max(
@@ -50,13 +53,13 @@ export default function FundingPage({
     <div className="geo-content">
       <section className="geo-section">
         <div className="supply-chain__header">
-          <h3 className="section-title">Funding & Valuation</h3>
+          <h3 className="section-title">{t('funding.title')}</h3>
           <div className="vla-filters">
-            <button className={`country-pill ${fundingStatusFilter === 'all' ? 'country-pill--active' : ''}`} onClick={() => onFundingStatusFilterChange('all')}>All</button>
-            <button className={`country-pill ${fundingStatusFilter === 'private' ? 'country-pill--active' : ''}`} onClick={() => onFundingStatusFilterChange(fundingStatusFilter === 'private' ? 'all' : 'private')}>Private</button>
-            <button className={`country-pill ${fundingStatusFilter === 'public' ? 'country-pill--active' : ''}`} onClick={() => onFundingStatusFilterChange(fundingStatusFilter === 'public' ? 'all' : 'public')}>Public</button>
-            <button className={`country-pill ${fundingStatusFilter === 'subsidiary' ? 'country-pill--active' : ''}`} onClick={() => onFundingStatusFilterChange(fundingStatusFilter === 'subsidiary' ? 'all' : 'subsidiary')}>Subsidiary</button>
-            <button className={`country-pill ${fundingStatusFilter === 'acquired' ? 'country-pill--active' : ''}`} onClick={() => onFundingStatusFilterChange(fundingStatusFilter === 'acquired' ? 'all' : 'acquired')}>Acquired</button>
+            <button className={`country-pill ${fundingStatusFilter === 'all' ? 'country-pill--active' : ''}`} onClick={() => onFundingStatusFilterChange('all')}>{t('funding.all')}</button>
+            <button className={`country-pill ${fundingStatusFilter === 'private' ? 'country-pill--active' : ''}`} onClick={() => onFundingStatusFilterChange(fundingStatusFilter === 'private' ? 'all' : 'private')}>{t('funding.private')}</button>
+            <button className={`country-pill ${fundingStatusFilter === 'public' ? 'country-pill--active' : ''}`} onClick={() => onFundingStatusFilterChange(fundingStatusFilter === 'public' ? 'all' : 'public')}>{t('funding.public')}</button>
+            <button className={`country-pill ${fundingStatusFilter === 'subsidiary' ? 'country-pill--active' : ''}`} onClick={() => onFundingStatusFilterChange(fundingStatusFilter === 'subsidiary' ? 'all' : 'subsidiary')}>{t('funding.subsidiary')}</button>
+            <button className={`country-pill ${fundingStatusFilter === 'acquired' ? 'country-pill--active' : ''}`} onClick={() => onFundingStatusFilterChange(fundingStatusFilter === 'acquired' ? 'all' : 'acquired')}>{t('funding.acquired')}</button>
           </div>
         </div>
         <div className="funding-list">
@@ -68,7 +71,7 @@ export default function FundingPage({
             >
               <span className="funding-row__country">{f.country}</span>
               <span className="funding-row__name">{f.name}</span>
-              <span className="funding-row__status">{getFundingStatusLabel(f.status)}</span>
+              <span className="funding-row__status">{getFundingStatusLabel(f.status, t)}</span>
               <div className="funding-row__bars">
                 {f.totalRaisedM != null && (
                   <div
@@ -85,25 +88,25 @@ export default function FundingPage({
               </div>
               <div className="funding-row__labels">
                 {f.totalRaisedM != null && (
-                  <span className="funding-row__raised-label">{formatAmount(f.totalRaisedM)} raised</span>
+                  <span className="funding-row__raised-label">{formatAmount(f.totalRaisedM)} {t('funding.raised')}</span>
                 )}
                 {f.latestValuationM != null && (
-                  <span className="funding-row__val-label">{formatAmount(f.latestValuationM)} val{f.latestValuationNote ? '*' : ''}</span>
+                  <span className="funding-row__val-label">{formatAmount(f.latestValuationM)} {t('funding.valuationShort')}{f.latestValuationNote ? '*' : ''}</span>
                 )}
               </div>
             </div>
           ))}
         </div>
         <div className="funding-legend">
-          <span className="funding-legend__item"><span className="funding-legend__bar funding-legend__bar--raised" /> Raised</span>
-          <span className="funding-legend__item"><span className="funding-legend__bar funding-legend__bar--val" /> Valuation</span>
+          <span className="funding-legend__item"><span className="funding-legend__bar funding-legend__bar--raised" /> {t('funding.raisedLegend')}</span>
+          <span className="funding-legend__item"><span className="funding-legend__bar funding-legend__bar--val" /> {t('funding.valuationLegend')}</span>
         </div>
-        <div className="funding-footnote">* analyst estimate / IPO target / acquisition price</div>
+        <div className="funding-footnote">{t('funding.footnote')}</div>
       </section>
 
       <section className="geo-section">
         <div className="supply-chain__header">
-          <h3 className="section-title">Top Investors</h3>
+          <h3 className="section-title">{t('funding.topInvestors')}</h3>
         </div>
         <div className="funding-investors">
           {topInvestors.map((inv) => (

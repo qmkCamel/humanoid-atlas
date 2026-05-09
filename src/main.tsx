@@ -6,6 +6,7 @@ import { Analytics } from '@vercel/analytics/react'
 import { ClerkProvider } from '@clerk/clerk-react'
 import './index.css'
 import App from './App.tsx'
+import { I18nProvider } from './i18n'
 
 const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
@@ -66,20 +67,24 @@ createRoot(document.getElementById('root')!).render(
     <HelmetProvider>
       {clerkPubKey ? (
         <ClerkProvider publishableKey={clerkPubKey} appearance={clerkAppearance}>
+          <I18nProvider>
+            <BrowserRouter>
+              <Routes>
+                <Route path="*" element={<App />} />
+              </Routes>
+              <Analytics />
+            </BrowserRouter>
+          </I18nProvider>
+        </ClerkProvider>
+      ) : (
+        <I18nProvider>
           <BrowserRouter>
             <Routes>
               <Route path="*" element={<App />} />
             </Routes>
             <Analytics />
           </BrowserRouter>
-        </ClerkProvider>
-      ) : (
-        <BrowserRouter>
-          <Routes>
-            <Route path="*" element={<App />} />
-          </Routes>
-          <Analytics />
-        </BrowserRouter>
+        </I18nProvider>
       )}
     </HelmetProvider>
   </StrictMode>,

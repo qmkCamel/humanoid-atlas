@@ -1,3 +1,7 @@
+import { translate } from '../i18n';
+import type { Locale } from '../i18n';
+import type { MessageKey } from '../i18n/messages';
+
 export const TAB_META: Record<string, { title: string; description: string }> = {
   skeleton: { title: 'Humanoid Atlas | Humanoid Robot Supply Chain Map & OEM Database', description: 'The comprehensive humanoid robot industry database. Compare 29+ OEMs, 41+ suppliers, hardware supply chain, VLA models, reward models, world models, and more.' },
   all_oems: { title: 'All Humanoid Robot OEMs | Humanoid Atlas', description: 'Compare 29+ humanoid robot manufacturers worldwide. Detailed specs, shipment data, and side-by-side comparison for Tesla Optimus, Figure, 1X NEO, Unitree, Agility Digit, and more.' },
@@ -44,3 +48,15 @@ export const TAB_META: Record<string, { title: string; description: string }> = 
   api_safety: { title: 'API Safety Endpoints | Humanoid Atlas', description: 'Access safety standards, OEM compliance profiles, and head design data via the API.' },
   api_query: { title: 'API Query & Compare Endpoints | Humanoid Atlas', description: 'Natural language search powered by LLM and side-by-side OEM comparison endpoints.' },
 };
+
+export function getLocalizedTabMeta(tabId: string, locale: Locale) {
+  const fallback = TAB_META[tabId] || TAB_META.skeleton;
+  const titleKey = `seo.${tabId}.title` as MessageKey;
+  const descriptionKey = `seo.${tabId}.description` as MessageKey;
+  const title = translate(locale, titleKey);
+  const description = translate(locale, descriptionKey);
+  return {
+    title: title === titleKey ? fallback.title : title,
+    description: description === descriptionKey ? fallback.description : description,
+  };
+}

@@ -17,7 +17,9 @@ import FundingPage from './FundingPage';
 import FactoriesPage from './FactoriesPage';
 import { MODEL_ROTATIONS, MODEL_SCALE, MODEL_SPIN, ACTUATOR_INFO, SKELETON_REGIONS, COMPONENT_SPEC_FIELDS } from '../app/modelConfig';
 import { TAB_GROUPS, TABS, TAB_TO_PATH, PATH_TO_TAB } from '../app/tabs';
-import { TAB_META } from '../app/seo';
+import { getLocalizedTabMeta } from '../app/seo';
+import { SUPPORTED_LOCALES, getTabGroupLabelKey, getTabLabelKey, useI18n } from '../i18n';
+import type { Locale } from '../i18n';
 import {
   BOTTLENECK_COMPONENTS,
   COUNTRY_GROUP_COLORS,
@@ -76,6 +78,7 @@ export default function AtlasAppView() {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
+  const { locale, setLocale, t } = useI18n();
 
   // Redirect legacy hash URLs to path-based routes
   useLegacyHashRedirect(navigate);
@@ -1208,7 +1211,7 @@ export default function AtlasAppView() {
   }
 
   // ==================== MAIN VIEW (tabs) ====================
-  const tabMeta = TAB_META[activeTab] || TAB_META.skeleton;
+  const tabMeta = getLocalizedTabMeta(activeTab, locale);
 
   return (
     <div className="app">
@@ -1222,7 +1225,7 @@ export default function AtlasAppView() {
       </Helmet>
       <header className="header">
         <span className="header-title">Humanoid Atlas</span>
-        <span className="header-sub">Built For Humanoid Enthusiasts</span>
+        <span className="header-sub">{t('app.subtitle')}</span>
         <div className="search-wrapper" ref={searchRef}>
           <svg className="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
@@ -1230,7 +1233,7 @@ export default function AtlasAppView() {
           <input
             className="search-input"
             type="text"
-            placeholder="Search & ask the atlas..."
+            placeholder={t('app.searchPlaceholder')}
             value={searchQuery}
             onChange={(e) => {
               setSearchQuery(e.target.value);
@@ -1281,7 +1284,7 @@ export default function AtlasAppView() {
           {searchOpen && searchQuery.trim() && (
             <div className="search-dropdown">
               {smartLoading ? (
-                <div className="search-empty">Searching...</div>
+                <div className="search-empty">{t('app.searching')}</div>
               ) : smartAnswer ? (
                 <>
                   <div className="search-answer">{smartAnswer.answer}</div>
@@ -1297,9 +1300,9 @@ export default function AtlasAppView() {
                   ))}
                 </>
               ) : isCompareQuery ? (
-                <div className="search-empty">Press Enter to compare</div>
+                <div className="search-empty">{t('app.pressEnterCompare')}</div>
               ) : isNlQuery ? (
-                <div className="search-empty">Press Enter to search</div>
+                <div className="search-empty">{t('app.pressEnterSearch')}</div>
               ) : searchResults.length > 0 || vlaSearchResults.length > 0 ? (
                 <>
                   {searchResults.map((c) => (
@@ -1318,17 +1321,32 @@ export default function AtlasAppView() {
                       <span className="search-result__meta">
                         <span>{m.country}</span>
                         <span>&middot;</span>
-                        <span className="search-result__type">VLA · {m.developer}</span>
+                        <span className="search-result__type">{t('app.vlaType')} · {m.developer}</span>
                       </span>
                     </div>
                   ))}
                 </>
               ) : (
-                <div className="search-empty">No results</div>
+                <div className="search-empty">{t('app.noResults')}</div>
               )}
             </div>
           )}
         </div>
+        <label className="language-switcher">
+          <span className="language-switcher__label">{t('language.switcherLabel')}</span>
+          <select
+            className="language-switcher__select"
+            value={locale}
+            aria-label={t('language.switcherLabel')}
+            onChange={(e) => setLocale(e.target.value as Locale)}
+          >
+            {SUPPORTED_LOCALES.map((option) => (
+              <option key={option} value={option}>
+                {option === 'zh-CN' ? t('language.chinese') : t('language.english')}
+              </option>
+            ))}
+          </select>
+        </label>
       </header>
 
       <div className="filter-bar">
@@ -1343,7 +1361,7 @@ export default function AtlasAppView() {
                   const firstTab = TABS.find((t) => t.group === g.id);
                   if (firstTab) { navigate(TAB_TO_PATH[firstTab.id] || '/'); setChainFocus(null); }
                 }}
-              >{g.label}{g.id === 'data' && <span className="tab-new-badge">NEW</span>}</button>
+              >{t(getTabGroupLabelKey(g.id))}{g.id === 'data' && <span className="tab-new-badge">{t('app.newBadge')}</span>}</button>
             </Fragment>
           ))}
         </div>
@@ -1351,14 +1369,14 @@ export default function AtlasAppView() {
 
       {TABS.filter((t) => t.group === activeTabGroup && !t.hidden).filter((t) => t.id !== 'account' || clerkSignedIn).length > 1 && (
       <nav className={`component-nav${activeTabGroup === 'cli' ? ' component-nav--cli' : ''}`}>
-        {TABS.filter((t) => t.group === activeTabGroup && !t.hidden).filter((t) => t.id !== 'account' || clerkSignedIn).map((t) => {
+        {TABS.filter((tab) => tab.group === activeTabGroup && !tab.hidden).filter((tab) => tab.id !== 'account' || clerkSignedIn).map((tab) => {
           return (
             <button
-              key={t.id}
-              className={`component-btn ${activeTab === t.id ? 'component-btn--active' : ''}`}
-              onClick={() => { navigate(TAB_TO_PATH[t.id] || '/'); setChainFocus(null); }}
+              key={tab.id}
+              className={`component-btn ${activeTab === tab.id ? 'component-btn--active' : ''}`}
+              onClick={() => { navigate(TAB_TO_PATH[tab.id] || '/'); setChainFocus(null); }}
             >
-              {t.label}
+              {t(getTabLabelKey(tab.id))}
             </button>
           );
         })}
@@ -3005,14 +3023,14 @@ export default function AtlasAppView() {
       </main>
 
       <footer className="footer">
-        <span>{oems.length} OEMs</span>
+        <span>{t('app.footer.oems', { count: oems.length })}</span>
         <span className="footer-sep" />
-        <span>{companies.filter((c) => c.type !== 'oem').length} Suppliers</span>
+        <span>{t('app.footer.suppliers', { count: companies.filter((c) => c.type !== 'oem').length })}</span>
         <span className="footer-sep" />
         <span>
-          {oems.reduce((s, c) => s + (c.robotSpecs?.shipments2025 || 0), 0).toLocaleString()} units shipped (2025)
+          {t('app.footer.shipped', { count: oems.reduce((s, c) => s + (c.robotSpecs?.shipments2025 || 0), 0).toLocaleString() })}
         </span>
-        <span className="footer-right"><a href="https://chatgpt.com/share/69c10e41-8034-8004-b523-5ff13a85368a" target="_blank" rel="noopener noreferrer"><img src="/chatgpt_logo.png" alt="ChatGPT" style={{ width: 14, height: 14, verticalAlign: 'middle' }} /></a>&nbsp;<a href="https://claude.ai/share/e01bd8a4-6cdc-4b27-9beb-a3b81de95867" target="_blank" rel="noopener noreferrer"><img src="/claude_logo.webp" alt="Claude" style={{ width: 17, height: 17, verticalAlign: 'middle' }} /></a>&nbsp;<a href="https://gemini.google.com/share/29b23abfdc21" target="_blank" rel="noopener noreferrer"><img src="https://www.gstatic.com/lamda/images/gemini_sparkle_4g_512_lt_f94943af3be039176192d.png" alt="Gemini" style={{ width: 14, height: 14, verticalAlign: 'middle' }} /></a>&nbsp;<a href="https://grok.com/share/c2hhcmQtMg_a9f8f529-4067-4ceb-bc5b-2ecc352ef404" target="_blank" rel="noopener noreferrer"><img src="/grok_logo.webp" alt="Grok" style={{ width: 14, height: 14, verticalAlign: 'middle' }} /></a> · <a href="https://github.com/kingjulio8238/humanoid-atlas" target="_blank" rel="noopener noreferrer">Contribute</a> · <a href="/changelog" onClick={(e) => { e.preventDefault(); window.history.pushState({}, '', '/changelog'); window.dispatchEvent(new PopStateEvent('popstate')); }}>Changelog</a> · <a href="/sources" onClick={(e) => { e.preventDefault(); window.history.pushState({}, '', '/sources'); window.dispatchEvent(new PopStateEvent('popstate')); }}>Data Sources</a> · Created by <a href="https://x.com/JulianSaks" target="_blank" rel="noopener noreferrer">Julian Saks</a>{viewCount !== null && <span className="view-count"> · {viewCount.toLocaleString()} visits</span>}</span>
+        <span className="footer-right"><a href="https://chatgpt.com/share/69c10e41-8034-8004-b523-5ff13a85368a" target="_blank" rel="noopener noreferrer"><img src="/chatgpt_logo.png" alt="ChatGPT" style={{ width: 14, height: 14, verticalAlign: 'middle' }} /></a>&nbsp;<a href="https://claude.ai/share/e01bd8a4-6cdc-4b27-9beb-a3b81de95867" target="_blank" rel="noopener noreferrer"><img src="/claude_logo.webp" alt="Claude" style={{ width: 17, height: 17, verticalAlign: 'middle' }} /></a>&nbsp;<a href="https://gemini.google.com/share/29b23abfdc21" target="_blank" rel="noopener noreferrer"><img src="https://www.gstatic.com/lamda/images/gemini_sparkle_4g_512_lt_f94943af3be039176192d.png" alt="Gemini" style={{ width: 14, height: 14, verticalAlign: 'middle' }} /></a>&nbsp;<a href="https://grok.com/share/c2hhcmQtMg_a9f8f529-4067-4ceb-bc5b-2ecc352ef404" target="_blank" rel="noopener noreferrer"><img src="/grok_logo.webp" alt="Grok" style={{ width: 14, height: 14, verticalAlign: 'middle' }} /></a> · <a href="https://github.com/kingjulio8238/humanoid-atlas" target="_blank" rel="noopener noreferrer">{t('app.footer.contribute')}</a> · <a href="/changelog" onClick={(e) => { e.preventDefault(); window.history.pushState({}, '', '/changelog'); window.dispatchEvent(new PopStateEvent('popstate')); }}>{t('app.footer.changelog')}</a> · <a href="/sources" onClick={(e) => { e.preventDefault(); window.history.pushState({}, '', '/sources'); window.dispatchEvent(new PopStateEvent('popstate')); }}>{t('app.footer.sources')}</a> · {t('app.footer.createdBy')} <a href="https://x.com/JulianSaks" target="_blank" rel="noopener noreferrer">Julian Saks</a>{viewCount !== null && <span className="view-count"> · {t('app.footer.visits', { count: viewCount.toLocaleString() })}</span>}</span>
       </footer>
     </div>
   );

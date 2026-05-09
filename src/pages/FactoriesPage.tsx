@@ -6,6 +6,8 @@ import {
   getProductionSorted,
 } from '../domain/atlasAnalytics';
 import type { CountryGroup } from '../domain/atlasAnalytics';
+import { useI18n } from '../i18n';
+import type { MessageKey } from '../i18n/messages';
 
 interface FactoriesPageProps {
   factoryStatusFilter: 'all' | FactoryStatus;
@@ -14,22 +16,22 @@ interface FactoriesPageProps {
   onSelectCompany: (id: string) => void;
 }
 
-function getFactoryStatusLabel(s: FactoryStatus) {
+function getFactoryStatusLabel(s: FactoryStatus, t: (key: MessageKey) => string) {
   switch (s) {
-    case 'operational': return 'Operational';
-    case 'under-construction': return 'Under Construction';
-    case 'planned': return 'Planned';
-    case 'pre-production': return 'Pre-Production';
-    case 'trials': return 'Trials';
+    case 'operational': return t('factories.operational');
+    case 'under-construction': return t('factories.underConstruction');
+    case 'planned': return t('factories.planned');
+    case 'pre-production': return t('factories.preProduction');
+    case 'trials': return t('factories.trials');
   }
 }
 
-function getMfgModelLabel(m: string) {
+function getMfgModelLabel(m: string, t: (key: MessageKey) => string) {
   switch (m) {
-    case 'in-house': return 'In-House';
-    case 'contract': return 'Contract';
-    case 'partner': return 'Partner';
-    case 'vertically-integrated': return 'Vert. Integrated';
+    case 'in-house': return t('factories.inHouse');
+    case 'contract': return t('factories.contract');
+    case 'partner': return t('factories.partner');
+    case 'vertically-integrated': return t('factories.verticallyIntegrated');
     default: return m;
   }
 }
@@ -46,6 +48,7 @@ export default function FactoriesPage({
   onFactoryStatusFilterChange,
   onSelectCompany,
 }: FactoriesPageProps) {
+  const { t } = useI18n();
   const productionSorted = getProductionSorted();
   const filteredFactories = getFilteredFactories(factoryStatusFilter);
   const scaleMax = Math.max(
@@ -60,7 +63,7 @@ export default function FactoriesPage({
     <div className="geo-content">
       <section className="geo-section">
         <div className="supply-chain__header">
-          <h3 className="section-title">Production Capacity</h3>
+          <h3 className="section-title">{t('factories.productionCapacity')}</h3>
         </div>
         <div className="funding-list">
           {productionSorted.map((p) => (
@@ -71,7 +74,7 @@ export default function FactoriesPage({
             >
               <span className="funding-row__country">{p.country}</span>
               <span className="funding-row__name">{p.name}</span>
-              <span className="funding-row__status">{getMfgModelLabel(p.mfgModel)}</span>
+              <span className="funding-row__status">{getMfgModelLabel(p.mfgModel, t)}</span>
               <div className="funding-row__bars">
                 {p.shipped2025 != null && (
                   <div
@@ -88,39 +91,39 @@ export default function FactoriesPage({
               </div>
               <div className="funding-row__labels">
                 {p.shipped2025 != null && (
-                  <span className="funding-row__raised-label">{p.shipped2025.toLocaleString()} shipped</span>
+                  <span className="funding-row__raised-label">{p.shipped2025.toLocaleString()} {t('factories.shipped')}</span>
                 )}
                 {p.shipped2025 == null && p.shipped2025Note && (
                   <span className="funding-row__raised-label">{p.shipped2025Note}</span>
                 )}
                 {p.annualCapacity != null && (
-                  <span className="funding-row__val-label">{formatUnits(p.annualCapacity)} capacity{p.capacityNote ? '*' : ''}</span>
+                  <span className="funding-row__val-label">{formatUnits(p.annualCapacity)} {t('factories.capacity')}{p.capacityNote ? '*' : ''}</span>
                 )}
               </div>
             </div>
           ))}
         </div>
         <div className="funding-legend">
-          <span className="funding-legend__item"><span className="funding-legend__bar funding-legend__bar--raised" /> 2025 Shipped</span>
-          <span className="funding-legend__item"><span className="funding-legend__bar funding-legend__bar--val" /> Capacity</span>
+          <span className="funding-legend__item"><span className="funding-legend__bar funding-legend__bar--raised" /> {t('factories.shippedLegend')}</span>
+          <span className="funding-legend__item"><span className="funding-legend__bar funding-legend__bar--val" /> {t('factories.capacityLegend')}</span>
         </div>
-        <div className="funding-footnote">* see capacity notes in data</div>
+        <div className="funding-footnote">{t('factories.footnote')}</div>
       </section>
 
       <section className="geo-section">
         <div className="supply-chain__header">
-          <h3 className="section-title">Factory Directory</h3>
+          <h3 className="section-title">{t('factories.directory')}</h3>
           <div className="vla-filters">
-            <button className={`country-pill ${factoryStatusFilter === 'all' ? 'country-pill--active' : ''}`} onClick={() => onFactoryStatusFilterChange('all')}>All</button>
-            <button className={`country-pill ${factoryStatusFilter === 'operational' ? 'country-pill--active' : ''}`} onClick={() => onFactoryStatusFilterChange(factoryStatusFilter === 'operational' ? 'all' : 'operational')}>Operational</button>
-            <button className={`country-pill ${factoryStatusFilter === 'under-construction' ? 'country-pill--active' : ''}`} onClick={() => onFactoryStatusFilterChange(factoryStatusFilter === 'under-construction' ? 'all' : 'under-construction')}>Under Construction</button>
-            <button className={`country-pill ${factoryStatusFilter === 'planned' ? 'country-pill--active' : ''}`} onClick={() => onFactoryStatusFilterChange(factoryStatusFilter === 'planned' ? 'all' : 'planned')}>Planned</button>
-            <button className={`country-pill ${factoryStatusFilter === 'pre-production' ? 'country-pill--active' : ''}`} onClick={() => onFactoryStatusFilterChange(factoryStatusFilter === 'pre-production' ? 'all' : 'pre-production')}>Pre-Production</button>
+            <button className={`country-pill ${factoryStatusFilter === 'all' ? 'country-pill--active' : ''}`} onClick={() => onFactoryStatusFilterChange('all')}>{t('funding.all')}</button>
+            <button className={`country-pill ${factoryStatusFilter === 'operational' ? 'country-pill--active' : ''}`} onClick={() => onFactoryStatusFilterChange(factoryStatusFilter === 'operational' ? 'all' : 'operational')}>{t('factories.operational')}</button>
+            <button className={`country-pill ${factoryStatusFilter === 'under-construction' ? 'country-pill--active' : ''}`} onClick={() => onFactoryStatusFilterChange(factoryStatusFilter === 'under-construction' ? 'all' : 'under-construction')}>{t('factories.underConstruction')}</button>
+            <button className={`country-pill ${factoryStatusFilter === 'planned' ? 'country-pill--active' : ''}`} onClick={() => onFactoryStatusFilterChange(factoryStatusFilter === 'planned' ? 'all' : 'planned')}>{t('factories.planned')}</button>
+            <button className={`country-pill ${factoryStatusFilter === 'pre-production' ? 'country-pill--active' : ''}`} onClick={() => onFactoryStatusFilterChange(factoryStatusFilter === 'pre-production' ? 'all' : 'pre-production')}>{t('factories.preProduction')}</button>
           </div>
         </div>
         <div className="chain-flow">
           <div className="chain-tier">
-            <div className="chain-tier-label">Factories</div>
+            <div className="chain-tier-label">{t('factories.factories')}</div>
             {filteredFactories.map((f) => (
               <button
                 key={f.id}
@@ -130,7 +133,7 @@ export default function FactoriesPage({
                 <span className="chain-name">{f.name}</span>
                 <span className="chain-country">{f.country}</span>
                 <span className="chain-share">
-                  {f.companyName} · {f.location} · {getFactoryStatusLabel(f.status)}{f.sizeSqft ? ` · ${f.sizeSqft}` : ''}
+                  {f.companyName} · {f.location} · {getFactoryStatusLabel(f.status, t)}{f.sizeSqft ? ` · ${f.sizeSqft}` : ''}
                 </span>
               </button>
             ))}
@@ -140,7 +143,7 @@ export default function FactoriesPage({
 
       <section className="geo-section">
         <div className="supply-chain__header">
-          <h3 className="section-title">Manufacturing Partners</h3>
+          <h3 className="section-title">{t('factories.partners')}</h3>
         </div>
         <div className="funding-investors">
           {manufacturingPartners.map((mp) => (
