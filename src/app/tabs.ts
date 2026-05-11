@@ -1,4 +1,4 @@
-export type TabGroup = 'overview' | 'industry' | 'data' | 'arena' | 'hardware' | 'software' | 'hri' | 'cli' | 'api';
+export type TabGroup = 'overview' | 'industry' | 'shop' | 'arena' | 'hardware' | 'software' | 'hri' | 'cli' | 'api';
 
 export interface TabDefinition {
   id: string;
@@ -10,7 +10,7 @@ export interface TabDefinition {
 export const TAB_GROUPS: { id: TabGroup; label: string }[] = [
   { id: 'overview', label: 'Overview' },
   { id: 'industry', label: 'Industry' },
-  { id: 'data', label: 'Data' },
+  { id: 'shop', label: 'Shop' },
   { id: 'arena', label: 'Arena' },
   { id: 'hardware', label: 'Hardware' },
   { id: 'software', label: 'Software' },
@@ -27,13 +27,15 @@ export const TABS: TabDefinition[] = [
   { id: 'funding', label: 'Funding', group: 'industry' },
   { id: 'timeline', label: 'Buildout', group: 'industry' },
   { id: 'factories', label: 'Factories', group: 'industry' },
-  { id: 'buy_data', label: 'Buy Data', group: 'data' },
-  { id: 'sell_data', label: 'Sell Data', group: 'data' },
-  { id: 'collect_data', label: 'Collect Data', group: 'data' },
-  { id: 'seller_terms', label: '', group: 'data', hidden: true },
-  { id: 'buyer_terms', label: '', group: 'data', hidden: true },
-  { id: 'collector_terms', label: '', group: 'data', hidden: true },
-  { id: 'account', label: 'Account', group: 'data' },
+  { id: 'equipment', label: 'Equipment', group: 'shop' },
+  { id: 'buy_data', label: 'Buy Data', group: 'shop' },
+  { id: 'sell_data', label: 'Sell Data', group: 'shop' },
+  { id: 'collect_data', label: 'Collect Data', group: 'shop' },
+  { id: 'seller_terms', label: '', group: 'shop', hidden: true },
+  { id: 'buyer_terms', label: '', group: 'shop', hidden: true },
+  { id: 'collector_terms', label: '', group: 'shop', hidden: true },
+  { id: 'account', label: 'Account', group: 'shop' },
+  { id: 'components', label: 'Components', group: 'shop' },
   { id: 'arena_oems', label: 'Atlas Arena', group: 'arena' },
   { id: 'arena_suppliers', label: 'Supplier Arena', group: 'arena', hidden: true },
   { id: 'arena_vla', label: 'VLA Arena', group: 'arena', hidden: true },
@@ -84,6 +86,8 @@ export const TAB_TO_PATH: Record<string, string> = {
   buyer_terms: '/data/buyer-terms',
   collector_terms: '/data/collector-terms',
   account: '/data/account',
+  equipment: '/shop/equipment',
+  components: '/shop/components',
   arena_oems: '/arena/humanoids',
   arena_suppliers: '/arena/suppliers',
   arena_vla: '/arena/vla',
@@ -125,4 +129,6 @@ export const PATH_TO_TAB: Record<string, string> = {
   ),
   '/geopolitics': 'geopolitics',
   '/buildout': 'timeline',
+  '/shop': 'equipment',
+  '/shop/data': 'buy_data',
 };

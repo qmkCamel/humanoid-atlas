@@ -10,6 +10,7 @@ import RewardChart from '../components/RewardChart';
 import ApiDocs from '../components/ApiDocs';
 import CliDocs from '../components/CliDocs';
 import DataBrokerage from '../components/DataBrokerage';
+import EquipmentPage from '../components/EquipmentPage';
 import SampleExplorer from '../components/SampleExplorer';
 import Arena from '../components/Arena';
 import AllOemsPage from './AllOemsPage';
@@ -1356,12 +1357,12 @@ export default function AtlasAppView() {
               {g.id === 'cli' && <div className="filter-bar__separator" />}
               <button
                 className={`tab-group-pill ${activeTabGroup === g.id ? 'tab-group-pill--active' : ''}`}
-                style={g.id === 'data' ? { position: 'relative', paddingRight: 22 } : undefined}
+                style={g.id === 'shop' ? { position: 'relative', paddingRight: 22 } : undefined}
                 onClick={() => {
                   const firstTab = TABS.find((t) => t.group === g.id);
                   if (firstTab) { navigate(TAB_TO_PATH[firstTab.id] || '/'); setChainFocus(null); }
                 }}
-              >{t(getTabGroupLabelKey(g.id))}{g.id === 'data' && <span className="tab-new-badge">{t('app.newBadge')}</span>}</button>
+              >{t(getTabGroupLabelKey(g.id))}{g.id === 'shop' && <span className="tab-new-badge">{t('app.newBadge')}</span>}</button>
             </Fragment>
           ))}
         </div>
@@ -1383,7 +1384,7 @@ export default function AtlasAppView() {
       </nav>
       )}
 
-      <main className={activeTabGroup === 'data' ? 'component-view' : activeTabGroup === 'cli' ? 'component-view' : activeTabGroup === 'api' ? 'component-view' : activeTabGroup === 'arena' ? 'component-view' : activeTab === 'skeleton' ? 'skeleton-view' : activeTab === 'network' ? 'skeleton-view' : activeTab === 'timeline' ? 'geo-view' : activeTab === 'geopolitics' ? 'geo-view' : activeTab === 'funding' ? 'geo-view' : activeTab === 'factories' ? 'geo-view' : 'component-view'}>
+      <main className={activeTabGroup === 'shop' ? 'component-view' : activeTabGroup === 'cli' ? 'component-view' : activeTabGroup === 'api' ? 'component-view' : activeTabGroup === 'arena' ? 'component-view' : activeTab === 'skeleton' ? 'skeleton-view' : activeTab === 'network' ? 'skeleton-view' : activeTab === 'timeline' ? 'geo-view' : activeTab === 'geopolitics' ? 'geo-view' : activeTab === 'funding' ? 'geo-view' : activeTab === 'factories' ? 'geo-view' : 'component-view'}>
         {/* Skeleton tab */}
         {activeTab === 'skeleton' && (
           <div className={`skeleton-interactive${skeletonRegion && skeletonSidebarOpen && !isMobile ? ' skeleton-interactive--sidebar-open' : ''}`}>
@@ -3009,8 +3010,16 @@ export default function AtlasAppView() {
           <Arena activeSubTab={activeTab} />
         )}
 
-        {activeTabGroup === 'data' && (
+        {activeTabGroup === 'shop' && activeTab !== 'equipment' && activeTab !== 'components' && (
           <DataBrokerage activeSubTab={activeTab} viewCount={viewCount} />
+        )}
+
+        {activeTab === 'equipment' && (
+          <EquipmentPage />
+        )}
+
+        {activeTab === 'components' && (
+          <div className="shop-coming-soon">COMING SOON</div>
         )}
 
         {activeTabGroup === 'cli' && (

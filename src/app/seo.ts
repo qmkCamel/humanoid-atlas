@@ -14,6 +14,8 @@ export const TAB_META: Record<string, { title: string; description: string }> = 
   sell_data: { title: 'Sell Training Data | Atlas Data Brokerage', description: 'List your training datasets on Atlas Data Brokerage. Reach OEM buyers, set your own prices, get paid via Stripe.' },
   collect_data: { title: 'Collect Training Data | Atlas Data Brokerage', description: 'Join data collection programs and earn by gathering training data for humanoid robots.' },
   account: { title: 'Account | Atlas Data Brokerage', description: 'Manage your Atlas Data Brokerage account.' },
+  equipment: { title: 'Equipment | Atlas Shop', description: 'NDAA-compliant Japanese-sourced equipment for US humanoid robotics defense buyers. Coming soon.' },
+  components: { title: 'Components | Atlas Shop', description: 'NDAA-compliant Japanese-sourced components for US humanoid robotics defense buyers. Coming soon.' },
   arena_oems: { title: 'Atlas Arena - Vote on the Best Humanoid | Atlas Arena', description: 'Head-to-head humanoid matchups. Vote on best specs, best value, most production-ready, and best design. Community-driven Elo rankings across 38 OEMs.' },
   arena_suppliers: { title: 'Supplier Arena - Vote on the Best Robotics Supplier | Atlas Arena', description: 'Head-to-head supplier matchups by component category. Compare motors, reducers, batteries, compute and more. Community-driven Elo rankings.' },
   arena_vla: { title: 'VLA Arena - Vote on the Best Vision-Language-Action Model | Atlas Arena', description: 'Head-to-head VLA model matchups. Compare Helix, pi0, GR00T, OpenVLA, Gemini Robotics and more. Community-driven Elo rankings across 19 models.' },

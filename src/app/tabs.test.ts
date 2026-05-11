@@ -16,6 +16,7 @@ describe('tab route maps', () => {
     expect(PATH_TO_TAB['/industry/geopolitics']).toBe('geopolitics');
     expect(PATH_TO_TAB['/hardware/motors']).toBe('motors');
     expect(PATH_TO_TAB['/software/vla']).toBe('vlas');
+    expect(PATH_TO_TAB['/shop/equipment']).toBe('equipment');
     expect(PATH_TO_TAB['/data/buy']).toBe('buy_data');
     expect(PATH_TO_TAB['/arena/humanoids']).toBe('arena_oems');
   });
@@ -23,5 +24,7 @@ describe('tab route maps', () => {
   it('keeps legacy plain paths mapped to the modern tab ids', () => {
     expect(PATH_TO_TAB['/geopolitics']).toBe('geopolitics');
     expect(PATH_TO_TAB['/buildout']).toBe('timeline');
+    expect(PATH_TO_TAB['/shop']).toBe('equipment');
+    expect(PATH_TO_TAB['/shop/data']).toBe('buy_data');
   });
 });
